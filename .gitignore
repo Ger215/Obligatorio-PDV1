@@ -97,3 +97,11 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+.DS_Store
+Obligatorio1-UnityProject/Temp
+Obligatorio1-UnityProject/Library
+Obligatorio1-UnityProject/obj
+
+Obligatorio1-UnityProject/*.csproj
+Obligatorio1-UnityProject/*.sln
