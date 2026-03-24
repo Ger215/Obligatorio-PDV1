@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+public class GameManager : SingletonBehaviour<GameManager>
 {
     [Header("Wave Setup")]
     [SerializeField] private GameObject enemyPrefab;
@@ -19,6 +19,16 @@ public class GameManager : MonoBehaviour
 
     public int CurrentWave { get; private set; }
     public int AliveEnemyCount => aliveEnemies.Count;
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        if (Instance != this)
+        {
+            return;
+        }
+    }
 
     private void Start()
     {

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BeatManager : MonoBehaviour
+public class BeatManager : SingletonBehaviour<BeatManager>
 {
     [Header("Beat Settings")]
     [SerializeField] private float beatsPerMinute = 120f;
@@ -14,8 +14,15 @@ public class BeatManager : MonoBehaviour
     public float SecondsPerBeat => 60f / beatsPerMinute;
     public float SongStartTime => songStartTime;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+
+        if (Instance != this)
+        {
+            return;
+        }
+
         songStartTime = Time.time + beatOffset;
     }
 

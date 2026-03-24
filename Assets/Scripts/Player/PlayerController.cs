@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(HealthSystem))]
 [RequireComponent(typeof(AttackSystem))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : SingletonBehaviour<PlayerController>
 {
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 5f;
@@ -36,8 +36,15 @@ public class PlayerController : MonoBehaviour
     private float dashTimeRemaining;
     private float lastDashTime = -Mathf.Infinity;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+
+        if (Instance != this)
+        {
+            return;
+        }
+
         rb = GetComponent<Rigidbody2D>();
         attackSystem = GetComponent<AttackSystem>();
         healthSystem = GetComponent<HealthSystem>();
@@ -52,11 +59,21 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
+        if (Instance != this)
+        {
+            return;
+        }
+
         healthSystem.Died += HandleDeath;
     }
 
     private void OnDisable()
     {
+        if (Instance != this || healthSystem == null)
+        {
+            return;
+        }
+
         healthSystem.Died -= HandleDeath;
     }
 

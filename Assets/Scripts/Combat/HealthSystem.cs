@@ -4,6 +4,7 @@ using UnityEngine;
 public class HealthSystem : MonoBehaviour
 {
     [Header("Health")]
+    [SerializeField] private HealthConfig config;
     [SerializeField] private int maxHealth = 5;
     [SerializeField] private bool destroyOnDeath = true;
     [SerializeField] private bool deactivateOnDeath;
@@ -20,6 +21,7 @@ public class HealthSystem : MonoBehaviour
 
     private void Awake()
     {
+        ApplyConfig(config);
         CurrentHealth = maxHealth;
     }
 
@@ -46,8 +48,16 @@ public class HealthSystem : MonoBehaviour
         CurrentHealth = maxHealth;
     }
 
+    public void Configure(HealthConfig newConfig)
+    {
+        config = newConfig;
+        ApplyConfig(config);
+        ResetHealth();
+    }
+
     public void Configure(int newMaxHealth, bool shouldDestroyOnDeath, bool shouldDeactivateOnDeath, float newDestroyDelay)
     {
+        config = null;
         maxHealth = Mathf.Max(1, newMaxHealth);
         destroyOnDeath = shouldDestroyOnDeath;
         deactivateOnDeath = shouldDeactivateOnDeath;
@@ -78,8 +88,22 @@ public class HealthSystem : MonoBehaviour
         }
     }
 
+    private void ApplyConfig(HealthConfig newConfig)
+    {
+        if (newConfig == null)
+        {
+            return;
+        }
+
+        maxHealth = Mathf.Max(1, newConfig.maxHealth);
+        destroyOnDeath = newConfig.destroyOnDeath;
+        deactivateOnDeath = newConfig.deactivateOnDeath;
+        destroyDelay = Mathf.Max(0f, newConfig.destroyDelay);
+    }
+
     private void OnValidate()
     {
+        ApplyConfig(config);
         maxHealth = Mathf.Max(1, maxHealth);
         destroyDelay = Mathf.Max(0f, destroyDelay);
     }

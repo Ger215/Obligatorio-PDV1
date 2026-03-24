@@ -131,8 +131,7 @@ public class EnemyController : MonoBehaviour
     private void FindPlayerTarget()
     {
         nextPathRefreshTime = Time.time + repathDelay;
-        PlayerController playerController = FindObjectOfType<PlayerController>();
-        playerTarget = playerController != null ? playerController.transform : null;
+        playerTarget = PlayerController.Instance != null ? PlayerController.Instance.transform : null;
     }
 
     public void Configure(

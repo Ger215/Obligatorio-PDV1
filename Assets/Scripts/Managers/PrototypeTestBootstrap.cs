@@ -10,56 +10,23 @@ public class PrototypeTestBootstrap : MonoBehaviour
     [SerializeField] private bool buildOnStart = true;
     [SerializeField] private bool createCameraIfMissing = true;
     [SerializeField] private bool logControlsOnStart = true;
-
-    [Header("Stage")]
-    [SerializeField] private Vector2 arenaSize = new Vector2(24f, 14f);
-    [SerializeField] private float platformThickness = 0.8f;
-    [SerializeField] private float wallThickness = 1f;
-
-    [Header("Rhythm")]
-    [SerializeField] private float beatsPerMinute = 120f;
-    [SerializeField] private float perfectWindow = 0.2f;
-    [SerializeField] private float warningWindow = 0.35f;
-    [SerializeField] private bool debugBeatLogs = true;
-    [SerializeField] private bool debugRhythmLogs = true;
-
-    [Header("Player")]
-    [SerializeField] private int playerMaxHealth = 10;
-    [SerializeField] private float playerMoveSpeed = 6f;
-    [SerializeField] private float playerJumpForce = 13f;
-    [SerializeField] private float playerDashSpeed = 14f;
-    [SerializeField] private float playerDashDuration = 0.15f;
-    [SerializeField] private float playerDashCooldown = 0.75f;
-    [SerializeField] private float playerAttackRange = 1.2f;
-    [SerializeField] private float playerAttackCooldown = 0.35f;
-    [SerializeField] private int playerBaseDamage = 2;
-    [SerializeField] private float playerPerfectDamageMultiplier = 2f;
-    [SerializeField] private float playerWeakDamageMultiplier = 0.5f;
-    [SerializeField] private float playerAttackPointDistance = 0.75f;
-
-    [Header("Enemy")]
-    [SerializeField] private int enemyMaxHealth = 3;
-    [SerializeField] private float enemyMoveSpeed = 3f;
-    [SerializeField] private float enemyJumpForce = 11f;
-    [SerializeField] private float enemyAttackDistance = 1.1f;
-    [SerializeField] private float enemyVerticalAttackTolerance = 1f;
-    [SerializeField] private float enemyJumpTriggerHeight = 1.35f;
-    [SerializeField] private float enemyAttackRange = 0.9f;
-    [SerializeField] private float enemyAttackCooldown = 0.8f;
-    [SerializeField] private int enemyBaseDamage = 1;
-    [SerializeField] private float enemyAttackPointDistance = 0.6f;
-    [SerializeField] private float enemyRepathDelay = 0.5f;
-
-    [Header("Waves")]
-    [SerializeField] private int startingEnemyCount = 2;
-    [SerializeField] private int additionalEnemiesPerWave = 1;
-    [SerializeField] private float timeBetweenWaves = 2f;
+    [SerializeField] private StageConfig stageConfig;
+    [SerializeField] private RhythmConfig rhythmConfig;
+    [SerializeField] private PlayerConfig playerConfig;
+    [SerializeField] private EnemyConfig enemyConfig;
+    [SerializeField] private WaveConfig waveConfig;
 
     private bool hasBuilt;
     private static Sprite cachedSquareSprite;
 
     private void Start()
     {
+        if (!HasRequiredConfigs())
+        {
+            Debug.LogError("PrototypeTestBootstrap needs all ScriptableObject config references assigned.");
+            return;
+        }
+
         if (!buildOnStart || hasBuilt)
         {
             return;
@@ -71,6 +38,11 @@ public class PrototypeTestBootstrap : MonoBehaviour
     [ContextMenu("Build Prototype Test Scene")]
     public void BuildPrototype()
     {
+        if (!HasRequiredConfigs())
+        {
+            Debug.LogError("PrototypeTestBootstrap cannot build without all config assets assigned.");
+            return;
+        }
         if (hasBuilt)
         {
             return;
@@ -110,7 +82,7 @@ public class PrototypeTestBootstrap : MonoBehaviour
         }
 
         mainCamera.orthographic = true;
-        mainCamera.orthographicSize = arenaSize.y * 0.45f;
+        mainCamera.orthographicSize = stageConfig.arenaSize.y * 0.45f;
         mainCamera.transform.position = new Vector3(0f, 1.5f, -10f);
         mainCamera.backgroundColor = new Color(0.11f, 0.12f, 0.16f);
         mainCamera.clearFlags = CameraClearFlags.SolidColor;
@@ -122,7 +94,7 @@ public class PrototypeTestBootstrap : MonoBehaviour
         beatManagerObject.transform.SetParent(transform);
 
         BeatManager beatManager = beatManagerObject.AddComponent<BeatManager>();
-        beatManager.Configure(beatsPerMinute, 0f, debugBeatLogs);
+        beatManager.Configure(rhythmConfig.beatsPerMinute, 0f, rhythmConfig.debugBeatLogs);
         return beatManager;
     }
 
@@ -130,7 +102,7 @@ public class PrototypeTestBootstrap : MonoBehaviour
     {
         GameObject indicatorObject = new GameObject("BeatIndicator");
         indicatorObject.transform.SetParent(transform);
-        indicatorObject.transform.position = new Vector3(0f, arenaSize.y * 0.38f, 0f);
+        indicatorObject.transform.position = new Vector3(0f, stageConfig.arenaSize.y * 0.38f, 0f);
 
         SpriteRenderer spriteRenderer = indicatorObject.AddComponent<SpriteRenderer>();
         spriteRenderer.sprite = GetSquareSprite();
@@ -139,8 +111,8 @@ public class PrototypeTestBootstrap : MonoBehaviour
         BeatIndicator beatIndicator = indicatorObject.AddComponent<BeatIndicator>();
         beatIndicator.Configure(
             beatManager,
-            perfectWindow,
-            warningWindow,
+            rhythmConfig.perfectWindow,
+            rhythmConfig.warningWindow,
             new Color(0.2f, 1f, 0.35f),
             new Color(1f, 0.85f, 0.2f),
             new Color(0.95f, 0.25f, 0.25f),
@@ -150,40 +122,34 @@ public class PrototypeTestBootstrap : MonoBehaviour
 
     private PlayerController CreatePlayer(BeatManager beatManager, float groundTopY)
     {
-        Vector2 playerSpawnPosition = new Vector2(-arenaSize.x * 0.28f, groundTopY + 0.5f);
+        Vector2 playerSpawnPosition = new Vector2(-stageConfig.arenaSize.x * 0.28f, groundTopY + 0.5f);
         GameObject playerObject = CreateActor("Player", playerSpawnPosition, new Vector2(1f, 1f), new Color(0.25f, 0.85f, 0.4f), PlayerLayer, 3f);
         playerObject.tag = "Player";
 
         HealthSystem healthSystem = playerObject.AddComponent<HealthSystem>();
-        healthSystem.Configure(playerMaxHealth, false, false, 0f);
+        healthSystem.Configure(playerConfig.healthConfig);
 
         RhythmChecker rhythmChecker = playerObject.AddComponent<RhythmChecker>();
-        rhythmChecker.Configure(beatManager, perfectWindow, debugRhythmLogs);
+        rhythmChecker.Configure(beatManager, rhythmConfig.perfectWindow, rhythmConfig.debugRhythmLogs);
 
-        Transform attackPoint = CreateChildMarker(playerObject.transform, "PlayerAttackPoint", new Vector3(playerAttackPointDistance, 0f, 0f));
+        Transform attackPoint = CreateChildMarker(playerObject.transform, "PlayerAttackPoint", new Vector3(playerConfig.attackPointDistance, 0f, 0f));
         Transform groundCheck = CreateChildMarker(playerObject.transform, "PlayerGroundCheck", new Vector3(0f, -0.56f, 0f));
 
         AttackSystem attackSystem = playerObject.AddComponent<AttackSystem>();
         attackSystem.Configure(
+            playerConfig.attackConfig,
             attackPoint,
             1 << EnemyLayer,
-            playerAttackRange,
-            playerAttackCooldown,
-            playerBaseDamage,
-            playerPerfectDamageMultiplier,
-            playerWeakDamageMultiplier,
-            true,
-            rhythmChecker,
-            true);
+            rhythmChecker);
 
         PlayerController playerController = playerObject.AddComponent<PlayerController>();
         playerController.Configure(
-            playerMoveSpeed,
-            playerJumpForce,
-            playerDashSpeed,
-            playerDashDuration,
-            playerDashCooldown,
-            playerAttackPointDistance,
+            playerConfig.moveSpeed,
+            playerConfig.jumpForce,
+            playerConfig.dashSpeed,
+            playerConfig.dashDuration,
+            playerConfig.dashCooldown,
+            playerConfig.attackPointDistance,
             groundCheck,
             1 << ArenaLayer,
             0.18f);
@@ -198,33 +164,27 @@ public class PrototypeTestBootstrap : MonoBehaviour
         enemyTemplate.SetActive(false);
 
         HealthSystem healthSystem = enemyTemplate.AddComponent<HealthSystem>();
-        healthSystem.Configure(enemyMaxHealth, true, false, 0f);
+        healthSystem.Configure(enemyConfig.healthConfig);
 
-        Transform attackPoint = CreateChildMarker(enemyTemplate.transform, "EnemyAttackPoint", new Vector3(enemyAttackPointDistance, 0f, 0f));
+        Transform attackPoint = CreateChildMarker(enemyTemplate.transform, "EnemyAttackPoint", new Vector3(enemyConfig.attackPointDistance, 0f, 0f));
         Transform groundCheck = CreateChildMarker(enemyTemplate.transform, "EnemyGroundCheck", new Vector3(0f, -0.51f, 0f));
 
         AttackSystem attackSystem = enemyTemplate.AddComponent<AttackSystem>();
         attackSystem.Configure(
+            enemyConfig.attackConfig,
             attackPoint,
             1 << PlayerLayer,
-            enemyAttackRange,
-            enemyAttackCooldown,
-            enemyBaseDamage,
-            1f,
-            1f,
-            false,
-            null,
-            false);
+            null);
 
         EnemyController enemyController = enemyTemplate.AddComponent<EnemyController>();
         enemyController.Configure(
-            enemyMoveSpeed,
-            enemyJumpForce,
-            enemyAttackDistance,
-            enemyVerticalAttackTolerance,
-            enemyJumpTriggerHeight,
-            enemyRepathDelay,
-            enemyAttackPointDistance,
+            enemyConfig.moveSpeed,
+            enemyConfig.jumpForce,
+            enemyConfig.attackDistance,
+            enemyConfig.verticalAttackTolerance,
+            enemyConfig.jumpTriggerHeight,
+            enemyConfig.repathDelay,
+            enemyConfig.attackPointDistance,
             groundCheck,
             1 << ArenaLayer,
             0.18f);
@@ -241,10 +201,10 @@ public class PrototypeTestBootstrap : MonoBehaviour
         gameManager.Configure(
             enemyTemplate,
             spawnPoints,
-            startingEnemyCount,
-            additionalEnemiesPerWave,
-            timeBetweenWaves,
-            arenaSize.x * 0.25f);
+            waveConfig.startingEnemyCount,
+            waveConfig.additionalEnemiesPerWave,
+            waveConfig.timeBetweenWaves,
+            stageConfig.arenaSize.x * 0.25f);
     }
 
     private Transform[] CreateSpawnPoints(float[] platformHeights)
@@ -254,9 +214,9 @@ public class PrototypeTestBootstrap : MonoBehaviour
 
         Vector2[] positions =
         {
-            new Vector2(arenaSize.x * 0.28f, platformHeights[0] + 0.45f),
-            new Vector2(-arenaSize.x * 0.08f, platformHeights[1] + 0.45f),
-            new Vector2(arenaSize.x * 0.18f, platformHeights[1] + 0.45f),
+            new Vector2(stageConfig.arenaSize.x * 0.28f, platformHeights[0] + 0.45f),
+            new Vector2(-stageConfig.arenaSize.x * 0.08f, platformHeights[1] + 0.45f),
+            new Vector2(stageConfig.arenaSize.x * 0.18f, platformHeights[1] + 0.45f),
             new Vector2(0f, platformHeights[2] + 0.45f)
         };
 
@@ -279,27 +239,27 @@ public class PrototypeTestBootstrap : MonoBehaviour
         stageRoot.transform.SetParent(transform);
 
         float[] platformHeights = GetPlatformHeights();
-        float groundWidth = arenaSize.x;
-        float lowPlatformWidth = arenaSize.x * 0.28f;
-        float midPlatformWidth = arenaSize.x * 0.24f;
-        float topPlatformWidth = arenaSize.x * 0.2f;
+        float groundWidth = stageConfig.arenaSize.x;
+        float lowPlatformWidth = stageConfig.arenaSize.x * 0.28f;
+        float midPlatformWidth = stageConfig.arenaSize.x * 0.24f;
+        float topPlatformWidth = stageConfig.arenaSize.x * 0.2f;
 
-        CreateStagePiece(stageRoot.transform, "Background", new Vector2(0f, 1f), new Vector2(arenaSize.x * 1.1f, arenaSize.y * 0.95f), new Color(0.14f, 0.15f, 0.2f), false, -1);
-        CreateStagePiece(stageRoot.transform, "Ground", new Vector2(0f, platformHeights[0] - (platformThickness * 0.5f)), new Vector2(groundWidth, platformThickness), new Color(0.27f, 0.29f, 0.34f), true, 0);
-        CreateStagePiece(stageRoot.transform, "PlatformLeft", new Vector2(-arenaSize.x * 0.18f, platformHeights[1] - (platformThickness * 0.5f)), new Vector2(lowPlatformWidth, platformThickness), new Color(0.34f, 0.36f, 0.42f), true, 0);
-        CreateStagePiece(stageRoot.transform, "PlatformRight", new Vector2(arenaSize.x * 0.2f, platformHeights[1] - (platformThickness * 0.5f)), new Vector2(midPlatformWidth, platformThickness), new Color(0.34f, 0.36f, 0.42f), true, 0);
-        CreateStagePiece(stageRoot.transform, "PlatformTop", new Vector2(0f, platformHeights[2] - (platformThickness * 0.5f)), new Vector2(topPlatformWidth, platformThickness), new Color(0.4f, 0.42f, 0.48f), true, 0);
-        CreateStagePiece(stageRoot.transform, "WallLeft", new Vector2(-arenaSize.x * 0.5f, 0f), new Vector2(wallThickness, arenaSize.y), new Color(0.22f, 0.24f, 0.29f), true, 0);
-        CreateStagePiece(stageRoot.transform, "WallRight", new Vector2(arenaSize.x * 0.5f, 0f), new Vector2(wallThickness, arenaSize.y), new Color(0.22f, 0.24f, 0.29f), true, 0);
+        CreateStagePiece(stageRoot.transform, "Background", new Vector2(0f, 1f), new Vector2(stageConfig.arenaSize.x * 1.1f, stageConfig.arenaSize.y * 0.95f), new Color(0.14f, 0.15f, 0.2f), false, -1);
+        CreateStagePiece(stageRoot.transform, "Ground", new Vector2(0f, platformHeights[0] - (stageConfig.platformThickness * 0.5f)), new Vector2(groundWidth, stageConfig.platformThickness), new Color(0.27f, 0.29f, 0.34f), true, 0);
+        CreateStagePiece(stageRoot.transform, "PlatformLeft", new Vector2(-stageConfig.arenaSize.x * 0.18f, platformHeights[1] - (stageConfig.platformThickness * 0.5f)), new Vector2(lowPlatformWidth, stageConfig.platformThickness), new Color(0.34f, 0.36f, 0.42f), true, 0);
+        CreateStagePiece(stageRoot.transform, "PlatformRight", new Vector2(stageConfig.arenaSize.x * 0.2f, platformHeights[1] - (stageConfig.platformThickness * 0.5f)), new Vector2(midPlatformWidth, stageConfig.platformThickness), new Color(0.34f, 0.36f, 0.42f), true, 0);
+        CreateStagePiece(stageRoot.transform, "PlatformTop", new Vector2(0f, platformHeights[2] - (stageConfig.platformThickness * 0.5f)), new Vector2(topPlatformWidth, stageConfig.platformThickness), new Color(0.4f, 0.42f, 0.48f), true, 0);
+        CreateStagePiece(stageRoot.transform, "WallLeft", new Vector2(-stageConfig.arenaSize.x * 0.5f, 0f), new Vector2(stageConfig.wallThickness, stageConfig.arenaSize.y), new Color(0.22f, 0.24f, 0.29f), true, 0);
+        CreateStagePiece(stageRoot.transform, "WallRight", new Vector2(stageConfig.arenaSize.x * 0.5f, 0f), new Vector2(stageConfig.wallThickness, stageConfig.arenaSize.y), new Color(0.22f, 0.24f, 0.29f), true, 0);
     }
 
     private float[] GetPlatformHeights()
     {
         return new[]
         {
-            -arenaSize.y * 0.33f,
+            -stageConfig.arenaSize.y * 0.33f,
             0f,
-            arenaSize.y * 0.24f
+            stageConfig.arenaSize.y * 0.24f
         };
     }
 
@@ -379,40 +339,16 @@ public class PrototypeTestBootstrap : MonoBehaviour
         return cachedSquareSprite;
     }
 
-    private void OnValidate()
+    private bool HasRequiredConfigs()
     {
-        arenaSize.x = Mathf.Max(12f, arenaSize.x);
-        arenaSize.y = Mathf.Max(8f, arenaSize.y);
-        platformThickness = Mathf.Max(0.25f, platformThickness);
-        wallThickness = Mathf.Max(0.25f, wallThickness);
-        beatsPerMinute = Mathf.Max(1f, beatsPerMinute);
-        perfectWindow = Mathf.Max(0.01f, perfectWindow);
-        warningWindow = Mathf.Max(perfectWindow, warningWindow);
-        playerMaxHealth = Mathf.Max(1, playerMaxHealth);
-        playerMoveSpeed = Mathf.Max(0.1f, playerMoveSpeed);
-        playerJumpForce = Mathf.Max(0.1f, playerJumpForce);
-        playerDashSpeed = Mathf.Max(playerMoveSpeed, playerDashSpeed);
-        playerDashDuration = Mathf.Max(0.01f, playerDashDuration);
-        playerDashCooldown = Mathf.Max(0.01f, playerDashCooldown);
-        playerAttackRange = Mathf.Max(0.1f, playerAttackRange);
-        playerAttackCooldown = Mathf.Max(0.01f, playerAttackCooldown);
-        playerBaseDamage = Mathf.Max(1, playerBaseDamage);
-        playerPerfectDamageMultiplier = Mathf.Max(1f, playerPerfectDamageMultiplier);
-        playerWeakDamageMultiplier = Mathf.Clamp(playerWeakDamageMultiplier, 0.1f, 1f);
-        playerAttackPointDistance = Mathf.Max(0.1f, playerAttackPointDistance);
-        enemyMaxHealth = Mathf.Max(1, enemyMaxHealth);
-        enemyMoveSpeed = Mathf.Max(0.1f, enemyMoveSpeed);
-        enemyJumpForce = Mathf.Max(0.1f, enemyJumpForce);
-        enemyAttackDistance = Mathf.Max(0.1f, enemyAttackDistance);
-        enemyVerticalAttackTolerance = Mathf.Max(0.1f, enemyVerticalAttackTolerance);
-        enemyJumpTriggerHeight = Mathf.Max(0.1f, enemyJumpTriggerHeight);
-        enemyAttackRange = Mathf.Max(0.1f, enemyAttackRange);
-        enemyAttackCooldown = Mathf.Max(0.01f, enemyAttackCooldown);
-        enemyBaseDamage = Mathf.Max(1, enemyBaseDamage);
-        enemyAttackPointDistance = Mathf.Max(0.1f, enemyAttackPointDistance);
-        enemyRepathDelay = Mathf.Max(0.1f, enemyRepathDelay);
-        startingEnemyCount = Mathf.Max(1, startingEnemyCount);
-        additionalEnemiesPerWave = Mathf.Max(0, additionalEnemiesPerWave);
-        timeBetweenWaves = Mathf.Max(0f, timeBetweenWaves);
+        return stageConfig != null &&
+               rhythmConfig != null &&
+               playerConfig != null &&
+               playerConfig.healthConfig != null &&
+               playerConfig.attackConfig != null &&
+               enemyConfig != null &&
+               enemyConfig.healthConfig != null &&
+               enemyConfig.attackConfig != null &&
+               waveConfig != null;
     }
 }

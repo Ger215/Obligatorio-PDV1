@@ -20,7 +20,7 @@ public class RhythmChecker : MonoBehaviour
     {
         if (beatManager == null)
         {
-            beatManager = FindObjectOfType<BeatManager>();
+            beatManager = BeatManager.Instance;
         }
     }
 

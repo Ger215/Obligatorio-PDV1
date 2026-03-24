@@ -25,7 +25,7 @@ public class BeatIndicator : MonoBehaviour
 
         if (beatManager == null)
         {
-            beatManager = FindObjectOfType<BeatManager>();
+            beatManager = BeatManager.Instance;
         }
     }
 

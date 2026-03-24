@@ -4,6 +4,7 @@ using UnityEngine;
 public class AttackSystem : MonoBehaviour
 {
     [Header("Attack Setup")]
+    [SerializeField] private AttackConfig config;
     [SerializeField] private Transform attackPoint;
     [SerializeField] private LayerMask targetLayers;
     [SerializeField] private float attackRange = 1.25f;
@@ -31,6 +32,7 @@ public class AttackSystem : MonoBehaviour
     private void Awake()
     {
         ownerHealth = GetComponent<HealthSystem>();
+        ApplyConfig(config);
 
         if (attackPoint == null)
         {
@@ -106,6 +108,19 @@ public class AttackSystem : MonoBehaviour
     }
 
     public void Configure(
+        AttackConfig newConfig,
+        Transform newAttackPoint,
+        LayerMask newTargetLayers,
+        RhythmChecker newRhythmChecker)
+    {
+        config = newConfig;
+        ApplyConfig(config);
+        attackPoint = newAttackPoint != null ? newAttackPoint : transform;
+        targetLayers = newTargetLayers;
+        rhythmChecker = newRhythmChecker;
+    }
+
+    public void Configure(
         Transform newAttackPoint,
         LayerMask newTargetLayers,
         float newAttackRange,
@@ -117,6 +132,7 @@ public class AttackSystem : MonoBehaviour
         RhythmChecker newRhythmChecker,
         bool shouldDebugAttackLogs)
     {
+        config = null;
         attackPoint = newAttackPoint != null ? newAttackPoint : transform;
         targetLayers = newTargetLayers;
         attackRange = Mathf.Max(0.1f, newAttackRange);
@@ -129,6 +145,22 @@ public class AttackSystem : MonoBehaviour
         debugAttackLogs = shouldDebugAttackLogs;
     }
 
+    private void ApplyConfig(AttackConfig newConfig)
+    {
+        if (newConfig == null)
+        {
+            return;
+        }
+
+        attackRange = Mathf.Max(0.1f, newConfig.attackRange);
+        attackCooldown = Mathf.Max(0.01f, newConfig.attackCooldown);
+        baseDamage = Mathf.Max(1, newConfig.baseDamage);
+        perfectHitMultiplier = Mathf.Max(1f, newConfig.perfectHitMultiplier);
+        weakHitMultiplier = Mathf.Clamp(newConfig.weakHitMultiplier, 0.1f, 1f);
+        useRhythmTiming = newConfig.useRhythmTiming;
+        debugAttackLogs = newConfig.debugAttackLogs;
+    }
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
@@ -138,6 +170,7 @@ public class AttackSystem : MonoBehaviour
 
     private void OnValidate()
     {
+        ApplyConfig(config);
         attackRange = Mathf.Max(0.1f, attackRange);
         attackCooldown = Mathf.Max(0.01f, attackCooldown);
         baseDamage = Mathf.Max(1, baseDamage);
