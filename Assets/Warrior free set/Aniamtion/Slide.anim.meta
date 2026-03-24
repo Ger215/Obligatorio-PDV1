@@ -1,8 +1,15 @@
 fileFormatVersion: 2
-guid: 59788383808ace546a4bdc59e4cc51ee
+guid: bd6167e0337245449a259e293568b4bc
 NativeFormatImporter:
   externalObjects: {}
-  mainObjectFileID: 0
+  mainObjectFileID: 7400000
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 195707
+  packageName: Warrior Free Asset
+  packageVersion: 1.0
+  assetPath: Assets/Warrior free set/Aniamtion/Slide.anim
+  uploadId: 434362

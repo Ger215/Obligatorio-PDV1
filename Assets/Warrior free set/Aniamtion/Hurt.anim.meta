@@ -1,8 +1,15 @@
 fileFormatVersion: 2
-guid: c3107f4cb44bc8f4c95ec9a19752ab02
+guid: 1d521053550d8d144afedd4351f60390
 NativeFormatImporter:
   externalObjects: {}
-  mainObjectFileID: 0
+  mainObjectFileID: 7400000
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 195707
+  packageName: Warrior Free Asset
+  packageVersion: 1.0
+  assetPath: Assets/Warrior free set/Aniamtion/Hurt.anim
+  uploadId: 434362

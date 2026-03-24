@@ -1,8 +1,15 @@
 fileFormatVersion: 2
-guid: 2259f343ef9e14a41a08c9fa793608ed
+guid: 843e70cca0afdad4fb614572c2f62d3e
 NativeFormatImporter:
   externalObjects: {}
-  mainObjectFileID: 0
+  mainObjectFileID: 7400000
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 195707
+  packageName: Warrior Free Asset
+  packageVersion: 1.0
+  assetPath: Assets/Warrior free set/Aniamtion/Dash NoDust.anim
+  uploadId: 434362

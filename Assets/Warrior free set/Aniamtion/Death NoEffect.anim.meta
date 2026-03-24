@@ -1,8 +1,15 @@
 fileFormatVersion: 2
-guid: 12ba1252b80223448b95ab1a8f389d5f
+guid: 0a0a51f3b63fc2b4794bb0f1e335dde1
 NativeFormatImporter:
   externalObjects: {}
-  mainObjectFileID: 0
+  mainObjectFileID: 7400000
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 195707
+  packageName: Warrior Free Asset
+  packageVersion: 1.0
+  assetPath: Assets/Warrior free set/Aniamtion/Death NoEffect.anim
+  uploadId: 434362

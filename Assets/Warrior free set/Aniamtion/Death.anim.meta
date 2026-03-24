@@ -1,8 +1,15 @@
 fileFormatVersion: 2
-guid: ffcfe760a60076f4f8cd6db458bbc2ae
+guid: 36684c15dec018a4ca8dcf9c646e3c15
 NativeFormatImporter:
   externalObjects: {}
-  mainObjectFileID: 0
+  mainObjectFileID: 7400000
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 195707
+  packageName: Warrior Free Asset
+  packageVersion: 1.0
+  assetPath: Assets/Warrior free set/Aniamtion/Death.anim
+  uploadId: 434362
