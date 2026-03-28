@@ -11,9 +11,11 @@ public class HealthSystem : MonoBehaviour
     [SerializeField] private float destroyDelay;
 
     private bool isDead;
+    private float incomingDamageMultiplier = 1f;
 
     public event Action<HealthSystem> Died;
     public event Action<int, int> Damaged;
+    public event Action<int, int> Healed;
 
     public int MaxHealth => maxHealth;
     public int CurrentHealth { get; private set; }
@@ -32,9 +34,10 @@ public class HealthSystem : MonoBehaviour
             return;
         }
 
-        CurrentHealth = Mathf.Max(CurrentHealth - damageAmount, 0);
+        int finalDamage = Mathf.Max(1, Mathf.RoundToInt(damageAmount * incomingDamageMultiplier));
+        CurrentHealth = Mathf.Max(CurrentHealth - finalDamage, 0);
         Damaged?.Invoke(CurrentHealth, maxHealth);
-        Debug.Log($"{name} took {damageAmount} damage. Health: {CurrentHealth}/{maxHealth}");
+        Debug.Log($"{name} took {finalDamage} damage. Health: {CurrentHealth}/{maxHealth}");
 
         if (CurrentHealth <= 0)
         {
@@ -42,10 +45,27 @@ public class HealthSystem : MonoBehaviour
         }
     }
 
+    public void Heal(int amount)
+    {
+        if (isDead || amount <= 0 || CurrentHealth >= maxHealth)
+        {
+            return;
+        }
+
+        CurrentHealth = Mathf.Min(CurrentHealth + amount, maxHealth);
+        Healed?.Invoke(CurrentHealth, maxHealth);
+    }
+
     public void ResetHealth()
     {
         isDead = false;
         CurrentHealth = maxHealth;
+        incomingDamageMultiplier = 1f;
+    }
+
+    public void SetIncomingDamageMultiplier(float multiplier)
+    {
+        incomingDamageMultiplier = Mathf.Max(0.1f, multiplier);
     }
 
     public void Configure(HealthConfig newConfig)

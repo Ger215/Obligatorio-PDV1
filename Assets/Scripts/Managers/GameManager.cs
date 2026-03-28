@@ -5,54 +5,71 @@ using UnityEngine;
 public class GameManager : SingletonBehaviour<GameManager>
 {
     [Header("Wave Setup")]
+    [SerializeField] private bool enableEnemySpawning = true;
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private Transform[] spawnPoints;
-    [SerializeField] private int startingEnemyCount = 2;
-    [SerializeField] private int additionalEnemiesPerWave = 1;
-    [SerializeField] private float timeBetweenWaves = 2f;
+    [SerializeField] private WaveConfig waveConfig;
+    [SerializeField] private EnemyConfig enemyConfig;
+    [SerializeField] private PlayerAbilityCatalog abilityCatalog;
+    [SerializeField] private GameHudController hudController;
+    [SerializeField] private AudioManager audioManager;
 
     [Header("Fallback Spawn Area")]
     [SerializeField] private float spawnRadius = 6f;
 
     private readonly List<HealthSystem> aliveEnemies = new List<HealthSystem>();
+    private readonly List<PlayerAbilityDefinition> offeredAbilities = new List<PlayerAbilityDefinition>();
+
     private bool waitingForNextWave;
+    private bool shopOpen;
+    private ExperienceSystem playerExperience;
+    private PlayerAbilityController playerAbilities;
 
     public int CurrentWave { get; private set; }
     public int AliveEnemyCount => aliveEnemies.Count;
-
-    protected override void Awake()
-    {
-        base.Awake();
-
-        if (Instance != this)
-        {
-            return;
-        }
-    }
+    public IReadOnlyList<PlayerAbilityDefinition> OfferedAbilities => offeredAbilities;
+    public bool ShopOpen => shopOpen;
 
     private void Start()
     {
+        if (PlayerController.Instance != null)
+        {
+            playerExperience = PlayerController.Instance.GetComponent<ExperienceSystem>();
+            playerAbilities = PlayerController.Instance.GetComponent<PlayerAbilityController>();
+        }
+
+        hudController?.Bind(this, PlayerController.Instance);
+        audioManager?.PlayBackgroundMusic();
         StartNextWave();
     }
 
     private void StartNextWave()
     {
-        if (enemyPrefab == null)
+        if (!enableEnemySpawning)
         {
-            Debug.LogError("GameManager needs an enemy prefab reference.");
+            aliveEnemies.Clear();
+            return;
+        }
+
+        if (enemyPrefab == null || waveConfig == null || enemyConfig == null)
+        {
+            Debug.LogError("GameManager needs enemyPrefab, waveConfig, and enemyConfig references.");
             return;
         }
 
         waitingForNextWave = false;
+        shopOpen = false;
+        Time.timeScale = 1f;
         CurrentWave++;
 
-        int enemiesToSpawn = startingEnemyCount + ((CurrentWave - 1) * additionalEnemiesPerWave);
-        Debug.Log($"Starting wave {CurrentWave} with {enemiesToSpawn} enemies.");
+        int enemiesToSpawn = waveConfig.startingEnemyCount + ((CurrentWave - 1) * waveConfig.additionalEnemiesPerWave);
 
         for (int i = 0; i < enemiesToSpawn; i++)
         {
             SpawnEnemy(i);
         }
+
+        hudController?.RefreshWaveState(CurrentWave, aliveEnemies.Count);
     }
 
     private void SpawnEnemy(int enemyIndex)
@@ -61,6 +78,7 @@ public class GameManager : SingletonBehaviour<GameManager>
         GameObject enemyInstance = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
         enemyInstance.name = $"Enemy_{CurrentWave}_{enemyIndex + 1}";
         enemyInstance.SetActive(true);
+        ApplyWaveScaling(enemyInstance);
 
         HealthSystem enemyHealth = enemyInstance.GetComponent<HealthSystem>();
 
@@ -72,6 +90,7 @@ public class GameManager : SingletonBehaviour<GameManager>
 
         enemyHealth.Died += HandleEnemyDeath;
         aliveEnemies.Add(enemyHealth);
+        hudController?.RefreshWaveState(CurrentWave, aliveEnemies.Count);
     }
 
     private Vector3 GetSpawnPosition(int enemyIndex)
@@ -95,6 +114,8 @@ public class GameManager : SingletonBehaviour<GameManager>
 
         deadEnemy.Died -= HandleEnemyDeath;
         aliveEnemies.Remove(deadEnemy);
+        RewardPlayerForEnemyDeath();
+        hudController?.RefreshWaveState(CurrentWave, aliveEnemies.Count);
 
         if (aliveEnemies.Count == 0 && !waitingForNextWave)
         {
@@ -105,32 +126,154 @@ public class GameManager : SingletonBehaviour<GameManager>
     private IEnumerator StartNextWaveAfterDelay()
     {
         waitingForNextWave = true;
-        Debug.Log($"Wave {CurrentWave} cleared. Next wave begins in {timeBetweenWaves:0.0} seconds.");
-        yield return new WaitForSeconds(timeBetweenWaves);
+
+        if (TryOpenAbilityShop())
+        {
+            yield break;
+        }
+
+        yield return new WaitForSeconds(waveConfig.timeBetweenWaves);
         StartNextWave();
     }
 
     public void Configure(
         GameObject newEnemyPrefab,
         Transform[] newSpawnPoints,
-        int newStartingEnemyCount,
-        int newAdditionalEnemiesPerWave,
-        float newTimeBetweenWaves,
+        WaveConfig newWaveConfig,
+        EnemyConfig newEnemyConfig,
+        PlayerAbilityCatalog newAbilityCatalog,
         float newSpawnRadius)
     {
         enemyPrefab = newEnemyPrefab;
         spawnPoints = newSpawnPoints;
-        startingEnemyCount = Mathf.Max(1, newStartingEnemyCount);
-        additionalEnemiesPerWave = Mathf.Max(0, newAdditionalEnemiesPerWave);
-        timeBetweenWaves = Mathf.Max(0f, newTimeBetweenWaves);
+        waveConfig = newWaveConfig;
+        enemyConfig = newEnemyConfig;
+        abilityCatalog = newAbilityCatalog;
         spawnRadius = Mathf.Max(1f, newSpawnRadius);
+    }
+
+    public void SelectOfferedAbility(int index)
+    {
+        if (!shopOpen || playerAbilities == null || playerExperience == null || index < 0 || index >= offeredAbilities.Count)
+        {
+            return;
+        }
+
+        PlayerAbilityDefinition selectedAbility = offeredAbilities[index];
+
+        if (!playerExperience.TrySpend(selectedAbility.cost))
+        {
+            return;
+        }
+
+        playerAbilities.LearnAbility(selectedAbility);
+        CloseShopAndContinue();
+    }
+
+    public void SkipAbilityShop()
+    {
+        if (!shopOpen)
+        {
+            return;
+        }
+
+        CloseShopAndContinue();
+    }
+
+    private void CloseShopAndContinue()
+    {
+        shopOpen = false;
+        offeredAbilities.Clear();
+        hudController?.HideAbilityShop();
+        StartCoroutine(BeginNextWaveAfterDelay());
+    }
+
+    private IEnumerator BeginNextWaveAfterDelay()
+    {
+        Time.timeScale = 1f;
+        yield return new WaitForSeconds(waveConfig != null ? waveConfig.timeBetweenWaves : 1f);
+        StartNextWave();
+    }
+
+    private bool TryOpenAbilityShop()
+    {
+        if (abilityCatalog == null || playerAbilities == null || playerExperience == null || playerAbilities.IsAbilityCapacityReached)
+        {
+            return false;
+        }
+
+        List<PlayerAbilityDefinition> availableAbilities = abilityCatalog.GetUnlearnedAbilities(playerAbilities.LearnedAbilities);
+
+        if (availableAbilities.Count == 0)
+        {
+            return false;
+        }
+
+        offeredAbilities.Clear();
+
+        while (offeredAbilities.Count < waveConfig.offeredAbilitiesCount && availableAbilities.Count > 0)
+        {
+            int randomIndex = Random.Range(0, availableAbilities.Count);
+            offeredAbilities.Add(availableAbilities[randomIndex]);
+            availableAbilities.RemoveAt(randomIndex);
+        }
+
+        shopOpen = true;
+        Time.timeScale = 0f;
+        hudController?.ShowAbilityShop(offeredAbilities, playerExperience.CurrentExperience);
+        return true;
+    }
+
+    private void RewardPlayerForEnemyDeath()
+    {
+        if (playerExperience == null)
+        {
+            return;
+        }
+
+        int reward = enemyConfig.baseExperienceReward + ((CurrentWave - 1) * waveConfig.bonusExperiencePerWave);
+        playerExperience.AddExperience(reward);
+    }
+
+    private void ApplyWaveScaling(GameObject enemyInstance)
+    {
+        int waveIndex = Mathf.Max(0, CurrentWave - 1);
+        float healthMultiplier = 1f + (waveConfig.enemyHealthMultiplierPerWave * waveIndex);
+        float damageMultiplier = 1f + (waveConfig.enemyDamageMultiplierPerWave * waveIndex);
+        float moveSpeedMultiplier = 1f + (waveConfig.enemyMoveSpeedMultiplierPerWave * waveIndex);
+
+        HealthSystem healthSystem = enemyInstance.GetComponent<HealthSystem>();
+        AttackSystem attackSystem = enemyInstance.GetComponent<AttackSystem>();
+        EnemyController enemyController = enemyInstance.GetComponent<EnemyController>();
+
+        if (healthSystem != null && enemyConfig.healthConfig != null)
+        {
+            healthSystem.Configure(
+                Mathf.RoundToInt(enemyConfig.healthConfig.maxHealth * healthMultiplier),
+                enemyConfig.healthConfig.destroyOnDeath,
+                enemyConfig.healthConfig.deactivateOnDeath,
+                enemyConfig.healthConfig.destroyDelay);
+        }
+
+        if (attackSystem != null && enemyConfig.attackConfig != null)
+        {
+            Transform attackPoint = attackSystem.AttackPointTransform != null ? attackSystem.AttackPointTransform : enemyInstance.transform;
+            attackSystem.Configure(
+                attackPoint,
+                1 << 8,
+                enemyConfig.attackConfig.attackRange,
+                enemyConfig.attackConfig.attackCooldown,
+                Mathf.RoundToInt(enemyConfig.attackConfig.baseDamage * damageMultiplier),
+                enemyConfig.attackConfig.criticalChance,
+                enemyConfig.attackConfig.criticalMultiplier,
+                enemyConfig.attackConfig.debugAttackLogs);
+        }
+
+        enemyController?.ApplyDifficultyMultiplier(moveSpeedMultiplier);
     }
 
     private void OnValidate()
     {
-        startingEnemyCount = Mathf.Max(1, startingEnemyCount);
-        additionalEnemiesPerWave = Mathf.Max(0, additionalEnemiesPerWave);
-        timeBetweenWaves = Mathf.Max(0f, timeBetweenWaves);
         spawnRadius = Mathf.Max(1f, spawnRadius);
     }
 }

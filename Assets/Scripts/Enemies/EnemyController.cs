@@ -28,6 +28,7 @@ public class EnemyController : MonoBehaviour
     private Transform playerTarget;
     private bool isDead;
     private bool isGrounded;
+    private bool jumpConsumed;
     private int facingDirection = 1;
     private float nextPathRefreshTime;
 
@@ -67,6 +68,7 @@ public class EnemyController : MonoBehaviour
         }
 
         isGrounded = CheckGrounded();
+        UpdateJumpState();
 
         if (playerTarget == null && Time.time >= nextPathRefreshTime)
         {
@@ -119,12 +121,13 @@ public class EnemyController : MonoBehaviour
         float horizontalVelocity = horizontalDistance <= attackDistance ? 0f : horizontalDirection * moveSpeed;
         rb.linearVelocity = new Vector2(horizontalVelocity, rb.linearVelocity.y);
 
-        bool shouldJump = isGrounded && verticalDistance > jumpTriggerHeight;
+        bool shouldJump = isGrounded && !jumpConsumed && verticalDistance > jumpTriggerHeight;
 
         if (shouldJump)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             isGrounded = false;
+            jumpConsumed = true;
         }
     }
 
@@ -169,6 +172,14 @@ public class EnemyController : MonoBehaviour
         return Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayers) != null;
     }
 
+    private void UpdateJumpState()
+    {
+        if (isGrounded && Mathf.Abs(rb.linearVelocity.y) <= 0.05f)
+        {
+            jumpConsumed = false;
+        }
+    }
+
     private void UpdateAttackPointPosition()
     {
         if (attackSystem == null || attackSystem.AttackPointTransform == null)
@@ -185,6 +196,11 @@ public class EnemyController : MonoBehaviour
         rb.linearVelocity = Vector2.zero;
     }
 
+    public void ApplyDifficultyMultiplier(float moveSpeedMultiplier)
+    {
+        moveSpeed = Mathf.Max(0.1f, moveSpeed * moveSpeedMultiplier);
+    }
+
     private void OnValidate()
     {
         moveSpeed = Mathf.Max(0.1f, moveSpeed);
@@ -195,5 +211,16 @@ public class EnemyController : MonoBehaviour
         repathDelay = Mathf.Max(0.1f, repathDelay);
         attackPointDistance = Mathf.Max(0.1f, attackPointDistance);
         groundCheckRadius = Mathf.Max(0.05f, groundCheckRadius);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (groundCheck == null)
+        {
+            return;
+        }
+
+        Gizmos.color = isGrounded ? Color.green : Color.yellow;
+        Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
     }
 }

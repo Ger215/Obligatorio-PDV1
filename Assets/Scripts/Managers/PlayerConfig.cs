@@ -11,6 +11,7 @@ public class PlayerConfig : ScriptableObject
     public float dashDuration = 0.15f;
     public float dashCooldown = 0.75f;
     public float attackPointDistance = 0.75f;
+    public int maxLearnedAbilities = 3;
 
     private void OnValidate()
     {
@@ -20,5 +21,6 @@ public class PlayerConfig : ScriptableObject
         dashDuration = Mathf.Max(0.01f, dashDuration);
         dashCooldown = Mathf.Max(0.01f, dashCooldown);
         attackPointDistance = Mathf.Max(0.1f, attackPointDistance);
+        maxLearnedAbilities = Mathf.Clamp(maxLearnedAbilities, 1, 3);
     }
 }

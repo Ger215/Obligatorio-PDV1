@@ -26,6 +26,7 @@ public class PlayerController : SingletonBehaviour<PlayerController>
     private Rigidbody2D rb;
     private AttackSystem attackSystem;
     private HealthSystem healthSystem;
+    private PlayerAbilityController abilityController;
 
     private float horizontalInput;
     private int facingDirection = 1;
@@ -33,6 +34,7 @@ public class PlayerController : SingletonBehaviour<PlayerController>
     private bool isDead;
     private bool jumpQueued;
     private bool isGrounded;
+    private bool jumpConsumed;
     private float dashTimeRemaining;
     private float lastDashTime = -Mathf.Infinity;
 
@@ -48,6 +50,7 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         rb = GetComponent<Rigidbody2D>();
         attackSystem = GetComponent<AttackSystem>();
         healthSystem = GetComponent<HealthSystem>();
+        abilityController = GetComponent<PlayerAbilityController>();
 
         if (groundCheck == null)
         {
@@ -65,6 +68,8 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         }
 
         healthSystem.Died += HandleDeath;
+        healthSystem.Damaged += HandleDamaged;
+        attackSystem.AttackResolved += HandleAttackResolved;
     }
 
     private void OnDisable()
@@ -75,6 +80,12 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         }
 
         healthSystem.Died -= HandleDeath;
+        healthSystem.Damaged -= HandleDamaged;
+
+        if (attackSystem != null)
+        {
+            attackSystem.AttackResolved -= HandleAttackResolved;
+        }
     }
 
     private void Update()
@@ -85,10 +96,12 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         }
 
         isGrounded = CheckGrounded();
+        UpdateJumpState();
         ReadMovementInput();
         ReadJumpInput();
         ReadAttackInput();
         ReadDashInput();
+        ReadAbilityInput();
     }
 
     private void FixedUpdate()
@@ -120,6 +133,8 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             isGrounded = false;
+            jumpConsumed = true;
+            AudioManager.Instance?.PlayJump();
         }
 
         jumpQueued = false;
@@ -158,9 +173,17 @@ public class PlayerController : SingletonBehaviour<PlayerController>
                            (Keyboard.current.wKey.wasPressedThisFrame || Keyboard.current.upArrowKey.wasPressedThisFrame)) ||
                           (Gamepad.current != null && Gamepad.current.buttonNorth.wasPressedThisFrame);
 
-        if (jumpPressed)
+        if (jumpPressed && !jumpConsumed)
         {
             jumpQueued = true;
+        }
+    }
+
+    private void UpdateJumpState()
+    {
+        if (isGrounded && Mathf.Abs(rb.linearVelocity.y) <= 0.05f)
+        {
+            jumpConsumed = false;
         }
     }
 
@@ -173,6 +196,29 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         if (attackPressed)
         {
             attackSystem.TryAttack();
+        }
+    }
+
+    private void ReadAbilityInput()
+    {
+        if (abilityController == null || Keyboard.current == null)
+        {
+            return;
+        }
+
+        if (Keyboard.current.digit1Key.wasPressedThisFrame)
+        {
+            abilityController.TryUseAbilitySlot(0);
+        }
+
+        if (Keyboard.current.digit2Key.wasPressedThisFrame)
+        {
+            abilityController.TryUseAbilitySlot(1);
+        }
+
+        if (Keyboard.current.digit3Key.wasPressedThisFrame)
+        {
+            abilityController.TryUseAbilitySlot(2);
         }
     }
 
@@ -247,6 +293,28 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         rb.linearVelocity = Vector2.zero;
     }
 
+    private void HandleDamaged(int currentHealth, int maxHealth)
+    {
+        AudioManager.Instance?.PlayPlayerDamaged();
+    }
+
+    private void HandleAttackResolved(bool critical, int damage, int targetsHit)
+    {
+        if (targetsHit > 0)
+        {
+            AudioManager.Instance?.PlayAttack(critical);
+        }
+    }
+
+    public int FacingDirection => facingDirection;
+    public Rigidbody2D Rigidbody => rb;
+    public AttackSystem AttackSystem => attackSystem;
+    public HealthSystem HealthSystem => healthSystem;
+    public bool IsGrounded => isGrounded;
+    public bool IsDashing => isDashing;
+    public float VerticalVelocity => rb != null ? rb.linearVelocity.y : 0f;
+    public float HorizontalInput => horizontalInput;
+
     private void OnValidate()
     {
         moveSpeed = Mathf.Max(0.1f, moveSpeed);
@@ -256,5 +324,16 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         dashCooldown = Mathf.Max(0.01f, dashCooldown);
         attackPointDistance = Mathf.Max(0.1f, attackPointDistance);
         groundCheckRadius = Mathf.Max(0.05f, groundCheckRadius);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (groundCheck == null)
+        {
+            return;
+        }
+
+        Gizmos.color = isGrounded ? Color.green : Color.yellow;
+        Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
     }
 }

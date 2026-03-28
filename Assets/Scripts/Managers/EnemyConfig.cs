@@ -12,6 +12,7 @@ public class EnemyConfig : ScriptableObject
     public float jumpTriggerHeight = 1.35f;
     public float attackPointDistance = 0.6f;
     public float repathDelay = 0.5f;
+    public int baseExperienceReward = 5;
 
     private void OnValidate()
     {
@@ -22,5 +23,6 @@ public class EnemyConfig : ScriptableObject
         jumpTriggerHeight = Mathf.Max(0.1f, jumpTriggerHeight);
         attackPointDistance = Mathf.Max(0.1f, attackPointDistance);
         repathDelay = Mathf.Max(0.1f, repathDelay);
+        baseExperienceReward = Mathf.Max(1, baseExperienceReward);
     }
 }
