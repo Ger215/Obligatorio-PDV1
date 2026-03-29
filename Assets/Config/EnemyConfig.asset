@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 377bf839e86e1d1499df6ee445e8a516, type: 3}
   m_Name: EnemyConfig
   m_EditorClassIdentifier: Assembly-CSharp::EnemyConfig
-  healthConfig: {fileID: 0}
-  attackConfig: {fileID: 0}
+  enemyType: 0
+  healthConfig: {fileID: 11400000, guid: abc60ecfaf9b0784c8f21a4d7f6b99fb, type: 2}
+  attackConfig: {fileID: 11400000, guid: 96a86de857af98b4aa0f306999f3654f, type: 2}
   moveSpeed: 3
   jumpForce: 11
   attackDistance: 1.1
@@ -21,3 +22,4 @@ MonoBehaviour:
   jumpTriggerHeight: 1.35
   attackPointDistance: 0.6
   repathDelay: 0.5
+  baseExperienceReward: 5

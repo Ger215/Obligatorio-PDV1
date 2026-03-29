@@ -235,12 +235,35 @@ public class GameManager : SingletonBehaviour<GameManager>
         playerExperience.AddExperience(reward);
     }
 
+    private static void GetTypeMultipliers(EnemyType type, out float healthMult, out float damageMult)
+    {
+        switch (type)
+        {
+            case EnemyType.Fast:
+                healthMult = 0.6f;
+                damageMult = 0.8f;
+                break;
+            case EnemyType.Tank:
+                healthMult = 2.5f;
+                damageMult = 1.5f;
+                break;
+            default:
+                healthMult = 1f;
+                damageMult = 1f;
+                break;
+        }
+    }
+
     private void ApplyWaveScaling(GameObject enemyInstance)
     {
         int waveIndex = Mathf.Max(0, CurrentWave - 1);
         float healthMultiplier = 1f + (waveConfig.enemyHealthMultiplierPerWave * waveIndex);
         float damageMultiplier = 1f + (waveConfig.enemyDamageMultiplierPerWave * waveIndex);
         float moveSpeedMultiplier = 1f + (waveConfig.enemyMoveSpeedMultiplierPerWave * waveIndex);
+
+        GetTypeMultipliers(enemyConfig.enemyType, out float typeHealth, out float typeDamage);
+        healthMultiplier *= typeHealth;
+        damageMultiplier *= typeDamage;
 
         HealthSystem healthSystem = enemyInstance.GetComponent<HealthSystem>();
         AttackSystem attackSystem = enemyInstance.GetComponent<AttackSystem>();
@@ -270,6 +293,7 @@ public class GameManager : SingletonBehaviour<GameManager>
         }
 
         enemyController?.ApplyDifficultyMultiplier(moveSpeedMultiplier);
+        enemyController?.SetEnemyType(enemyConfig.enemyType);
     }
 
     private void OnValidate()

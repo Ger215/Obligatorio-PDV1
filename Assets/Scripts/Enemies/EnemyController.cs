@@ -24,7 +24,9 @@ public class EnemyController : MonoBehaviour
     private Rigidbody2D rb;
     private AttackSystem attackSystem;
     private HealthSystem healthSystem;
+    private ProjectileLauncher projectileLauncher;
 
+    private EnemyType enemyType;
     private Transform playerTarget;
     private bool isDead;
     private bool isGrounded;
@@ -37,6 +39,7 @@ public class EnemyController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         attackSystem = GetComponent<AttackSystem>();
         healthSystem = GetComponent<HealthSystem>();
+        projectileLauncher = GetComponent<ProjectileLauncher>();
 
         if (groundCheck == null)
         {
@@ -90,7 +93,14 @@ public class EnemyController : MonoBehaviour
 
         if (Mathf.Abs(deltaToPlayer.x) <= attackDistance && Mathf.Abs(deltaToPlayer.y) <= verticalAttackTolerance)
         {
-            attackSystem.TryAttack();
+            if (enemyType == EnemyType.Ranged && projectileLauncher != null)
+            {
+                projectileLauncher.TryLaunch(deltaToPlayer);
+            }
+            else
+            {
+                attackSystem.TryAttack();
+            }
         }
     }
 
@@ -199,6 +209,30 @@ public class EnemyController : MonoBehaviour
     public void ApplyDifficultyMultiplier(float moveSpeedMultiplier)
     {
         moveSpeed = Mathf.Max(0.1f, moveSpeed * moveSpeedMultiplier);
+    }
+
+    public void SetEnemyType(EnemyType type)
+    {
+        enemyType = type;
+
+        switch (type)
+        {
+            case EnemyType.Fast:
+                moveSpeed *= 1.8f;
+                attackDistance *= 0.85f;
+                break;
+            case EnemyType.Tank:
+                moveSpeed *= 0.5f;
+                attackDistance *= 1.4f;
+                break;
+            case EnemyType.Ranged:
+                attackDistance *= 4f;
+                verticalAttackTolerance = 10f;
+                break;
+        }
+
+        moveSpeed = Mathf.Max(0.1f, moveSpeed);
+        attackDistance = Mathf.Max(0.1f, attackDistance);
     }
 
     private void OnValidate()

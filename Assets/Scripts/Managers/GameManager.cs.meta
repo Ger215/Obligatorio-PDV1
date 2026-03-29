@@ -1,2 +1,17 @@
 fileFormatVersion: 2
 guid: 95f1fa751fa088d41b896c59816681ca
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - enemyPrefab: {instanceID: 0}
+  - waveConfig: {instanceID: 0}
+  - enemyConfig: {instanceID: 0}
+  - abilityCatalog: {instanceID: 0}
+  - hudController: {instanceID: 0}
+  - audioManager: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
