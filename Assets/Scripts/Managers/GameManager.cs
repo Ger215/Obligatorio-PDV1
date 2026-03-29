@@ -9,7 +9,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private Transform[] spawnPoints;
     [SerializeField] private WaveConfig waveConfig;
-    [SerializeField] private EnemyConfig enemyConfig;
+    [SerializeField] private EnemyTypeConfig[] enemyTypeConfigs;
     [SerializeField] private PlayerAbilityCatalog abilityCatalog;
     [SerializeField] private GameHudController hudController;
     [SerializeField] private AudioManager audioManager;
@@ -19,6 +19,7 @@ public class GameManager : SingletonBehaviour<GameManager>
 
     private readonly List<HealthSystem> aliveEnemies = new List<HealthSystem>();
     private readonly List<PlayerAbilityDefinition> offeredAbilities = new List<PlayerAbilityDefinition>();
+    private readonly Dictionary<HealthSystem, int> enemyXpRewards = new Dictionary<HealthSystem, int>();
 
     private bool waitingForNextWave;
     private bool shopOpen;
@@ -51,9 +52,9 @@ public class GameManager : SingletonBehaviour<GameManager>
             return;
         }
 
-        if (enemyPrefab == null || waveConfig == null || enemyConfig == null)
+        if (enemyPrefab == null || waveConfig == null || enemyTypeConfigs == null || enemyTypeConfigs.Length == 0)
         {
-            Debug.LogError("GameManager needs enemyPrefab, waveConfig, and enemyConfig references.");
+            Debug.LogError("GameManager needs enemyPrefab, waveConfig, and at least one enemyTypeConfig.");
             return;
         }
 
@@ -74,11 +75,19 @@ public class GameManager : SingletonBehaviour<GameManager>
 
     private void SpawnEnemy(int enemyIndex)
     {
+        EnemyType type = PickEnemyTypeForWave();
+        EnemyConfig config = GetConfigForType(type);
+
+        if (config == null)
+        {
+            Debug.LogError($"No EnemyConfig found for type {type}.");
+            return;
+        }
+
         Vector3 spawnPosition = GetSpawnPosition(enemyIndex);
         GameObject enemyInstance = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
-        enemyInstance.name = $"Enemy_{CurrentWave}_{enemyIndex + 1}";
-        enemyInstance.SetActive(true);
-        ApplyWaveScaling(enemyInstance);
+        enemyInstance.name = $"Enemy_{CurrentWave}_{enemyIndex + 1}_{type}";
+        ApplyWaveScaling(enemyInstance, config, type);
 
         HealthSystem enemyHealth = enemyInstance.GetComponent<HealthSystem>();
 
@@ -88,9 +97,38 @@ public class GameManager : SingletonBehaviour<GameManager>
             return;
         }
 
+        int xpReward = config.baseExperienceReward + ((CurrentWave - 1) * waveConfig.bonusExperiencePerWave);
+        enemyXpRewards[enemyHealth] = xpReward;
         enemyHealth.Died += HandleEnemyDeath;
         aliveEnemies.Add(enemyHealth);
         hudController?.RefreshWaveState(CurrentWave, aliveEnemies.Count);
+    }
+
+    private EnemyType PickEnemyTypeForWave()
+    {
+        if (waveConfig.waveDefinitions != null && CurrentWave - 1 < waveConfig.waveDefinitions.Length)
+        {
+            EnemyType[] allowed = waveConfig.waveDefinitions[CurrentWave - 1].allowedTypes;
+            if (allowed != null && allowed.Length > 0)
+            {
+                return allowed[Random.Range(0, allowed.Length)];
+            }
+        }
+
+        return EnemyType.Chaser;
+    }
+
+    private EnemyConfig GetConfigForType(EnemyType type)
+    {
+        foreach (EnemyTypeConfig entry in enemyTypeConfigs)
+        {
+            if (entry.type == type)
+            {
+                return entry.config;
+            }
+        }
+
+        return enemyTypeConfigs[0].config;
     }
 
     private Vector3 GetSpawnPosition(int enemyIndex)
@@ -114,7 +152,7 @@ public class GameManager : SingletonBehaviour<GameManager>
 
         deadEnemy.Died -= HandleEnemyDeath;
         aliveEnemies.Remove(deadEnemy);
-        RewardPlayerForEnemyDeath();
+        RewardPlayerForEnemyDeath(deadEnemy);
         hudController?.RefreshWaveState(CurrentWave, aliveEnemies.Count);
 
         if (aliveEnemies.Count == 0 && !waitingForNextWave)
@@ -140,14 +178,14 @@ public class GameManager : SingletonBehaviour<GameManager>
         GameObject newEnemyPrefab,
         Transform[] newSpawnPoints,
         WaveConfig newWaveConfig,
-        EnemyConfig newEnemyConfig,
+        EnemyTypeConfig[] newEnemyTypeConfigs,
         PlayerAbilityCatalog newAbilityCatalog,
         float newSpawnRadius)
     {
         enemyPrefab = newEnemyPrefab;
         spawnPoints = newSpawnPoints;
         waveConfig = newWaveConfig;
-        enemyConfig = newEnemyConfig;
+        enemyTypeConfigs = newEnemyTypeConfigs;
         abilityCatalog = newAbilityCatalog;
         spawnRadius = Mathf.Max(1f, newSpawnRadius);
     }
@@ -224,15 +262,18 @@ public class GameManager : SingletonBehaviour<GameManager>
         return true;
     }
 
-    private void RewardPlayerForEnemyDeath()
+    private void RewardPlayerForEnemyDeath(HealthSystem deadEnemy)
     {
         if (playerExperience == null)
         {
             return;
         }
 
-        int reward = enemyConfig.baseExperienceReward + ((CurrentWave - 1) * waveConfig.bonusExperiencePerWave);
-        playerExperience.AddExperience(reward);
+        if (enemyXpRewards.TryGetValue(deadEnemy, out int reward))
+        {
+            enemyXpRewards.Remove(deadEnemy);
+            playerExperience.AddExperience(reward);
+        }
     }
 
     private static void GetTypeMultipliers(EnemyType type, out float healthMult, out float damageMult)
@@ -254,14 +295,14 @@ public class GameManager : SingletonBehaviour<GameManager>
         }
     }
 
-    private void ApplyWaveScaling(GameObject enemyInstance)
+    private void ApplyWaveScaling(GameObject enemyInstance, EnemyConfig config, EnemyType type)
     {
         int waveIndex = Mathf.Max(0, CurrentWave - 1);
         float healthMultiplier = 1f + (waveConfig.enemyHealthMultiplierPerWave * waveIndex);
         float damageMultiplier = 1f + (waveConfig.enemyDamageMultiplierPerWave * waveIndex);
         float moveSpeedMultiplier = 1f + (waveConfig.enemyMoveSpeedMultiplierPerWave * waveIndex);
 
-        GetTypeMultipliers(enemyConfig.enemyType, out float typeHealth, out float typeDamage);
+        GetTypeMultipliers(type, out float typeHealth, out float typeDamage);
         healthMultiplier *= typeHealth;
         damageMultiplier *= typeDamage;
 
@@ -269,31 +310,31 @@ public class GameManager : SingletonBehaviour<GameManager>
         AttackSystem attackSystem = enemyInstance.GetComponent<AttackSystem>();
         EnemyController enemyController = enemyInstance.GetComponent<EnemyController>();
 
-        if (healthSystem != null && enemyConfig.healthConfig != null)
+        if (healthSystem != null && config.healthConfig != null)
         {
             healthSystem.Configure(
-                Mathf.RoundToInt(enemyConfig.healthConfig.maxHealth * healthMultiplier),
-                enemyConfig.healthConfig.destroyOnDeath,
-                enemyConfig.healthConfig.deactivateOnDeath,
-                enemyConfig.healthConfig.destroyDelay);
+                Mathf.RoundToInt(config.healthConfig.maxHealth * healthMultiplier),
+                config.healthConfig.destroyOnDeath,
+                config.healthConfig.deactivateOnDeath,
+                config.healthConfig.destroyDelay);
         }
 
-        if (attackSystem != null && enemyConfig.attackConfig != null)
+        if (attackSystem != null && config.attackConfig != null)
         {
             Transform attackPoint = attackSystem.AttackPointTransform != null ? attackSystem.AttackPointTransform : enemyInstance.transform;
             attackSystem.Configure(
                 attackPoint,
                 1 << 8,
-                enemyConfig.attackConfig.attackRange,
-                enemyConfig.attackConfig.attackCooldown,
-                Mathf.RoundToInt(enemyConfig.attackConfig.baseDamage * damageMultiplier),
-                enemyConfig.attackConfig.criticalChance,
-                enemyConfig.attackConfig.criticalMultiplier,
-                enemyConfig.attackConfig.debugAttackLogs);
+                config.attackConfig.attackRange,
+                config.attackConfig.attackCooldown,
+                Mathf.RoundToInt(config.attackConfig.baseDamage * damageMultiplier),
+                config.attackConfig.criticalChance,
+                config.attackConfig.criticalMultiplier,
+                config.attackConfig.debugAttackLogs);
         }
 
         enemyController?.ApplyDifficultyMultiplier(moveSpeedMultiplier);
-        enemyController?.SetEnemyType(enemyConfig.enemyType);
+        enemyController?.SetEnemyType(type);
     }
 
     private void OnValidate()
