@@ -34,19 +34,35 @@ public class Projectile : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        HandleHit(other.gameObject);
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        HandleHit(collision.gameObject);
+    }
+
+    private void HandleHit(GameObject other)
+    {
         if (hit)
         {
             return;
         }
 
-        if (((1 << other.gameObject.layer) & targetLayers.value) == 0)
+        bool isTarget = ((1 << other.layer) & targetLayers.value) != 0;
+
+        if (isTarget)
         {
+            hit = true;
+            other.GetComponent<HealthSystem>()?.TakeDamage(damage);
+            Destroy(gameObject);
             return;
         }
 
-        hit = true;
-        HealthSystem health = other.GetComponent<HealthSystem>();
-        health?.TakeDamage(damage);
-        Destroy(gameObject);
+        if (other.CompareTag("Ground") || other.CompareTag("Platform"))
+        {
+            hit = true;
+            Destroy(gameObject);
+        }
     }
 }

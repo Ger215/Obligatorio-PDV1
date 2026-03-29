@@ -84,8 +84,9 @@ public class GameManager : SingletonBehaviour<GameManager>
             return;
         }
 
+        GameObject prefabToUse = GetPrefabForType(type) ?? enemyPrefab;
         Vector3 spawnPosition = GetSpawnPosition(enemyIndex);
-        GameObject enemyInstance = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
+        GameObject enemyInstance = Instantiate(prefabToUse, spawnPosition, Quaternion.identity);
         enemyInstance.name = $"Enemy_{CurrentWave}_{enemyIndex + 1}_{type}";
         ApplyWaveScaling(enemyInstance, config, type);
 
@@ -131,16 +132,35 @@ public class GameManager : SingletonBehaviour<GameManager>
         return enemyTypeConfigs[0].config;
     }
 
+    private GameObject GetPrefabForType(EnemyType type)
+    {
+        foreach (EnemyTypeConfig entry in enemyTypeConfigs)
+        {
+            if (entry.type == type && entry.prefab != null)
+            {
+                return entry.prefab;
+            }
+        }
+
+        return null;
+    }
+
     private Vector3 GetSpawnPosition(int enemyIndex)
     {
+        Vector3 basePosition;
+
         if (spawnPoints != null && spawnPoints.Length > 0)
         {
             Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
-            return spawnPoint.position;
+            basePosition = spawnPoint.position;
+        }
+        else
+        {
+            basePosition = transform.position;
         }
 
-        Vector2 randomOffset = Random.insideUnitCircle * spawnRadius;
-        return transform.position + new Vector3(randomOffset.x, randomOffset.y, 0f);
+        float offsetX = (enemyIndex % 2 == 0 ? 1f : -1f) * (1f + enemyIndex * 0.8f);
+        return basePosition + new Vector3(offsetX, 0f, 0f);
     }
 
     private void HandleEnemyDeath(HealthSystem deadEnemy)

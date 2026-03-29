@@ -8,7 +8,17 @@ public class PlayerController : SingletonBehaviour<PlayerController>
 {
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float acceleration = 60f;
+    [SerializeField] private float deceleration = 80f;
+
+    [Header("Jump")]
     [SerializeField] private float jumpForce = 12f;
+    [SerializeField] private float coyoteTime = 0.12f;
+    [SerializeField] private float jumpBufferTime = 0.1f;
+    [SerializeField] private float fallGravityMultiplier = 2.5f;
+    [SerializeField] private float jumpCutGravityMultiplier = 2f;
+    [SerializeField] private float maxFallSpeed = 18f;
+    [SerializeField] private bool canDoubleJump = true;
 
     [Header("Dash")]
     [SerializeField] private float dashSpeed = 12f;
@@ -32,11 +42,14 @@ public class PlayerController : SingletonBehaviour<PlayerController>
     private int facingDirection = 1;
     private bool isDashing;
     private bool isDead;
-    private bool jumpQueued;
     private bool isGrounded;
-    private bool jumpConsumed;
+    private bool jumpHeld;
+    private bool hasDoubleJumped;
+    private float coyoteTimeCounter;
+    private float jumpBufferCounter;
     private float dashTimeRemaining;
     private float lastDashTime = -Mathf.Infinity;
+    private float defaultGravityScale;
 
     protected override void Awake()
     {
@@ -51,6 +64,7 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         attackSystem = GetComponent<AttackSystem>();
         healthSystem = GetComponent<HealthSystem>();
         abilityController = GetComponent<PlayerAbilityController>();
+        defaultGravityScale = rb.gravityScale;
 
         if (groundCheck == null)
         {
@@ -96,7 +110,7 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         }
 
         isGrounded = CheckGrounded();
-        UpdateJumpState();
+        UpdateTimers();
         ReadMovementInput();
         ReadJumpInput();
         ReadAttackInput();
@@ -112,32 +126,97 @@ public class PlayerController : SingletonBehaviour<PlayerController>
             return;
         }
 
-        Vector2 currentVelocity = rb.linearVelocity;
-
         if (isDashing)
         {
-            rb.linearVelocity = new Vector2(facingDirection * dashSpeed, currentVelocity.y);
+            rb.linearVelocity = new Vector2(facingDirection * dashSpeed, 0f);
+            rb.gravityScale = 0f;
             dashTimeRemaining -= Time.fixedDeltaTime;
 
             if (dashTimeRemaining <= 0f)
             {
                 isDashing = false;
+                rb.gravityScale = defaultGravityScale;
             }
 
             return;
         }
 
-        rb.linearVelocity = new Vector2(horizontalInput * moveSpeed, currentVelocity.y);
+        ApplyHorizontalMovement();
+        ApplyGravityModifiers();
+        TryJump();
+    }
 
-        if (jumpQueued && isGrounded)
+    private void UpdateTimers()
+    {
+        if (isGrounded)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-            isGrounded = false;
-            jumpConsumed = true;
-            AudioManager.Instance?.PlayJump();
+            coyoteTimeCounter = coyoteTime;
+            hasDoubleJumped = false;
+        }
+        else
+        {
+            coyoteTimeCounter -= Time.deltaTime;
         }
 
-        jumpQueued = false;
+        if (jumpBufferCounter > 0f)
+        {
+            jumpBufferCounter -= Time.deltaTime;
+        }
+    }
+
+    private void ApplyHorizontalMovement()
+    {
+        float targetSpeed = horizontalInput * moveSpeed;
+        float accelRate = Mathf.Abs(targetSpeed) > 0.01f ? acceleration : deceleration;
+        float newSpeed = Mathf.MoveTowards(rb.linearVelocity.x, targetSpeed, accelRate * Time.fixedDeltaTime);
+        rb.linearVelocity = new Vector2(newSpeed, rb.linearVelocity.y);
+    }
+
+    private void ApplyGravityModifiers()
+    {
+        if (rb.linearVelocity.y < -0.01f)
+        {
+            rb.gravityScale = defaultGravityScale * fallGravityMultiplier;
+            float clampedY = Mathf.Max(rb.linearVelocity.y, -maxFallSpeed);
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, clampedY);
+        }
+        else if (rb.linearVelocity.y > 0.01f && !jumpHeld)
+        {
+            rb.gravityScale = defaultGravityScale * jumpCutGravityMultiplier;
+        }
+        else
+        {
+            rb.gravityScale = defaultGravityScale;
+        }
+    }
+
+    private void TryJump()
+    {
+        if (jumpBufferCounter <= 0f)
+        {
+            return;
+        }
+
+        bool canJumpFromGround = coyoteTimeCounter > 0f;
+        bool canJumpDouble = canDoubleJump && !hasDoubleJumped && !canJumpFromGround;
+
+        if (canJumpFromGround)
+        {
+            PerformJump();
+            coyoteTimeCounter = 0f;
+        }
+        else if (canJumpDouble)
+        {
+            PerformJump();
+            hasDoubleJumped = true;
+        }
+    }
+
+    private void PerformJump()
+    {
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+        jumpBufferCounter = 0f;
+        AudioManager.Instance?.PlayJump();
     }
 
     private void ReadMovementInput()
@@ -157,7 +236,8 @@ public class PlayerController : SingletonBehaviour<PlayerController>
             }
         }
 
-        float gamepadInput = Gamepad.current != null ? Gamepad.current.leftStick.ReadValue().x : 0f;
+        float rawGamepad = Gamepad.current != null ? Gamepad.current.leftStick.ReadValue().x : 0f;
+        float gamepadInput = Mathf.Abs(rawGamepad) > 0.2f ? rawGamepad : 0f;
         horizontalInput = Mathf.Clamp(keyboardInput + gamepadInput, -1f, 1f);
 
         if (Mathf.Abs(horizontalInput) > 0.01f)
@@ -173,17 +253,13 @@ public class PlayerController : SingletonBehaviour<PlayerController>
                            (Keyboard.current.wKey.wasPressedThisFrame || Keyboard.current.upArrowKey.wasPressedThisFrame)) ||
                           (Gamepad.current != null && Gamepad.current.buttonNorth.wasPressedThisFrame);
 
-        if (jumpPressed && !jumpConsumed)
-        {
-            jumpQueued = true;
-        }
-    }
+        jumpHeld = (Keyboard.current != null &&
+                   (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)) ||
+                  (Gamepad.current != null && Gamepad.current.buttonNorth.isPressed);
 
-    private void UpdateJumpState()
-    {
-        if (isGrounded && Mathf.Abs(rb.linearVelocity.y) <= 0.05f)
+        if (jumpPressed)
         {
-            jumpConsumed = false;
+            jumpBufferCounter = jumpBufferTime;
         }
     }
 
@@ -253,7 +329,15 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         float newAttackPointDistance,
         Transform newGroundCheck,
         LayerMask newGroundLayers,
-        float newGroundCheckRadius)
+        float newGroundCheckRadius,
+        float newAcceleration,
+        float newDeceleration,
+        float newCoyoteTime,
+        float newJumpBufferTime,
+        float newFallGravityMultiplier,
+        float newJumpCutGravityMultiplier,
+        float newMaxFallSpeed,
+        bool newCanDoubleJump)
     {
         moveSpeed = Mathf.Max(0.1f, newMoveSpeed);
         jumpForce = Mathf.Max(0.1f, newJumpForce);
@@ -264,6 +348,14 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         groundCheck = newGroundCheck != null ? newGroundCheck : transform;
         groundLayers = newGroundLayers;
         groundCheckRadius = Mathf.Max(0.05f, newGroundCheckRadius);
+        acceleration = Mathf.Max(0.1f, newAcceleration);
+        deceleration = Mathf.Max(0.1f, newDeceleration);
+        coyoteTime = Mathf.Max(0f, newCoyoteTime);
+        jumpBufferTime = Mathf.Max(0f, newJumpBufferTime);
+        fallGravityMultiplier = Mathf.Max(1f, newFallGravityMultiplier);
+        jumpCutGravityMultiplier = Mathf.Max(1f, newJumpCutGravityMultiplier);
+        maxFallSpeed = Mathf.Max(1f, newMaxFallSpeed);
+        canDoubleJump = newCanDoubleJump;
         UpdateAttackPointPosition();
     }
 
@@ -291,6 +383,7 @@ public class PlayerController : SingletonBehaviour<PlayerController>
     {
         isDead = true;
         rb.linearVelocity = Vector2.zero;
+        rb.gravityScale = defaultGravityScale;
     }
 
     private void HandleDamaged(int currentHealth, int maxHealth)
@@ -324,6 +417,13 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         dashCooldown = Mathf.Max(0.01f, dashCooldown);
         attackPointDistance = Mathf.Max(0.1f, attackPointDistance);
         groundCheckRadius = Mathf.Max(0.05f, groundCheckRadius);
+        acceleration = Mathf.Max(0.1f, acceleration);
+        deceleration = Mathf.Max(0.1f, deceleration);
+        coyoteTime = Mathf.Max(0f, coyoteTime);
+        jumpBufferTime = Mathf.Max(0f, jumpBufferTime);
+        fallGravityMultiplier = Mathf.Max(1f, fallGravityMultiplier);
+        jumpCutGravityMultiplier = Mathf.Max(1f, jumpCutGravityMultiplier);
+        maxFallSpeed = Mathf.Max(1f, maxFallSpeed);
     }
 
     private void OnDrawGizmosSelected()
