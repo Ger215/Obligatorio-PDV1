@@ -25,6 +25,7 @@ public class EnemyController : MonoBehaviour
     private AttackSystem attackSystem;
     private HealthSystem healthSystem;
     private ProjectileLauncher projectileLauncher;
+    private SpriteRenderer spriteRenderer;
 
     private EnemyType enemyType;
     private Transform playerTarget;
@@ -40,6 +41,7 @@ public class EnemyController : MonoBehaviour
         attackSystem = GetComponent<AttackSystem>();
         healthSystem = GetComponent<HealthSystem>();
         projectileLauncher = GetComponent<ProjectileLauncher>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
 
         if (groundCheck == null)
         {
@@ -59,6 +61,7 @@ public class EnemyController : MonoBehaviour
 
     private void Start()
     {
+        attackDistance += Random.Range(-0.3f, 0.3f);
         FindPlayerTarget();
         UpdateAttackPointPosition();
     }
@@ -89,6 +92,11 @@ public class EnemyController : MonoBehaviour
         {
             facingDirection = deltaToPlayer.x > 0f ? 1 : -1;
             UpdateAttackPointPosition();
+
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.flipX = facingDirection == -1;
+            }
         }
 
         if (Mathf.Abs(deltaToPlayer.x) <= attackDistance && Mathf.Abs(deltaToPlayer.y) <= verticalAttackTolerance)
@@ -128,10 +136,19 @@ public class EnemyController : MonoBehaviour
             facingDirection = horizontalDirection >= 0f ? 1 : -1;
         }
 
+        if (enemyType == EnemyType.Ranged)
+        {
+            bool inRange = horizontalDistance <= attackDistance && Mathf.Abs(deltaToPlayer.y) <= verticalAttackTolerance;
+            float horizontalFly = inRange ? 0f : horizontalDirection * moveSpeed;
+            float verticalFly = Mathf.Sin(Time.time * 4f) * 2f;
+            rb.linearVelocity = new Vector2(horizontalFly, verticalFly);
+            return;
+        }
+
         float horizontalVelocity = horizontalDistance <= attackDistance ? 0f : horizontalDirection * moveSpeed;
         rb.linearVelocity = new Vector2(horizontalVelocity, rb.linearVelocity.y);
 
-        bool shouldJump = isGrounded && !jumpConsumed && verticalDistance > jumpTriggerHeight;
+        bool shouldJump = isGrounded && !jumpConsumed && verticalDistance > jumpTriggerHeight && enemyType != EnemyType.Fast;
 
         if (shouldJump)
         {

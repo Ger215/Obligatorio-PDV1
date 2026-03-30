@@ -12,11 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3418525126b98674480a6b63b3c1dd26, type: 3}
   m_Name: PlayerConfig
   m_EditorClassIdentifier: Assembly-CSharp::PlayerConfig
-  healthConfig: {fileID: 0}
-  attackConfig: {fileID: 0}
+  healthConfig: {fileID: 11400000, guid: abc60ecfaf9b0784c8f21a4d7f6b99fb, type: 2}
+  attackConfig: {fileID: 11400000, guid: 96a86de857af98b4aa0f306999f3654f, type: 2}
   moveSpeed: 6
+  acceleration: 60
+  deceleration: 80
   jumpForce: 13
+  coyoteTime: 0.12
+  jumpBufferTime: 0.1
+  fallGravityMultiplier: 2.5
+  jumpCutGravityMultiplier: 2
+  maxFallSpeed: 18
+  canDoubleJump: 1
   dashSpeed: 14
   dashDuration: 0.15
   dashCooldown: 0.75
   attackPointDistance: 0.75
+  maxLearnedAbilities: 3

@@ -78,9 +78,9 @@ GameObject:
   - component: {fileID: 8741199782492536330}
   - component: {fileID: -5537474972638094397}
   - component: {fileID: -1284490874964591002}
-  - component: {fileID: 2876151079395397295}
+  - component: {fileID: -849232216556832729}
   m_Layer: 8
-  m_Name: Enemy_Tank
+  m_Name: Enemy_Ranged
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -96,7 +96,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 4.3, y: 4.3, z: 4.3}
+  m_LocalScale: {x: 2.8, y: 2.8, z: 2.8}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 7188317349574601431}
@@ -118,7 +118,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 2
+  m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -243,7 +243,7 @@ SpriteRenderer:
   m_SortingLayer: 4
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -7789336541686914335, guid: 6a2e668acb3f4be4da46032c5288d62a, type: 3}
+  m_Sprite: {fileID: -8787873683496046383, guid: c93e011a10b31ee45b7517d3b51410ac, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -287,8 +287,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.01}
-  m_Size: {x: 0.43, y: 0.67}
+  m_Offset: {x: 0, y: -0.02}
+  m_Size: {x: 0.45, y: 0.35}
   m_Direction: 0
 --- !u!114 &-1284490874964591002
 MonoBehaviour:
@@ -309,7 +309,7 @@ MonoBehaviour:
   targetLayers:
     serializedVersion: 2
     m_Bits: 128
---- !u!95 &2876151079395397295
+--- !u!95 &-849232216556832729
 Animator:
   serializedVersion: 7
   m_ObjectHideFlags: 0
@@ -319,7 +319,7 @@ Animator:
   m_GameObject: {fileID: 5567071987261642664}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: f0709256c995b427989d787397f755ea, type: 2}
+  m_Controller: {fileID: 9100000, guid: 9be1651bb012e454d9c3b160f1fed08d, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
