@@ -29,12 +29,14 @@ public class EnemyController : MonoBehaviour
     private SpriteRenderer spriteRenderer;
 
     private EnemyType enemyType;
+    private float knockbackMultiplier = 1f;
     private Transform playerTarget;
     private bool isDead;
     private bool isGrounded;
     private bool jumpConsumed;
     private int facingDirection = 1;
     private float nextPathRefreshTime;
+    private float knockbackEndTime;
 
     private void Awake()
     {
@@ -53,11 +55,13 @@ public class EnemyController : MonoBehaviour
     private void OnEnable()
     {
         healthSystem.Died += HandleDeath;
+        healthSystem.Damaged += HandleDamaged;
     }
 
     private void OnDisable()
     {
         healthSystem.Died -= HandleDeath;
+        healthSystem.Damaged -= HandleDamaged;
     }
 
     private void Start()
@@ -113,11 +117,22 @@ public class EnemyController : MonoBehaviour
         }
     }
 
+    public void ApplyKnockback(float forceX)
+    {
+        rb.AddForce(new Vector2(forceX * knockbackMultiplier, 0f), ForceMode2D.Impulse);
+        knockbackEndTime = Time.time + 0.2f;
+    }
+
     private void FixedUpdate()
     {
         if (isDead)
         {
             rb.linearVelocity = Vector2.zero;
+            return;
+        }
+
+        if (Time.time < knockbackEndTime)
+        {
             return;
         }
 
@@ -218,11 +233,25 @@ public class EnemyController : MonoBehaviour
         attackSystem.AttackPointTransform.localPosition = new Vector3(facingDirection * attackPointDistance, 0f, 0f);
     }
 
+    private void HandleDamaged(int current, int max)
+    {
+        if (spriteRenderer != null)
+        {
+            StartCoroutine(HitFlash());
+        }
+    }
+
+    private System.Collections.IEnumerator HitFlash()
+    {
+        spriteRenderer.color = new Color(1f, 0.2f, 0.2f, 1f);
+        yield return new WaitForSeconds(0.1f);
+        spriteRenderer.color = Color.white;
+    }
+
     private void HandleDeath(HealthSystem deadHealthSystem)
     {
         isDead = true;
         rb.linearVelocity = Vector2.zero;
-
     }
 
     public void ApplyDifficultyMultiplier(float moveSpeedMultiplier)
@@ -239,14 +268,20 @@ public class EnemyController : MonoBehaviour
             case EnemyType.Fast:
                 moveSpeed *= 1.8f;
                 attackDistance *= 0.85f;
+                knockbackMultiplier = 1.8f;
                 break;
             case EnemyType.Tank:
                 moveSpeed *= 0.5f;
                 attackDistance *= 1.4f;
+                knockbackMultiplier = 1.4f;
                 break;
             case EnemyType.Ranged:
                 attackDistance *= 4f;
                 verticalAttackTolerance = 10f;
+                knockbackMultiplier = 1.2f;
+                break;
+            case EnemyType.Chaser:
+                knockbackMultiplier = 1f;
                 break;
         }
 

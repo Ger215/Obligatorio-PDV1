@@ -271,6 +271,7 @@ public class PlayerController : SingletonBehaviour<PlayerController>
 
         if (attackPressed)
         {
+            ApplyKnockbackToNearbyEnemies();
             attackSystem.TryAttack();
         }
     }
@@ -376,7 +377,8 @@ public class PlayerController : SingletonBehaviour<PlayerController>
             return;
         }
 
-        attackSystem.AttackPointTransform.localPosition = new Vector3(facingDirection * attackPointDistance, 0f, 0f);
+        float currentY = attackSystem.AttackPointTransform.localPosition.y;
+        attackSystem.AttackPointTransform.localPosition = new Vector3(facingDirection * attackPointDistance, currentY, 0f);
     }
 
     private void HandleDeath(HealthSystem deadHealthSystem)
@@ -389,6 +391,20 @@ public class PlayerController : SingletonBehaviour<PlayerController>
     private void HandleDamaged(int currentHealth, int maxHealth)
     {
         AudioManager.Instance?.PlayPlayerDamaged();
+    }
+
+    private void ApplyKnockbackToNearbyEnemies()
+    {
+        float knockbackForce = attackSystem != null ? attackSystem.KnockbackForce : 6f;
+        Collider2D[] nearby = Physics2D.OverlapCircleAll(attackSystem.AttackPointTransform.position, attackSystem.AttackRange, 1 << 8);
+
+        foreach (Collider2D col in nearby)
+        {
+            EnemyController enemy = col.GetComponentInParent<EnemyController>();
+            if (enemy == null) continue;
+            float dir = col.transform.position.x > transform.position.x ? 1f : -1f;
+            enemy.ApplyKnockback(dir * knockbackForce);
+        }
     }
 
     private void HandleAttackResolved(bool critical, int damage, int targetsHit)
