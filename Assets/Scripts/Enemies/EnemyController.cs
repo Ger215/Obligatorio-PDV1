@@ -21,6 +21,7 @@ public class EnemyController : MonoBehaviour
     [Header("Combat Facing")]
     [SerializeField] private float attackPointDistance = 0.6f;
 
+
     private Rigidbody2D rb;
     private AttackSystem attackSystem;
     private HealthSystem healthSystem;
@@ -221,6 +222,7 @@ public class EnemyController : MonoBehaviour
     {
         isDead = true;
         rb.linearVelocity = Vector2.zero;
+
     }
 
     public void ApplyDifficultyMultiplier(float moveSpeedMultiplier)

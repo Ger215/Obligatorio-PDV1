@@ -14,6 +14,9 @@ public class GameManager : SingletonBehaviour<GameManager>
     [SerializeField] private GameHudController hudController;
     [SerializeField] private AudioManager audioManager;
 
+    [Header("Death FX")]
+    [SerializeField] private GameObject enemyDeathFXPrefab;
+
     [Header("Fallback Spawn Area")]
     [SerializeField] private float spawnRadius = 6f;
 
@@ -172,6 +175,13 @@ public class GameManager : SingletonBehaviour<GameManager>
 
         deadEnemy.Died -= HandleEnemyDeath;
         aliveEnemies.Remove(deadEnemy);
+
+        if (enemyDeathFXPrefab != null)
+        {
+            GameObject fx = Instantiate(enemyDeathFXPrefab, deadEnemy.transform.position, Quaternion.identity);
+            Destroy(fx, 1f);
+        }
+
         RewardPlayerForEnemyDeath(deadEnemy);
         hudController?.RefreshWaveState(CurrentWave, aliveEnemies.Count);
 
