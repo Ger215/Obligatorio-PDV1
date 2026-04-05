@@ -282,7 +282,7 @@ Transform:
   m_GameObject: {fileID: 332727427}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.036, y: -0.049, z: 0}
+  m_LocalPosition: {x: -1.2, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -706,15 +706,16 @@ MonoBehaviour:
   - {fileID: 468843292}
   waveConfig: {fileID: 11400000, guid: f2206a6e0bb7a6340a43d837db06a3ce, type: 2}
   enemyTypeConfigs:
-  - type: 2
-    config: {fileID: 11400000, guid: 73fcc624c406d4d049ab650ebd40da1b, type: 2}
-    prefab: {fileID: 5567071987261642664, guid: 2454e6e5d8b244c82a8388e024774c70, type: 3}
+  - type: 0
+    config: {fileID: 11400000, guid: 583c89007ec854d138a7c1d756b23b91, type: 2}
+    prefab: {fileID: 5567071987261642664, guid: 4e71fff2760894f02b35e62f793b4b74, type: 3}
   - type: 3
     config: {fileID: 11400000, guid: 219dc3973baf24580a2a4d49204041d5, type: 2}
     prefab: {fileID: 5567071987261642664, guid: 0728bd49c71f74438a4f88af74839cff, type: 3}
   abilityCatalog: {fileID: 11400000, guid: a383491400ac4dd40a5ff7c443430b1f, type: 2}
   hudController: {fileID: 829912347}
   audioManager: {fileID: 2092198904}
+  enemyDeathFXPrefab: {fileID: 995318177037323328, guid: d2730e32cfa264267aca320d28dd988f, type: 3}
   spawnRadius: 1.21
 --- !u!1 &1457512974
 GameObject:
@@ -1036,7 +1037,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   groundCheckRadius: 0.22
-  attackPointDistance: 0.21
+  attackPointDistance: 0.1
 --- !u!114 &1590280738
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1059,6 +1060,7 @@ MonoBehaviour:
   baseDamage: 1
   criticalChance: 0.15
   criticalMultiplier: 2
+  knockbackForce: 4
   debugAttackLogs: 1
 --- !u!114 &1590280739
 MonoBehaviour:
@@ -1689,63 +1691,6 @@ MonoBehaviour:
   audioConfig: {fileID: 0}
   musicSource: {fileID: 2092198903}
   sfxSource: {fileID: 2092198902}
---- !u!1001 &6567802213273527698
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 995318177037323328, guid: d2730e32cfa264267aca320d28dd988f, type: 3}
-      propertyPath: m_Name
-      value: EnemyDeathFX
-      objectReference: {fileID: 0}
-    - target: {fileID: 4302238969931194525, guid: d2730e32cfa264267aca320d28dd988f, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 4.72344
-      objectReference: {fileID: 0}
-    - target: {fileID: 4302238969931194525, guid: d2730e32cfa264267aca320d28dd988f, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.97986
-      objectReference: {fileID: 0}
-    - target: {fileID: 4302238969931194525, guid: d2730e32cfa264267aca320d28dd988f, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4302238969931194525, guid: d2730e32cfa264267aca320d28dd988f, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4302238969931194525, guid: d2730e32cfa264267aca320d28dd988f, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4302238969931194525, guid: d2730e32cfa264267aca320d28dd988f, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4302238969931194525, guid: d2730e32cfa264267aca320d28dd988f, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4302238969931194525, guid: d2730e32cfa264267aca320d28dd988f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4302238969931194525, guid: d2730e32cfa264267aca320d28dd988f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4302238969931194525, guid: d2730e32cfa264267aca320d28dd988f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: d2730e32cfa264267aca320d28dd988f, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1759,4 +1704,3 @@ SceneRoots:
   - {fileID: 1457512977}
   - {fileID: 1990762575}
   - {fileID: 510079100}
-  - {fileID: 6567802213273527698}
