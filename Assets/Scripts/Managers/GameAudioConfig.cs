@@ -1,0 +1,19 @@
+using UnityEngine;
+
+[CreateAssetMenu(fileName = "GameAudioConfig", menuName = "Config/Audio/Game Audio")]
+public class GameAudioConfig : ScriptableObject
+{
+    public AudioClip backgroundMusic;
+    public AudioClip jump;
+    public AudioClip attack;
+    public AudioClip attackCritical;
+    public AudioClip playerDamaged;
+    public AudioClip uiButton;
+    public AudioClip uiSpecialButton;
+    public AudioClip dashStrike;
+    public AudioClip healPulse;
+    public AudioClip shockwave;
+    public AudioClip berserk;
+    public AudioClip guardianAura;
+    public AudioClip bladeStorm;
+}
