@@ -700,7 +700,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95f1fa751fa088d41b896c59816681ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  enableEnemySpawning: 1
+  enableEnemySpawning: 0
   enemyPrefab: {fileID: 5567071987261642664, guid: 5cf96c136bdfb0341a862d3dd6b75139, type: 3}
   spawnPoints:
   - {fileID: 468843292}

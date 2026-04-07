@@ -30,6 +30,10 @@ public class PlayerController : SingletonBehaviour<PlayerController>
     [SerializeField] private LayerMask groundLayers;
     [SerializeField] private float groundCheckRadius = 0.15f;
 
+    [Header("Wall Check")]
+    [SerializeField] private float wallCheckDistance = 0.35f;
+    [SerializeField] private Vector2 wallCheckSize = new Vector2(0.1f, 0.8f);
+
     [Header("Combat Facing")]
     [SerializeField] private float attackPointDistance = 0.75f;
 
@@ -65,6 +69,20 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         healthSystem = GetComponent<HealthSystem>();
         abilityController = GetComponent<PlayerAbilityController>();
         defaultGravityScale = rb.gravityScale;
+
+        PhysicsMaterial2D frictionless = new PhysicsMaterial2D("PlayerFrictionless")
+        {
+            friction = 0f,
+            bounciness = 0f
+        };
+        rb.sharedMaterial = frictionless;
+        foreach (Collider2D col in GetComponentsInChildren<Collider2D>())
+        {
+            if (!col.isTrigger)
+            {
+                col.sharedMaterial = frictionless;
+            }
+        }
 
         if (groundCheck == null)
         {
@@ -146,6 +164,15 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         TryJump();
     }
 
+    private bool IsTouchingWall(int dir)
+    {
+        float bottomY = groundCheck != null ? groundCheck.position.y : transform.position.y;
+        Vector2 origin = new Vector2(
+            transform.position.x + dir * (wallCheckDistance * 0.5f),
+            bottomY + wallCheckSize.y * 0.5f);
+        return Physics2D.OverlapBox(origin, wallCheckSize, 0f, groundLayers) != null;
+    }
+
     private void UpdateTimers()
     {
         if (isGrounded)
@@ -167,6 +194,16 @@ public class PlayerController : SingletonBehaviour<PlayerController>
     private void ApplyHorizontalMovement()
     {
         float targetSpeed = horizontalInput * moveSpeed;
+
+        if (!isGrounded && Mathf.Abs(targetSpeed) > 0.01f)
+        {
+            int dir = targetSpeed > 0f ? 1 : -1;
+            if (IsTouchingWall(dir))
+            {
+                targetSpeed = 0f;
+            }
+        }
+
         float accelRate = Mathf.Abs(targetSpeed) > 0.01f ? acceleration : deceleration;
         float newSpeed = Mathf.MoveTowards(rb.linearVelocity.x, targetSpeed, accelRate * Time.fixedDeltaTime);
         rb.linearVelocity = new Vector2(newSpeed, rb.linearVelocity.y);
