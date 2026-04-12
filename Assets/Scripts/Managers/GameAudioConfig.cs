@@ -5,6 +5,7 @@ public class GameAudioConfig : ScriptableObject
 {
     public AudioClip backgroundMusic;
     public AudioClip jump;
+    public AudioClip doubleJump;
     public AudioClip attack;
     public AudioClip attackCritical;
     public AudioClip playerDamaged;

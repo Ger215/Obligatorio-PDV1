@@ -24,6 +24,7 @@ public class AudioManager : SingletonBehaviour<AudioManager>
     }
 
     public void PlayJump() => PlayClip(audioConfig != null ? audioConfig.jump : null);
+    public void PlayDoubleJump() => PlayClip(audioConfig != null ? (audioConfig.doubleJump != null ? audioConfig.doubleJump : audioConfig.jump) : null);
     public void PlayAttack(bool critical) => PlayClip(audioConfig != null ? (critical ? audioConfig.attackCritical : audioConfig.attack) : null);
     public void PlayPlayerDamaged() => PlayClip(audioConfig != null ? audioConfig.playerDamaged : null);
     public void PlayButton(bool special) => PlayClip(audioConfig != null ? (special ? audioConfig.uiSpecialButton : audioConfig.uiButton) : null);
