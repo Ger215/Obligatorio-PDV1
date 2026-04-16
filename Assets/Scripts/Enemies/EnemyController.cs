@@ -56,12 +56,14 @@ public class EnemyController : MonoBehaviour
     {
         healthSystem.Died += HandleDeath;
         healthSystem.Damaged += HandleDamaged;
+        attackSystem.AttackResolved += HandleAttackResolved;
     }
 
     private void OnDisable()
     {
         healthSystem.Died -= HandleDeath;
         healthSystem.Damaged -= HandleDamaged;
+        attackSystem.AttackResolved -= HandleAttackResolved;
     }
 
     private void Start()
@@ -233,8 +235,14 @@ public class EnemyController : MonoBehaviour
         attackSystem.AttackPointTransform.localPosition = new Vector3(facingDirection * attackPointDistance, 0f, 0f);
     }
 
+    private void HandleAttackResolved(bool critical, int damage, int targetsHit)
+    {
+        AudioManager.Instance?.PlayEnemyAttack();
+    }
+
     private void HandleDamaged(int current, int max)
     {
+        AudioManager.Instance?.PlayEnemyDamaged();
         if (spriteRenderer != null)
         {
             StartCoroutine(HitFlash());
@@ -252,6 +260,7 @@ public class EnemyController : MonoBehaviour
     {
         isDead = true;
         rb.linearVelocity = Vector2.zero;
+        AudioManager.Instance?.PlayEnemyDeath();
     }
 
     public void ApplyDifficultyMultiplier(float moveSpeedMultiplier)

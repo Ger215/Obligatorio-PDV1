@@ -364,6 +364,7 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         isDashing = true;
         dashTimeRemaining = dashDuration;
         UpdateAttackPointPosition();
+        AudioManager.Instance?.PlayDash();
     }
 
     public void Configure(

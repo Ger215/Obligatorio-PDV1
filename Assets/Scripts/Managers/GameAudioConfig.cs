@@ -9,6 +9,10 @@ public class GameAudioConfig : ScriptableObject
     public AudioClip attack;
     public AudioClip attackCritical;
     public AudioClip playerDamaged;
+    public AudioClip dash;
+    public AudioClip enemyAttack;
+    public AudioClip enemyDamaged;
+    public AudioClip enemyDeath;
     public AudioClip uiButton;
     public AudioClip uiSpecialButton;
     public AudioClip dashStrike;
