@@ -16,6 +16,9 @@ public class GameManager : SingletonBehaviour<GameManager>
 
     [Header("Death FX")]
     [SerializeField] private GameObject enemyDeathFXPrefab;
+    [SerializeField] private GameObject floatingTextPrefab;
+    [SerializeField] private Canvas hudCanvas;
+    [SerializeField] private Color xpFloatingTextColor = new Color(0.3f, 1f, 0.4f);
 
     [Header("Fallback Spawn Area")]
     [SerializeField] private float spawnRadius = 6f;
@@ -74,6 +77,7 @@ public class GameManager : SingletonBehaviour<GameManager>
         }
 
         hudController?.RefreshWaveState(CurrentWave, aliveEnemies.Count);
+        hudController?.ShowWaveAnnouncement(CurrentWave);
     }
 
     private void SpawnEnemy(int enemyIndex)
@@ -182,7 +186,7 @@ public class GameManager : SingletonBehaviour<GameManager>
             Destroy(fx, 1f);
         }
 
-        RewardPlayerForEnemyDeath(deadEnemy);
+        RewardPlayerForEnemyDeath(deadEnemy, deadEnemy.transform.position);
         hudController?.RefreshWaveState(CurrentWave, aliveEnemies.Count);
 
         if (aliveEnemies.Count == 0 && !waitingForNextWave)
@@ -292,17 +296,31 @@ public class GameManager : SingletonBehaviour<GameManager>
         return true;
     }
 
-    private void RewardPlayerForEnemyDeath(HealthSystem deadEnemy)
+    private void RewardPlayerForEnemyDeath(HealthSystem deadEnemy, Vector3 worldPosition)
     {
         if (playerExperience == null)
         {
             return;
         }
 
-        if (enemyXpRewards.TryGetValue(deadEnemy, out int reward))
+        if (!enemyXpRewards.TryGetValue(deadEnemy, out int reward))
         {
-            enemyXpRewards.Remove(deadEnemy);
-            playerExperience.AddExperience(reward);
+            return;
+        }
+
+        enemyXpRewards.Remove(deadEnemy);
+        playerExperience.AddExperience(reward);
+
+        if (floatingTextPrefab != null && hudCanvas != null)
+        {
+            GameObject instance = Instantiate(floatingTextPrefab, hudCanvas.transform);
+            Vector2 screenPoint = Camera.main.WorldToScreenPoint(worldPosition);
+            Camera uiCamera = hudCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : hudCanvas.worldCamera;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                (RectTransform)hudCanvas.transform, screenPoint, uiCamera, out Vector2 canvasPos);
+            ((RectTransform)instance.transform).anchoredPosition = canvasPos;
+            FloatingText floatingText = instance.GetComponent<FloatingText>();
+            floatingText?.Play($"+{reward} XP", xpFloatingTextColor);
         }
     }
 
