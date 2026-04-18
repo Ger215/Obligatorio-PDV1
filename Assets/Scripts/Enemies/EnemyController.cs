@@ -21,22 +21,30 @@ public class EnemyController : MonoBehaviour
     [Header("Combat Facing")]
     [SerializeField] private float attackPointDistance = 0.6f;
 
+
     private Rigidbody2D rb;
     private AttackSystem attackSystem;
     private HealthSystem healthSystem;
+    private ProjectileLauncher projectileLauncher;
+    private SpriteRenderer spriteRenderer;
 
+    private EnemyType enemyType;
+    private float knockbackMultiplier = 1f;
     private Transform playerTarget;
     private bool isDead;
     private bool isGrounded;
     private bool jumpConsumed;
     private int facingDirection = 1;
     private float nextPathRefreshTime;
+    private float knockbackEndTime;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         attackSystem = GetComponent<AttackSystem>();
         healthSystem = GetComponent<HealthSystem>();
+        projectileLauncher = GetComponent<ProjectileLauncher>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
 
         if (groundCheck == null)
         {
@@ -47,15 +55,20 @@ public class EnemyController : MonoBehaviour
     private void OnEnable()
     {
         healthSystem.Died += HandleDeath;
+        healthSystem.Damaged += HandleDamaged;
+        attackSystem.AttackResolved += HandleAttackResolved;
     }
 
     private void OnDisable()
     {
         healthSystem.Died -= HandleDeath;
+        healthSystem.Damaged -= HandleDamaged;
+        attackSystem.AttackResolved -= HandleAttackResolved;
     }
 
     private void Start()
     {
+        attackDistance += Random.Range(-0.3f, 0.3f);
         FindPlayerTarget();
         UpdateAttackPointPosition();
     }
@@ -86,12 +99,30 @@ public class EnemyController : MonoBehaviour
         {
             facingDirection = deltaToPlayer.x > 0f ? 1 : -1;
             UpdateAttackPointPosition();
+
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.flipX = facingDirection == -1;
+            }
         }
 
         if (Mathf.Abs(deltaToPlayer.x) <= attackDistance && Mathf.Abs(deltaToPlayer.y) <= verticalAttackTolerance)
         {
-            attackSystem.TryAttack();
+            if (enemyType == EnemyType.Ranged && projectileLauncher != null)
+            {
+                projectileLauncher.TryLaunch(deltaToPlayer);
+            }
+            else
+            {
+                attackSystem.TryAttack();
+            }
         }
+    }
+
+    public void ApplyKnockback(float forceX)
+    {
+        rb.AddForce(new Vector2(forceX * knockbackMultiplier, 0f), ForceMode2D.Impulse);
+        knockbackEndTime = Time.time + 0.2f;
     }
 
     private void FixedUpdate()
@@ -99,6 +130,11 @@ public class EnemyController : MonoBehaviour
         if (isDead)
         {
             rb.linearVelocity = Vector2.zero;
+            return;
+        }
+
+        if (Time.time < knockbackEndTime)
+        {
             return;
         }
 
@@ -118,10 +154,19 @@ public class EnemyController : MonoBehaviour
             facingDirection = horizontalDirection >= 0f ? 1 : -1;
         }
 
+        if (enemyType == EnemyType.Ranged)
+        {
+            bool inRange = horizontalDistance <= attackDistance && Mathf.Abs(deltaToPlayer.y) <= verticalAttackTolerance;
+            float horizontalFly = inRange ? 0f : horizontalDirection * moveSpeed;
+            float verticalFly = Mathf.Sin(Time.time * 4f) * 2f;
+            rb.linearVelocity = new Vector2(horizontalFly, verticalFly);
+            return;
+        }
+
         float horizontalVelocity = horizontalDistance <= attackDistance ? 0f : horizontalDirection * moveSpeed;
         rb.linearVelocity = new Vector2(horizontalVelocity, rb.linearVelocity.y);
 
-        bool shouldJump = isGrounded && !jumpConsumed && verticalDistance > jumpTriggerHeight;
+        bool shouldJump = isGrounded && !jumpConsumed && verticalDistance > jumpTriggerHeight && enemyType != EnemyType.Fast;
 
         if (shouldJump)
         {
@@ -190,15 +235,67 @@ public class EnemyController : MonoBehaviour
         attackSystem.AttackPointTransform.localPosition = new Vector3(facingDirection * attackPointDistance, 0f, 0f);
     }
 
+    private void HandleAttackResolved(bool critical, int damage, int targetsHit)
+    {
+        AudioManager.Instance?.PlayEnemyAttack();
+    }
+
+    private void HandleDamaged(int current, int max)
+    {
+        AudioManager.Instance?.PlayEnemyDamaged();
+        if (spriteRenderer != null)
+        {
+            StartCoroutine(HitFlash());
+        }
+    }
+
+    private System.Collections.IEnumerator HitFlash()
+    {
+        spriteRenderer.color = new Color(1f, 0.2f, 0.2f, 1f);
+        yield return new WaitForSeconds(0.1f);
+        spriteRenderer.color = Color.white;
+    }
+
     private void HandleDeath(HealthSystem deadHealthSystem)
     {
         isDead = true;
         rb.linearVelocity = Vector2.zero;
+        AudioManager.Instance?.PlayEnemyDeath();
     }
 
     public void ApplyDifficultyMultiplier(float moveSpeedMultiplier)
     {
         moveSpeed = Mathf.Max(0.1f, moveSpeed * moveSpeedMultiplier);
+    }
+
+    public void SetEnemyType(EnemyType type)
+    {
+        enemyType = type;
+
+        switch (type)
+        {
+            case EnemyType.Fast:
+                moveSpeed *= 1.8f;
+                attackDistance *= 0.85f;
+                knockbackMultiplier = 1.8f;
+                break;
+            case EnemyType.Tank:
+                moveSpeed *= 0.5f;
+                attackDistance *= 1.4f;
+                knockbackMultiplier = 1.4f;
+                break;
+            case EnemyType.Ranged:
+                attackDistance *= 4f;
+                verticalAttackTolerance = 10f;
+                knockbackMultiplier = 1.2f;
+                break;
+            case EnemyType.Chaser:
+                knockbackMultiplier = 1f;
+                break;
+        }
+
+        moveSpeed = Mathf.Max(0.1f, moveSpeed);
+        attackDistance = Mathf.Max(0.1f, attackDistance);
     }
 
     private void OnValidate()

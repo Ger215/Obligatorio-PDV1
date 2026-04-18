@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 377bf839e86e1d1499df6ee445e8a516, type: 3}
+  m_Name: EnemyConfig_Fast
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyConfig
+  enemyType: 1
+  healthConfig: {fileID: 11400000, guid: abc60ecfaf9b0784c8f21a4d7f6b99fb, type: 2}
+  attackConfig: {fileID: 11400000, guid: 96a86de857af98b4aa0f306999f3654f, type: 2}
+  moveSpeed: 3
+  jumpForce: 3
+  attackDistance: 1.1
+  verticalAttackTolerance: 1
+  jumpTriggerHeight: 1.35
+  attackPointDistance: 0.6
+  repathDelay: 0.5
+  baseExperienceReward: 5

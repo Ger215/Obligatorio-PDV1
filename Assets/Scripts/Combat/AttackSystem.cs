@@ -16,6 +16,9 @@ public class AttackSystem : MonoBehaviour
     [SerializeField] private float criticalChance = 0.15f;
     [SerializeField] private float criticalMultiplier = 2f;
 
+    [Header("Knockback")]
+    [SerializeField] private float knockbackForce = 6f;
+
     [Header("Debug")]
     [SerializeField] private bool debugAttackLogs = true;
 
@@ -27,6 +30,8 @@ public class AttackSystem : MonoBehaviour
 
     public Transform AttackPointTransform => attackPoint;
     public float AttackCooldown => attackCooldown;
+    public float AttackRange => attackRange;
+    public float KnockbackForce => knockbackForce;
     public bool LastAttackWasCritical { get; private set; }
     public event Action<bool, int, int> AttackResolved;
 
