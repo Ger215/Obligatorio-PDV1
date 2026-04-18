@@ -1,11 +1,5 @@
 using UnityEngine;
 
-[System.Serializable]
-public class WaveDefinition
-{
-    public EnemyType[] allowedTypes = { EnemyType.Chaser };
-}
-
 [CreateAssetMenu(fileName = "WaveConfig", menuName = "Config/Waves")]
 public class WaveConfig : ScriptableObject
 {
@@ -17,9 +11,6 @@ public class WaveConfig : ScriptableObject
     public float enemyMoveSpeedMultiplierPerWave = 0.05f;
     public int bonusExperiencePerWave = 1;
     public int offeredAbilitiesCount = 3;
-
-    [Header("Wave Definitions")]
-    public WaveDefinition[] waveDefinitions;
 
     private void OnValidate()
     {

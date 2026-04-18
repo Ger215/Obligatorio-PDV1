@@ -59,7 +59,6 @@ ExportedObj/
 *.pidb.meta
 *.pdb.meta
 *.mdb.meta
-*.meta
 
 # Unity3D generated file on crash reports
 sysinfo.txt
@@ -106,8 +105,3 @@ Obligatorio1-UnityProject/obj
 
 Obligatorio1-UnityProject/*.csproj
 Obligatorio1-UnityProject/*.sln
-
-.agents/
-.claude/
-CLAUDE.md
-skills-lock.json

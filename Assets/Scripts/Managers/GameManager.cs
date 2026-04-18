@@ -9,23 +9,16 @@ public class GameManager : SingletonBehaviour<GameManager>
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private Transform[] spawnPoints;
     [SerializeField] private WaveConfig waveConfig;
-    [SerializeField] private EnemyTypeConfig[] enemyTypeConfigs;
+    [SerializeField] private EnemyConfig enemyConfig;
     [SerializeField] private PlayerAbilityCatalog abilityCatalog;
     [SerializeField] private GameHudController hudController;
     [SerializeField] private AudioManager audioManager;
-
-    [Header("Death FX")]
-    [SerializeField] private GameObject enemyDeathFXPrefab;
-    [SerializeField] private GameObject floatingTextPrefab;
-    [SerializeField] private Canvas hudCanvas;
-    [SerializeField] private Color xpFloatingTextColor = new Color(0.3f, 1f, 0.4f);
 
     [Header("Fallback Spawn Area")]
     [SerializeField] private float spawnRadius = 6f;
 
     private readonly List<HealthSystem> aliveEnemies = new List<HealthSystem>();
     private readonly List<PlayerAbilityDefinition> offeredAbilities = new List<PlayerAbilityDefinition>();
-    private readonly Dictionary<HealthSystem, int> enemyXpRewards = new Dictionary<HealthSystem, int>();
 
     private bool waitingForNextWave;
     private bool shopOpen;
@@ -58,9 +51,9 @@ public class GameManager : SingletonBehaviour<GameManager>
             return;
         }
 
-        if (enemyPrefab == null || waveConfig == null || enemyTypeConfigs == null || enemyTypeConfigs.Length == 0)
+        if (enemyPrefab == null || waveConfig == null || enemyConfig == null)
         {
-            Debug.LogError("GameManager needs enemyPrefab, waveConfig, and at least one enemyTypeConfig.");
+            Debug.LogError("GameManager needs enemyPrefab, waveConfig, and enemyConfig references.");
             return;
         }
 
@@ -77,25 +70,15 @@ public class GameManager : SingletonBehaviour<GameManager>
         }
 
         hudController?.RefreshWaveState(CurrentWave, aliveEnemies.Count);
-        hudController?.ShowWaveAnnouncement(CurrentWave);
     }
 
     private void SpawnEnemy(int enemyIndex)
     {
-        EnemyType type = PickEnemyTypeForWave();
-        EnemyConfig config = GetConfigForType(type);
-
-        if (config == null)
-        {
-            Debug.LogError($"No EnemyConfig found for type {type}.");
-            return;
-        }
-
-        GameObject prefabToUse = GetPrefabForType(type) ?? enemyPrefab;
         Vector3 spawnPosition = GetSpawnPosition(enemyIndex);
-        GameObject enemyInstance = Instantiate(prefabToUse, spawnPosition, Quaternion.identity);
-        enemyInstance.name = $"Enemy_{CurrentWave}_{enemyIndex + 1}_{type}";
-        ApplyWaveScaling(enemyInstance, config, type);
+        GameObject enemyInstance = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
+        enemyInstance.name = $"Enemy_{CurrentWave}_{enemyIndex + 1}";
+        enemyInstance.SetActive(true);
+        ApplyWaveScaling(enemyInstance);
 
         HealthSystem enemyHealth = enemyInstance.GetComponent<HealthSystem>();
 
@@ -105,69 +88,21 @@ public class GameManager : SingletonBehaviour<GameManager>
             return;
         }
 
-        int xpReward = config.baseExperienceReward + ((CurrentWave - 1) * waveConfig.bonusExperiencePerWave);
-        enemyXpRewards[enemyHealth] = xpReward;
         enemyHealth.Died += HandleEnemyDeath;
         aliveEnemies.Add(enemyHealth);
         hudController?.RefreshWaveState(CurrentWave, aliveEnemies.Count);
     }
 
-    private EnemyType PickEnemyTypeForWave()
-    {
-        if (waveConfig.waveDefinitions != null && CurrentWave - 1 < waveConfig.waveDefinitions.Length)
-        {
-            EnemyType[] allowed = waveConfig.waveDefinitions[CurrentWave - 1].allowedTypes;
-            if (allowed != null && allowed.Length > 0)
-            {
-                return allowed[Random.Range(0, allowed.Length)];
-            }
-        }
-
-        return EnemyType.Chaser;
-    }
-
-    private EnemyConfig GetConfigForType(EnemyType type)
-    {
-        foreach (EnemyTypeConfig entry in enemyTypeConfigs)
-        {
-            if (entry.type == type)
-            {
-                return entry.config;
-            }
-        }
-
-        return enemyTypeConfigs[0].config;
-    }
-
-    private GameObject GetPrefabForType(EnemyType type)
-    {
-        foreach (EnemyTypeConfig entry in enemyTypeConfigs)
-        {
-            if (entry.type == type && entry.prefab != null)
-            {
-                return entry.prefab;
-            }
-        }
-
-        return null;
-    }
-
     private Vector3 GetSpawnPosition(int enemyIndex)
     {
-        Vector3 basePosition;
-
         if (spawnPoints != null && spawnPoints.Length > 0)
         {
             Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
-            basePosition = spawnPoint.position;
-        }
-        else
-        {
-            basePosition = transform.position;
+            return spawnPoint.position;
         }
 
-        float offsetX = (enemyIndex % 2 == 0 ? 1f : -1f) * (1f + enemyIndex * 0.8f);
-        return basePosition + new Vector3(offsetX, 0f, 0f);
+        Vector2 randomOffset = Random.insideUnitCircle * spawnRadius;
+        return transform.position + new Vector3(randomOffset.x, randomOffset.y, 0f);
     }
 
     private void HandleEnemyDeath(HealthSystem deadEnemy)
@@ -179,14 +114,7 @@ public class GameManager : SingletonBehaviour<GameManager>
 
         deadEnemy.Died -= HandleEnemyDeath;
         aliveEnemies.Remove(deadEnemy);
-
-        if (enemyDeathFXPrefab != null)
-        {
-            GameObject fx = Instantiate(enemyDeathFXPrefab, deadEnemy.transform.position, Quaternion.identity);
-            Destroy(fx, 1f);
-        }
-
-        RewardPlayerForEnemyDeath(deadEnemy, deadEnemy.transform.position);
+        RewardPlayerForEnemyDeath();
         hudController?.RefreshWaveState(CurrentWave, aliveEnemies.Count);
 
         if (aliveEnemies.Count == 0 && !waitingForNextWave)
@@ -212,14 +140,14 @@ public class GameManager : SingletonBehaviour<GameManager>
         GameObject newEnemyPrefab,
         Transform[] newSpawnPoints,
         WaveConfig newWaveConfig,
-        EnemyTypeConfig[] newEnemyTypeConfigs,
+        EnemyConfig newEnemyConfig,
         PlayerAbilityCatalog newAbilityCatalog,
         float newSpawnRadius)
     {
         enemyPrefab = newEnemyPrefab;
         spawnPoints = newSpawnPoints;
         waveConfig = newWaveConfig;
-        enemyTypeConfigs = newEnemyTypeConfigs;
+        enemyConfig = newEnemyConfig;
         abilityCatalog = newAbilityCatalog;
         spawnRadius = Mathf.Max(1f, newSpawnRadius);
     }
@@ -296,93 +224,52 @@ public class GameManager : SingletonBehaviour<GameManager>
         return true;
     }
 
-    private void RewardPlayerForEnemyDeath(HealthSystem deadEnemy, Vector3 worldPosition)
+    private void RewardPlayerForEnemyDeath()
     {
         if (playerExperience == null)
         {
             return;
         }
 
-        if (!enemyXpRewards.TryGetValue(deadEnemy, out int reward))
-        {
-            return;
-        }
-
-        enemyXpRewards.Remove(deadEnemy);
+        int reward = enemyConfig.baseExperienceReward + ((CurrentWave - 1) * waveConfig.bonusExperiencePerWave);
         playerExperience.AddExperience(reward);
-
-        if (floatingTextPrefab != null && hudCanvas != null)
-        {
-            GameObject instance = Instantiate(floatingTextPrefab, hudCanvas.transform);
-            Vector2 screenPoint = Camera.main.WorldToScreenPoint(worldPosition);
-            Camera uiCamera = hudCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : hudCanvas.worldCamera;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                (RectTransform)hudCanvas.transform, screenPoint, uiCamera, out Vector2 canvasPos);
-            ((RectTransform)instance.transform).anchoredPosition = canvasPos;
-            FloatingText floatingText = instance.GetComponent<FloatingText>();
-            floatingText?.Play($"+{reward} XP", xpFloatingTextColor);
-        }
     }
 
-    private static void GetTypeMultipliers(EnemyType type, out float healthMult, out float damageMult)
-    {
-        switch (type)
-        {
-            case EnemyType.Fast:
-                healthMult = 0.6f;
-                damageMult = 0.8f;
-                break;
-            case EnemyType.Tank:
-                healthMult = 2.5f;
-                damageMult = 1.5f;
-                break;
-            default:
-                healthMult = 1f;
-                damageMult = 1f;
-                break;
-        }
-    }
-
-    private void ApplyWaveScaling(GameObject enemyInstance, EnemyConfig config, EnemyType type)
+    private void ApplyWaveScaling(GameObject enemyInstance)
     {
         int waveIndex = Mathf.Max(0, CurrentWave - 1);
         float healthMultiplier = 1f + (waveConfig.enemyHealthMultiplierPerWave * waveIndex);
         float damageMultiplier = 1f + (waveConfig.enemyDamageMultiplierPerWave * waveIndex);
         float moveSpeedMultiplier = 1f + (waveConfig.enemyMoveSpeedMultiplierPerWave * waveIndex);
 
-        GetTypeMultipliers(type, out float typeHealth, out float typeDamage);
-        healthMultiplier *= typeHealth;
-        damageMultiplier *= typeDamage;
-
         HealthSystem healthSystem = enemyInstance.GetComponent<HealthSystem>();
         AttackSystem attackSystem = enemyInstance.GetComponent<AttackSystem>();
         EnemyController enemyController = enemyInstance.GetComponent<EnemyController>();
 
-        if (healthSystem != null && config.healthConfig != null)
+        if (healthSystem != null && enemyConfig.healthConfig != null)
         {
             healthSystem.Configure(
-                Mathf.RoundToInt(config.healthConfig.maxHealth * healthMultiplier),
-                config.healthConfig.destroyOnDeath,
-                config.healthConfig.deactivateOnDeath,
-                config.healthConfig.destroyDelay);
+                Mathf.RoundToInt(enemyConfig.healthConfig.maxHealth * healthMultiplier),
+                enemyConfig.healthConfig.destroyOnDeath,
+                enemyConfig.healthConfig.deactivateOnDeath,
+                enemyConfig.healthConfig.destroyDelay);
         }
 
-        if (attackSystem != null && config.attackConfig != null)
+        if (attackSystem != null && enemyConfig.attackConfig != null)
         {
             Transform attackPoint = attackSystem.AttackPointTransform != null ? attackSystem.AttackPointTransform : enemyInstance.transform;
             attackSystem.Configure(
                 attackPoint,
                 1 << 8,
-                config.attackConfig.attackRange,
-                config.attackConfig.attackCooldown,
-                Mathf.RoundToInt(config.attackConfig.baseDamage * damageMultiplier),
-                config.attackConfig.criticalChance,
-                config.attackConfig.criticalMultiplier,
-                config.attackConfig.debugAttackLogs);
+                enemyConfig.attackConfig.attackRange,
+                enemyConfig.attackConfig.attackCooldown,
+                Mathf.RoundToInt(enemyConfig.attackConfig.baseDamage * damageMultiplier),
+                enemyConfig.attackConfig.criticalChance,
+                enemyConfig.attackConfig.criticalMultiplier,
+                enemyConfig.attackConfig.debugAttackLogs);
         }
 
         enemyController?.ApplyDifficultyMultiplier(moveSpeedMultiplier);
-        enemyController?.SetEnemyType(type);
     }
 
     private void OnValidate()

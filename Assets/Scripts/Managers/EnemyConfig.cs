@@ -3,10 +3,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "EnemyConfig", menuName = "Config/Enemy")]
 public class EnemyConfig : ScriptableObject
 {
-    [Header("Type")]
-    public EnemyType enemyType = EnemyType.Chaser;
-
-    [Header("Stats")]
     public HealthConfig healthConfig;
     public AttackConfig attackConfig;
     public float moveSpeed = 3f;
