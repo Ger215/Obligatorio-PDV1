@@ -239,21 +239,29 @@ public class PlayerController : SingletonBehaviour<PlayerController>
 
         if (canJumpFromGround)
         {
-            PerformJump();
+            PerformJump(false);
             coyoteTimeCounter = 0f;
         }
         else if (canJumpDouble)
         {
-            PerformJump();
+            PerformJump(true);
             hasDoubleJumped = true;
         }
     }
 
-    private void PerformJump()
+    private void PerformJump(bool isDoubleJump)
     {
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
         jumpBufferCounter = 0f;
-        AudioManager.Instance?.PlayJump();
+
+        if (isDoubleJump)
+        {
+            AudioManager.Instance?.PlayDoubleJump();
+        }
+        else
+        {
+            AudioManager.Instance?.PlayJump();
+        }
     }
 
     private void ReadMovementInput()
@@ -306,10 +314,10 @@ public class PlayerController : SingletonBehaviour<PlayerController>
                              (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame) ||
                              (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame);
 
-        if (attackPressed)
+        if (attackPressed && attackSystem.TryAttack())
         {
+            AudioManager.Instance?.PlayAttack(attackSystem.LastAttackWasCritical);
             ApplyKnockbackToNearbyEnemies();
-            attackSystem.TryAttack();
         }
     }
 
@@ -356,6 +364,7 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         isDashing = true;
         dashTimeRemaining = dashDuration;
         UpdateAttackPointPosition();
+        AudioManager.Instance?.PlayDash();
     }
 
     public void Configure(
@@ -446,10 +455,6 @@ public class PlayerController : SingletonBehaviour<PlayerController>
 
     private void HandleAttackResolved(bool critical, int damage, int targetsHit)
     {
-        if (targetsHit > 0)
-        {
-            AudioManager.Instance?.PlayAttack(critical);
-        }
     }
 
     public int FacingDirection => facingDirection;

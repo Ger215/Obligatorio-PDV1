@@ -5,9 +5,14 @@ public class GameAudioConfig : ScriptableObject
 {
     public AudioClip backgroundMusic;
     public AudioClip jump;
+    public AudioClip doubleJump;
     public AudioClip attack;
     public AudioClip attackCritical;
     public AudioClip playerDamaged;
+    public AudioClip dash;
+    public AudioClip enemyAttack;
+    public AudioClip enemyDamaged;
+    public AudioClip enemyDeath;
     public AudioClip uiButton;
     public AudioClip uiSpecialButton;
     public AudioClip dashStrike;

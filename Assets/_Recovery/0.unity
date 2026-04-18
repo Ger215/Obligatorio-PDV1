@@ -707,11 +707,8 @@ MonoBehaviour:
   waveConfig: {fileID: 11400000, guid: f2206a6e0bb7a6340a43d837db06a3ce, type: 2}
   enemyTypeConfigs:
   - type: 0
-    config: {fileID: 11400000, guid: 583c89007ec854d138a7c1d756b23b91, type: 2}
-    prefab: {fileID: 5567071987261642664, guid: 4e71fff2760894f02b35e62f793b4b74, type: 3}
-  - type: 3
-    config: {fileID: 11400000, guid: 219dc3973baf24580a2a4d49204041d5, type: 2}
-    prefab: {fileID: 5567071987261642664, guid: 0728bd49c71f74438a4f88af74839cff, type: 3}
+    config: {fileID: 11400000, guid: 3f5dd5d400165f9438bc7ffe6c933af4, type: 2}
+    prefab: {fileID: 5567071987261642664, guid: 041a702f840206a48925db646c208db3, type: 3}
   abilityCatalog: {fileID: 11400000, guid: a383491400ac4dd40a5ff7c443430b1f, type: 2}
   hudController: {fileID: 829912347}
   audioManager: {fileID: 2092198904}
@@ -1037,6 +1034,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   groundCheckRadius: 0.22
+  wallCheckDistance: 0.35
+  wallCheckSize: {x: 0.1, y: 0.8}
   attackPointDistance: 0.1
 --- !u!114 &1590280738
 MonoBehaviour:
@@ -1688,7 +1687,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d71e44e479f7bec4f95cbd410b07b659, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
-  audioConfig: {fileID: 0}
+  audioConfig: {fileID: 11400000, guid: 3bb3bae6765e1e546af241767c054352, type: 2}
   musicSource: {fileID: 2092198903}
   sfxSource: {fileID: 2092198902}
 --- !u!1660057539 &9223372036854775807

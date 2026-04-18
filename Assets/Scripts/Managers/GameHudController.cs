@@ -1,17 +1,27 @@
+using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class GameHudController : SingletonBehaviour<GameHudController>
 {
-    [SerializeField] private Text healthText;
-    [SerializeField] private Text experienceText;
-    [SerializeField] private Text waveText;
-    [SerializeField] private Text enemiesText;
-    [SerializeField] private Text[] abilitySlotTexts;
+    [Header("Wave Announcement")]
+    [SerializeField] private CanvasGroup waveAnnouncerGroup;
+    [SerializeField] private TMP_Text waveAnnouncerText;
+    [SerializeField] private float announceFadeInDuration = 0.4f;
+    [SerializeField] private float announceHoldDuration = 1.2f;
+    [SerializeField] private float announceFadeOutDuration = 0.5f;
+
+    [Header("HUD")]
+    [SerializeField] private TMP_Text healthText;
+    [SerializeField] private TMP_Text experienceText;
+    [SerializeField] private TMP_Text waveText;
+    [SerializeField] private TMP_Text enemiesText;
+    [SerializeField] private TMP_Text[] abilitySlotTexts;
     [SerializeField] private GameObject abilityShopPanel;
     [SerializeField] private Button[] abilityButtons;
-    [SerializeField] private Text[] abilityButtonTexts;
+    [SerializeField] private TMP_Text[] abilityButtonTexts;
     [SerializeField] private Button skipShopButton;
 
     public void Bind(GameManager gameManager, PlayerController player)
@@ -41,6 +51,57 @@ public class GameHudController : SingletonBehaviour<GameHudController>
                 GameManager.Instance?.SkipAbilityShop();
             });
         }
+    }
+
+    public void ShowWaveAnnouncement(int wave)
+    {
+        if (waveAnnouncerGroup == null || waveAnnouncerText == null)
+        {
+            return;
+        }
+
+        if (waveAnnouncerText != null)
+        {
+            waveAnnouncerText.text = $"WAVE {wave}";
+        }
+
+        StopCoroutine("AnimateWaveAnnouncer");
+        StartCoroutine("AnimateWaveAnnouncer");
+    }
+
+    private IEnumerator AnimateWaveAnnouncer()
+    {
+        waveAnnouncerGroup.alpha = 0f;
+        waveAnnouncerGroup.gameObject.SetActive(true);
+        waveAnnouncerGroup.transform.localScale = Vector3.one * 1.6f;
+
+        float t = 0f;
+        while (t < announceFadeInDuration)
+        {
+            t += Time.deltaTime;
+            float progress = t / announceFadeInDuration;
+            waveAnnouncerGroup.alpha = progress;
+            waveAnnouncerGroup.transform.localScale = Vector3.one * Mathf.Lerp(1.6f, 1f, progress);
+            yield return null;
+        }
+
+        waveAnnouncerGroup.alpha = 1f;
+        waveAnnouncerGroup.transform.localScale = Vector3.one;
+
+        yield return new WaitForSeconds(announceHoldDuration);
+
+        t = 0f;
+        while (t < announceFadeOutDuration)
+        {
+            t += Time.deltaTime;
+            float progress = t / announceFadeOutDuration;
+            waveAnnouncerGroup.alpha = 1f - progress;
+            waveAnnouncerGroup.transform.localScale = Vector3.one * Mathf.Lerp(1f, 0.8f, progress);
+            yield return null;
+        }
+
+        waveAnnouncerGroup.alpha = 0f;
+        waveAnnouncerGroup.gameObject.SetActive(false);
     }
 
     public void RefreshWaveState(int currentWave, int enemiesAlive)
@@ -101,7 +162,7 @@ public class GameHudController : SingletonBehaviour<GameHudController>
         for (int i = 0; i < abilityButtons.Length; i++)
         {
             Button button = abilityButtons[i];
-            Text label = i < abilityButtonTexts.Length ? abilityButtonTexts[i] : null;
+            TMP_Text label = i < abilityButtonTexts.Length ? abilityButtonTexts[i] : null;
 
             if (button == null)
             {
@@ -153,7 +214,7 @@ public class GameHudController : SingletonBehaviour<GameHudController>
     {
         if (experienceText != null)
         {
-            experienceText.text = $"XP: {currentExperience} (Earned: {totalExperience})";
+            experienceText.text = $"XP: {currentExperience}";
         }
     }
 }
