@@ -5,7 +5,6 @@ public class ProjectileLauncher : MonoBehaviour
     [Header("Projectile")]
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private float cooldown = 2f;
-    [SerializeField] private float projectileSpeed = 8f;
     [SerializeField] private int damage = 1;
     [SerializeField] private LayerMask targetLayers;
 
