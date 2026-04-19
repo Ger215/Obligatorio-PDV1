@@ -1,46 +1,7 @@
 fileFormatVersion: 2
-guid: dbbf34ceee1cf5043af8baa1a8981eb4
+guid: 63b03eaa85550aa41a7d451f2b848e58
 TextureImporter:
-  internalIDToNameTable:
-  - first:
-      213: 6465122525070234856
-    second: Tiles_example_0
-  - first:
-      213: -4560908446061073971
-    second: Tiles_example_1
-  - first:
-      213: -4425882457953338568
-    second: Tiles_example_2
-  - first:
-      213: 9185709069812329047
-    second: Tiles_example_3
-  - first:
-      213: -8723220138334175087
-    second: Tiles_example_4
-  - first:
-      213: -3615942091953264553
-    second: Tiles_example_5
-  - first:
-      213: 7710427033442697687
-    second: Tiles_example_6
-  - first:
-      213: -6758869150870582872
-    second: Tiles_example_7
-  - first:
-      213: 4764088050865340225
-    second: Tiles_example_8
-  - first:
-      213: -4999771219678957417
-    second: Tiles_example_9
-  - first:
-      213: -8436205438753681318
-    second: Tiles_example_10
-  - first:
-      213: -5162240443357414728
-    second: Tiles_example_11
-  - first:
-      213: 5330369914111849581
-    second: Tiles_example_12
+  internalIDToNameTable: []
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -73,7 +34,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -82,7 +43,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -106,7 +67,7 @@ TextureImporter:
   swizzle: 50462976
   cookieLightType: 0
   platformSettings:
-  - serializedVersion: 4
+  - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -119,8 +80,21 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
+  - serializedVersion: 3
     buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -134,322 +108,27 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites:
-    - serializedVersion: 2
-      name: Tiles_example_0
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 15
-        width: 113
-        height: 113
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8e41030deaab8b950800000000000000
-      internalID: 6465122525070234856
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Tiles_example_1
-      rect:
-        serializedVersion: 2
-        x: 112
-        y: 111
-        width: 6
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: dc9637bdee564b0c0800000000000000
-      internalID: -4560908446061073971
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Tiles_example_2
-      rect:
-        serializedVersion: 2
-        x: 115
-        y: 111
-        width: 13
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 83bfe049a5b1492c0800000000000000
-      internalID: -4425882457953338568
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Tiles_example_3
-      rect:
-        serializedVersion: 2
-        x: 112
-        y: 95
-        width: 16
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 75a6f342bb13a7f70800000000000000
-      internalID: 9185709069812329047
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Tiles_example_4
-      rect:
-        serializedVersion: 2
-        x: 113
-        y: 63
-        width: 15
-        height: 26
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 190ce057085e0f680800000000000000
-      internalID: -8723220138334175087
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Tiles_example_5
-      rect:
-        serializedVersion: 2
-        x: 113
-        y: 47
-        width: 15
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7582eb053d791ddc0800000000000000
-      internalID: -3615942091953264553
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Tiles_example_6
-      rect:
-        serializedVersion: 2
-        x: 86
-        y: 0
-        width: 42
-        height: 31
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7d1cbea0980f00b60800000000000000
-      internalID: 7710427033442697687
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Tiles_example_7
-      rect:
-        serializedVersion: 2
-        x: 113
-        y: 31
-        width: 15
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8a9430b315ca332a0800000000000000
-      internalID: -6758869150870582872
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Tiles_example_8
-      rect:
-        serializedVersion: 2
-        x: 1
-        y: 0
-        width: 14
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 14ff28e47d07d1240800000000000000
-      internalID: 4764088050865340225
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Tiles_example_9
-      rect:
-        serializedVersion: 2
-        x: 17
-        y: 0
-        width: 15
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 79070dcc09e3d9ab0800000000000000
-      internalID: -4999771219678957417
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Tiles_example_10
-      rect:
-        serializedVersion: 2
-        x: 33
-        y: 0
-        width: 15
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a505ed2b9d39cea80800000000000000
-      internalID: -8436205438753681318
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Tiles_example_11
-      rect:
-        serializedVersion: 2
-        x: 49
-        y: 0
-        width: 15
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8bab680eaa90c58b0800000000000000
-      internalID: -5162240443357414728
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Tiles_example_12
-      rect:
-        serializedVersion: 2
-        x: 63
-        y: 0
-        width: 18
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d64f014023749f940800000000000000
-      internalID: 5330369914111849581
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
+    sprites: []
     outline: []
-    customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
-    spriteCustomMetadata:
-      entries: []
-    nameFileIdTable:
-      Tiles_example_0: 6465122525070234856
-      Tiles_example_1: -4560908446061073971
-      Tiles_example_10: -8436205438753681318
-      Tiles_example_11: -5162240443357414728
-      Tiles_example_12: 5330369914111849581
-      Tiles_example_2: -4425882457953338568
-      Tiles_example_3: 9185709069812329047
-      Tiles_example_4: -8723220138334175087
-      Tiles_example_5: -3615942091953264553
-      Tiles_example_6: 7710427033442697687
-      Tiles_example_7: -6758869150870582872
-      Tiles_example_8: 4764088050865340225
-      Tiles_example_9: -4999771219678957417
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 254632
+  packageName: 2D TileSet Platformer
+  packageVersion: 1.0
+  assetPath: Assets/PlatformerTileset/TileSet/Tiles_example.png
+  uploadId: 694875
