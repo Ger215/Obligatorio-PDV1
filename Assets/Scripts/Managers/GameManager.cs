@@ -6,7 +6,6 @@ public class GameManager : SingletonBehaviour<GameManager>
 {
     [Header("Wave Setup")]
     [SerializeField] private bool enableEnemySpawning = true;
-    [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private Transform[] spawnPoints;
     [SerializeField] private WaveConfig waveConfig;
     [SerializeField] private EnemyTypeConfig[] enemyTypeConfigs;
@@ -58,9 +57,9 @@ public class GameManager : SingletonBehaviour<GameManager>
             return;
         }
 
-        if (enemyPrefab == null || waveConfig == null || enemyTypeConfigs == null || enemyTypeConfigs.Length == 0)
+        if (waveConfig == null || enemyTypeConfigs == null || enemyTypeConfigs.Length == 0)
         {
-            Debug.LogError("GameManager needs enemyPrefab, waveConfig, and at least one enemyTypeConfig.");
+            Debug.LogError("GameManager needs waveConfig and at least one enemyTypeConfig.");
             return;
         }
 
@@ -91,7 +90,14 @@ public class GameManager : SingletonBehaviour<GameManager>
             return;
         }
 
-        GameObject prefabToUse = GetPrefabForType(type) ?? enemyPrefab;
+        GameObject prefabToUse = GetPrefabForType(type);
+
+        if (prefabToUse == null)
+        {
+            Debug.LogError($"No prefab configured for EnemyType {type} in EnemyTypeConfigs.");
+            return;
+        }
+
         Vector3 spawnPosition = GetSpawnPosition(enemyIndex);
         GameObject enemyInstance = Instantiate(prefabToUse, spawnPosition, Quaternion.identity);
         enemyInstance.name = $"Enemy_{CurrentWave}_{enemyIndex + 1}_{type}";
@@ -209,14 +215,12 @@ public class GameManager : SingletonBehaviour<GameManager>
     }
 
     public void Configure(
-        GameObject newEnemyPrefab,
         Transform[] newSpawnPoints,
         WaveConfig newWaveConfig,
         EnemyTypeConfig[] newEnemyTypeConfigs,
         PlayerAbilityCatalog newAbilityCatalog,
         float newSpawnRadius)
     {
-        enemyPrefab = newEnemyPrefab;
         spawnPoints = newSpawnPoints;
         waveConfig = newWaveConfig;
         enemyTypeConfigs = newEnemyTypeConfigs;
@@ -372,13 +376,25 @@ public class GameManager : SingletonBehaviour<GameManager>
             Transform attackPoint = attackSystem.AttackPointTransform != null ? attackSystem.AttackPointTransform : enemyInstance.transform;
             attackSystem.Configure(
                 attackPoint,
-                1 << 8,
+                1 << 7,
                 config.attackConfig.attackRange,
                 config.attackConfig.attackCooldown,
                 Mathf.RoundToInt(config.attackConfig.baseDamage * damageMultiplier),
                 config.attackConfig.criticalChance,
                 config.attackConfig.criticalMultiplier,
                 config.attackConfig.debugAttackLogs);
+        }
+
+        if (enemyController != null && config != null)
+        {
+            enemyController.ApplyMovementConfig(
+                config.moveSpeed,
+                config.jumpForce,
+                config.attackDistance,
+                config.verticalAttackTolerance,
+                config.jumpTriggerHeight,
+                config.repathDelay,
+                config.attackPointDistance);
         }
 
         enemyController?.ApplyDifficultyMultiplier(moveSpeedMultiplier);

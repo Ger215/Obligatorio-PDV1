@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyConfig
   enemyType: 0
   healthConfig: {fileID: 11400000, guid: abc60ecfaf9b0784c8f21a4d7f6b99fb, type: 2}
-  attackConfig: {fileID: 11400000, guid: 96a86de857af98b4aa0f306999f3654f, type: 2}
+  attackConfig: {fileID: 11400000, guid: 33b2452e93c44e949c95f82851e2c465, type: 2}
   moveSpeed: 3
-  jumpForce: 3
-  attackDistance: 1.1
+  jumpForce: 9
+  attackDistance: 1.07
   verticalAttackTolerance: 1
   jumpTriggerHeight: 1.35
-  attackPointDistance: 0.6
+  attackPointDistance: 0.4
   repathDelay: 0.5
   baseExperienceReward: 5

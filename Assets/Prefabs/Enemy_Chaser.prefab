@@ -78,6 +78,7 @@ GameObject:
   - component: {fileID: 8741199782492536330}
   - component: {fileID: -5537474972638094397}
   - component: {fileID: 9197400972870928280}
+  - component: {fileID: 7008221101780278071}
   m_Layer: 8
   m_Name: Enemy_Chaser
   m_TagString: Untagged
@@ -168,6 +169,7 @@ MonoBehaviour:
   baseDamage: 1
   criticalChance: 0.15
   criticalMultiplier: 2
+  knockbackForce: 6
   debugAttackLogs: 1
 --- !u!114 &2766487229391979447
 MonoBehaviour:
@@ -193,6 +195,13 @@ MonoBehaviour:
     m_Bits: 64
   groundCheckRadius: 0.15
   attackPointDistance: 0.6
+  wallCheckDistance: 0.35
+  ceilingCheckDistance: 1.5
+  groundAheadDistance: 0.6
+  stuckCheckInterval: 0.5
+  stuckMoveThreshold: 0.12
+  separationRadius: 1
+  separationForce: 4
 --- !u!212 &8741199782492536330
 SpriteRenderer:
   serializedVersion: 2
@@ -297,7 +306,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5567071987261642664}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: bd2b425559d69490f82a84671bfa1f9a, type: 2}
   m_CullingMode: 0
@@ -311,3 +320,21 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &7008221101780278071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5567071987261642664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd9d4f2f85c5f4fbcb737a79da78d579, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpriteFrameAnimator
+  frames:
+  - {fileID: -4751526285514923649, guid: 7e7792866d97b894aa5ef52add3cbf22, type: 3}
+  - {fileID: -8449166612927704982, guid: 92872c7143ce56e45bbc4ac0238a12bb, type: 3}
+  - {fileID: 4190115084237617856, guid: c9b6de3e3b8486c429eefbbe5200d957, type: 3}
+  - {fileID: -272193215937087373, guid: 5fd449fbe7e577e4aa5be2c8dd5ad322, type: 3}
+  fps: 12

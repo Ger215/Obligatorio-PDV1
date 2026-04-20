@@ -15,11 +15,18 @@ public class PlayerAnimationDriver : MonoBehaviour
     [SerializeField] private string dashStateName = "Dash";
     [SerializeField] private string hurtStateName = "Hurt";
 
+    [Header("Hit Flash")]
+    [SerializeField] private float hitFlashDuration = 0.15f;
+    [SerializeField] private float hurtStateDuration = 0.4f;
+    [SerializeField] private string recoveryStateName = "Idle";
+
     private Animator animator;
     private PlayerController playerController;
     private AttackSystem attackSystem;
     private HealthSystem healthSystem;
+    private SpriteRenderer spriteRenderer;
     private bool wasDashing;
+    private Coroutine hurtExitCoroutine;
 
     private void Awake()
     {
@@ -27,6 +34,7 @@ public class PlayerAnimationDriver : MonoBehaviour
         playerController = GetComponent<PlayerController>();
         attackSystem = GetComponent<AttackSystem>();
         healthSystem = GetComponent<HealthSystem>();
+        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
         if (animatorController != null)
         {
@@ -77,6 +85,27 @@ public class PlayerAnimationDriver : MonoBehaviour
         if (!string.IsNullOrWhiteSpace(hurtStateName))
         {
             animator.CrossFade(hurtStateName, 0.05f);
+
+            if (hurtExitCoroutine != null) StopCoroutine(hurtExitCoroutine);
+            hurtExitCoroutine = StartCoroutine(ExitHurtState());
         }
+
+        if (spriteRenderer != null)
+        {
+            StartCoroutine(HitFlash());
+        }
+    }
+
+    private System.Collections.IEnumerator ExitHurtState()
+    {
+        yield return new WaitForSeconds(hurtStateDuration);
+        animator.CrossFade(recoveryStateName, 0.15f);
+    }
+
+    private System.Collections.IEnumerator HitFlash()
+    {
+        spriteRenderer.color = new Color(1f, 0.2f, 0.2f, 1f);
+        yield return new WaitForSeconds(hitFlashDuration);
+        spriteRenderer.color = Color.white;
     }
 }

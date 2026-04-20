@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyConfig
   enemyType: 3
   healthConfig: {fileID: 11400000, guid: abc60ecfaf9b0784c8f21a4d7f6b99fb, type: 2}
-  attackConfig: {fileID: 11400000, guid: 96a86de857af98b4aa0f306999f3654f, type: 2}
+  attackConfig: {fileID: 11400000, guid: 8763ddda45f24968938be86d99f6ad64, type: 2}
   moveSpeed: 3
   jumpForce: 3
   attackDistance: 1.1
