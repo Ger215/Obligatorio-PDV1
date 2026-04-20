@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c9460eeb85a11840b7aba84da386ad4, type: 3}
   m_Name: AttackConfig_Fast
   m_EditorClassIdentifier: Assembly-CSharp::AttackConfig
-  attackRange: 0.7
-  attackCooldown: 0.5
+  attackRange: 0.4
+  attackCooldown: 0.35
   baseDamage: 1
   perfectHitMultiplier: 2
   weakHitMultiplier: 0.5

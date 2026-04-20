@@ -47,6 +47,8 @@ public class EnemyController : MonoBehaviour
     private float knockbackEndTime;
     private float stuckTimer;
     private Vector3 stuckCheckPosition;
+    private float dashEndTime;
+    private float nextDashTime;
 
     private void Awake()
     {
@@ -187,6 +189,9 @@ public class EnemyController : MonoBehaviour
             : horizontalDirection * moveSpeed;
         rb.linearVelocity = new Vector2(horizontalVelocity, rb.linearVelocity.y);
 
+        if (enemyType == EnemyType.Fast)
+            TryFastDash(horizontalDistance, horizontalDirection);
+
         // Only jump if no ceiling is blocking the path
         bool shouldJump = isGrounded && !jumpConsumed && enemyType != EnemyType.Fast
             && !ceilingAbove
@@ -216,6 +221,23 @@ public class EnemyController : MonoBehaviour
         }
 
         ApplySeparation();
+    }
+
+    private void TryFastDash(float horizontalDistance, float horizontalDirection)
+    {
+        float dashTriggerRange = attackDistance * 3.5f;
+        bool canDash = Time.time >= nextDashTime
+            && horizontalDistance > attackDistance
+            && horizontalDistance <= dashTriggerRange;
+
+        if (canDash)
+        {
+            dashEndTime = Time.time + 0.18f;
+            nextDashTime = Time.time + 1.8f;
+        }
+
+        if (Time.time < dashEndTime)
+            rb.linearVelocity = new Vector2(horizontalDirection * moveSpeed * 2.5f, rb.linearVelocity.y);
     }
 
     private void FindPlayerTarget()
