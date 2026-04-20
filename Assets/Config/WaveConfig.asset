@@ -21,4 +21,6 @@ MonoBehaviour:
   bonusExperiencePerWave: 1
   offeredAbilitiesCount: 3
   waveDefinitions:
-  - allowedTypes: 02000000
+  - allowedTypes: 03000000
+  - allowedTypes: 00000000
+  - allowedTypes: 01000000

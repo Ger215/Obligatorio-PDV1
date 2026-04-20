@@ -337,8 +337,8 @@ public class GameManager : SingletonBehaviour<GameManager>
                 damageMult = 0.8f;
                 break;
             case EnemyType.Tank:
-                healthMult = 2.5f;
-                damageMult = 1.5f;
+                healthMult = 2.0f;
+                damageMult = 1.0f;
                 break;
             default:
                 healthMult = 1f;

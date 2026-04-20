@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c9460eeb85a11840b7aba84da386ad4, type: 3}
   m_Name: AttackConfig_Tank
   m_EditorClassIdentifier: Assembly-CSharp::AttackConfig
-  attackRange: 1.2
+  attackRange: 0.9
   attackCooldown: 1.5
   baseDamage: 2
   perfectHitMultiplier: 2
