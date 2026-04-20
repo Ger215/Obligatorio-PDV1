@@ -302,8 +302,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 599a4e41ff8754b549f58594ea674999, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileLauncher
-  projectilePrefab: {fileID: 2594636052371397479, guid: 0f813b2cf205f4090a97338324989145, type: 3}
-  cooldown: 2
+  projectilePrefab: {fileID: 2594636052371397479, guid: b53f393ce7df3654e9f12adf7061e2d6, type: 3}
+  cooldown: 3.5
   projectileSpeed: 8
   damage: 1
   targetLayers:

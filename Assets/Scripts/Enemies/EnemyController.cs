@@ -21,6 +21,14 @@ public class EnemyController : MonoBehaviour
     [Header("Combat Facing")]
     [SerializeField] private float attackPointDistance = 0.6f;
 
+    [Header("Navigation")]
+    [SerializeField] private float wallCheckDistance = 0.35f;
+    [SerializeField] private float ceilingCheckDistance = 1.5f;
+    [SerializeField] private float groundAheadDistance = 0.6f;
+    [SerializeField] private float stuckCheckInterval = 0.5f;
+    [SerializeField] private float stuckMoveThreshold = 0.12f;
+    [SerializeField] private float separationRadius = 1f;
+    [SerializeField] private float separationForce = 4f;
 
     private Rigidbody2D rb;
     private AttackSystem attackSystem;
@@ -37,6 +45,10 @@ public class EnemyController : MonoBehaviour
     private int facingDirection = 1;
     private float nextPathRefreshTime;
     private float knockbackEndTime;
+    private float stuckTimer;
+    private Vector3 stuckCheckPosition;
+    private float dashEndTime;
+    private float nextDashTime;
 
     private void Awake()
     {
@@ -69,6 +81,7 @@ public class EnemyController : MonoBehaviour
     private void Start()
     {
         attackDistance += Random.Range(-0.3f, 0.3f);
+        stuckCheckPosition = transform.position;
         FindPlayerTarget();
         UpdateAttackPointPosition();
     }
@@ -163,10 +176,26 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
-        float horizontalVelocity = horizontalDistance <= attackDistance ? 0f : horizontalDirection * moveSpeed;
+        bool wallAhead = enemyType != EnemyType.Fast && CheckWallAhead();
+        bool ceilingAbove = enemyType != EnemyType.Fast && CheckCeilingAbove();
+        bool groundAhead = CheckGroundAhead();
+        bool playerBelow = verticalDistance < -verticalAttackTolerance;
+        bool playerAttackable = Mathf.Abs(deltaToPlayer.y) <= verticalAttackTolerance;
+
+        // Force movement: under a platform (ceiling+wall) or walking off a ledge toward player below
+        bool forceHorizontal = (ceilingAbove && wallAhead) || (playerBelow && !groundAhead);
+        float horizontalVelocity = (!forceHorizontal && horizontalDistance <= attackDistance && playerAttackable)
+            ? 0f
+            : horizontalDirection * moveSpeed;
         rb.linearVelocity = new Vector2(horizontalVelocity, rb.linearVelocity.y);
 
-        bool shouldJump = isGrounded && !jumpConsumed && verticalDistance > jumpTriggerHeight && enemyType != EnemyType.Fast;
+        if (enemyType == EnemyType.Fast)
+            TryFastDash(horizontalDistance, horizontalDirection);
+
+        // Only jump if no ceiling is blocking the path
+        bool shouldJump = isGrounded && !jumpConsumed && enemyType != EnemyType.Fast
+            && !ceilingAbove
+            && (verticalDistance > jumpTriggerHeight || wallAhead);
 
         if (shouldJump)
         {
@@ -174,6 +203,41 @@ public class EnemyController : MonoBehaviour
             isGrounded = false;
             jumpConsumed = true;
         }
+
+        bool tryingToMove = horizontalDistance > attackDistance || forceHorizontal;
+        stuckTimer += Time.fixedDeltaTime;
+        if (stuckTimer >= stuckCheckInterval)
+        {
+            float moved = Vector3.Distance(transform.position, stuckCheckPosition);
+            if (tryingToMove && moved < stuckMoveThreshold && isGrounded && !jumpConsumed
+                && enemyType != EnemyType.Fast && !ceilingAbove)
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+                isGrounded = false;
+                jumpConsumed = true;
+            }
+            stuckTimer = 0f;
+            stuckCheckPosition = transform.position;
+        }
+
+        ApplySeparation();
+    }
+
+    private void TryFastDash(float horizontalDistance, float horizontalDirection)
+    {
+        float dashTriggerRange = attackDistance * 3.5f;
+        bool canDash = Time.time >= nextDashTime
+            && horizontalDistance > attackDistance
+            && horizontalDistance <= dashTriggerRange;
+
+        if (canDash)
+        {
+            dashEndTime = Time.time + 0.18f;
+            nextDashTime = Time.time + 1.8f;
+        }
+
+        if (Time.time < dashEndTime)
+            rb.linearVelocity = new Vector2(horizontalDirection * moveSpeed * 2.5f, rb.linearVelocity.y);
     }
 
     private void FindPlayerTarget()
@@ -207,6 +271,41 @@ public class EnemyController : MonoBehaviour
         UpdateAttackPointPosition();
     }
 
+    private bool CheckWallAhead()
+    {
+        if (groundLayers == 0) return false;
+        Vector2 origin = (Vector2)transform.position + Vector2.up * 0.1f;
+        RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.right * facingDirection, wallCheckDistance, groundLayers);
+        return hit.collider != null;
+    }
+
+    private bool CheckCeilingAbove()
+    {
+        if (groundLayers == 0) return false;
+        Vector2 origin = (Vector2)transform.position + Vector2.up * 0.2f;
+        return Physics2D.Raycast(origin, Vector2.up, ceilingCheckDistance, groundLayers).collider != null;
+    }
+
+    private bool CheckGroundAhead()
+    {
+        if (groundLayers == 0) return true;
+        Vector2 ahead = (Vector2)transform.position + Vector2.right * facingDirection * 0.4f;
+        return Physics2D.Raycast(ahead, Vector2.down, groundAheadDistance, groundLayers).collider != null;
+    }
+
+    private void ApplySeparation()
+    {
+        Collider2D[] nearby = Physics2D.OverlapCircleAll(transform.position, separationRadius, 1 << 8);
+        foreach (Collider2D col in nearby)
+        {
+            if (col.gameObject == gameObject) continue;
+            Vector2 away = (Vector2)(transform.position - col.transform.position);
+            if (away.sqrMagnitude < 0.001f) continue;
+            float strength = 1f - (away.magnitude / separationRadius);
+            rb.AddForce(away.normalized * separationForce * strength, ForceMode2D.Force);
+        }
+    }
+
     private bool CheckGrounded()
     {
         if (groundCheck == null)
@@ -232,7 +331,9 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
-        attackSystem.AttackPointTransform.localPosition = new Vector3(facingDirection * attackPointDistance, 0f, 0f);
+        float scale = Mathf.Abs(transform.localScale.x);
+        float localDist = scale > 0.001f ? attackPointDistance / scale : attackPointDistance;
+        attackSystem.AttackPointTransform.localPosition = new Vector3(facingDirection * localDist, 0f, 0f);
     }
 
     private void HandleAttackResolved(bool critical, int damage, int targetsHit)
@@ -261,6 +362,19 @@ public class EnemyController : MonoBehaviour
         isDead = true;
         rb.linearVelocity = Vector2.zero;
         AudioManager.Instance?.PlayEnemyDeath();
+    }
+
+    public void ApplyMovementConfig(float newMoveSpeed, float newJumpForce, float newAttackDistance,
+        float newVerticalAttackTolerance, float newJumpTriggerHeight, float newRepathDelay, float newAttackPointDistance)
+    {
+        moveSpeed = Mathf.Max(0.1f, newMoveSpeed);
+        jumpForce = Mathf.Max(0.1f, newJumpForce);
+        attackDistance = Mathf.Max(0.1f, newAttackDistance);
+        verticalAttackTolerance = Mathf.Max(0.1f, newVerticalAttackTolerance);
+        jumpTriggerHeight = Mathf.Max(0.1f, newJumpTriggerHeight);
+        repathDelay = Mathf.Max(0.1f, newRepathDelay);
+        attackPointDistance = Mathf.Max(0.1f, newAttackPointDistance);
+        UpdateAttackPointPosition();
     }
 
     public void ApplyDifficultyMultiplier(float moveSpeedMultiplier)

@@ -7,7 +7,7 @@ AnimationClip:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: EnemyChaser_Animation
-  serializedVersion: 7
+  serializedVersion: 6
   m_Legacy: 0
   m_Compressed: 0
   m_UseHighQualityCurve: 1
@@ -18,8 +18,7 @@ AnimationClip:
   m_ScaleCurves: []
   m_FloatCurves: []
   m_PPtrCurves:
-  - serializedVersion: 2
-    curve:
+  - curve:
     - time: 0
       value: {fileID: -4751526285514923649, guid: 7e7792866d97b894aa5ef52add3cbf22, type: 3}
     - time: 0.083333336
@@ -29,12 +28,11 @@ AnimationClip:
     - time: 0.25
       value: {fileID: -272193215937087373, guid: 5fd449fbe7e577e4aa5be2c8dd5ad322, type: 3}
     attribute: m_Sprite
-    path: 
+    path:
     classID: 212
     script: {fileID: 0}
-    flags: 2
   m_SampleRate: 12
-  m_WrapMode: 0
+  m_WrapMode: 2
   m_Bounds:
     m_Center: {x: 0, y: 0, z: 0}
     m_Extent: {x: 0, y: 0, z: 0}
@@ -47,8 +45,6 @@ AnimationClip:
       typeID: 212
       customType: 23
       isPPtrCurve: 1
-      isIntCurve: 0
-      isSerializeReferenceCurve: 0
     pptrCurveMapping:
     - {fileID: -4751526285514923649, guid: 7e7792866d97b894aa5ef52add3cbf22, type: 3}
     - {fileID: -8449166612927704982, guid: 92872c7143ce56e45bbc4ac0238a12bb, type: 3}

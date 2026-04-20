@@ -2091,7 +2091,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   enableEnemySpawning: 1
-  enemyPrefab: {fileID: 5567071987261642664, guid: 5cf96c136bdfb0341a862d3dd6b75139, type: 3}
   spawnPoints:
   - {fileID: 468843292}
   - {fileID: 989672425}
@@ -2100,6 +2099,15 @@ MonoBehaviour:
   - type: 0
     config: {fileID: 11400000, guid: 3f5dd5d400165f9438bc7ffe6c933af4, type: 2}
     prefab: {fileID: 5567071987261642664, guid: 041a702f840206a48925db646c208db3, type: 3}
+  - type: 2
+    config: {fileID: 11400000, guid: ad703050c28565340943aa074f91d24b, type: 2}
+    prefab: {fileID: 5567071987261642664, guid: 5e886831a79175b4392ae1ed79b9b06b, type: 3}
+  - type: 1
+    config: {fileID: 11400000, guid: aa731eb806aa41c42bbc777832c3e141, type: 2}
+    prefab: {fileID: 5567071987261642664, guid: 2113856575600714f9d7b93a8f285d1a, type: 3}
+  - type: 3
+    config: {fileID: 11400000, guid: c14a069df0d13684598d68e003e3213b, type: 2}
+    prefab: {fileID: 5567071987261642664, guid: 4d83e31caac1c16479edf2bfdce0660c, type: 3}
   abilityCatalog: {fileID: 11400000, guid: a383491400ac4dd40a5ff7c443430b1f, type: 2}
   hudController: {fileID: 829912347}
   audioManager: {fileID: 2092198904}
@@ -3783,6 +3791,9 @@ MonoBehaviour:
   attackTrigger: Attack
   dashStateName: Dash
   hurtStateName: Hurt
+  hitFlashDuration: 0.15
+  hurtStateDuration: 0.4
+  recoveryStateName: Idle
 --- !u!1 &1604843904
 GameObject:
   m_ObjectHideFlags: 0
