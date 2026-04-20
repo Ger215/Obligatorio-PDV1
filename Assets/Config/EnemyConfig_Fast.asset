@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: EnemyConfig_Fast
   m_EditorClassIdentifier: Assembly-CSharp::EnemyConfig
   enemyType: 1
-  healthConfig: {fileID: 11400000, guid: abc60ecfaf9b0784c8f21a4d7f6b99fb, type: 2}
+  healthConfig: {fileID: 11400000, guid: d4e5f6a2b9c1073e8d3a5b4c2e961047, type: 2}
   attackConfig: {fileID: 11400000, guid: d7c1d245400d4fb5be6fdc677d93b248, type: 2}
   moveSpeed: 2
   jumpForce: 3

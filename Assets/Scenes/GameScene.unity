@@ -2096,15 +2096,12 @@ MonoBehaviour:
   - {fileID: 989672425}
   waveConfig: {fileID: 11400000, guid: f2206a6e0bb7a6340a43d837db06a3ce, type: 2}
   enemyTypeConfigs:
-  - type: 0
-    config: {fileID: 11400000, guid: 3f5dd5d400165f9438bc7ffe6c933af4, type: 2}
-    prefab: {fileID: 5567071987261642664, guid: 041a702f840206a48925db646c208db3, type: 3}
-  - type: 1
-    config: {fileID: 11400000, guid: aa731eb806aa41c42bbc777832c3e141, type: 2}
-    prefab: {fileID: 5567071987261642664, guid: 2113856575600714f9d7b93a8f285d1a, type: 3}
   - type: 2
     config: {fileID: 11400000, guid: ad703050c28565340943aa074f91d24b, type: 2}
     prefab: {fileID: 5567071987261642664, guid: 5e886831a79175b4392ae1ed79b9b06b, type: 3}
+  - type: 0
+    config: {fileID: 11400000, guid: 3f5dd5d400165f9438bc7ffe6c933af4, type: 2}
+    prefab: {fileID: 5567071987261642664, guid: 041a702f840206a48925db646c208db3, type: 3}
   abilityCatalog: {fileID: 11400000, guid: a383491400ac4dd40a5ff7c443430b1f, type: 2}
   hudController: {fileID: 829912347}
   audioManager: {fileID: 2092198904}

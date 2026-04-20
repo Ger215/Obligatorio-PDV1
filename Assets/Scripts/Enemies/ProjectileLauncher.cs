@@ -20,6 +20,7 @@ public class ProjectileLauncher : MonoBehaviour
     {
         if (projectilePrefab == null)
         {
+            Debug.LogWarning($"[ProjectileLauncher] projectilePrefab is NULL on {gameObject.name}");
             return;
         }
 
@@ -29,6 +30,7 @@ public class ProjectileLauncher : MonoBehaviour
         }
 
         lastLaunchTime = Time.time;
+        Debug.Log($"[ProjectileLauncher] Launching from {gameObject.name} dir={direction}");
 
         GameObject proj = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
         Projectile projectile = proj.GetComponent<Projectile>();

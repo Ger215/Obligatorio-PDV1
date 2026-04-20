@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: EnemyConfig_Ranged
   m_EditorClassIdentifier: Assembly-CSharp::EnemyConfig
   enemyType: 2
-  healthConfig: {fileID: 11400000, guid: abc60ecfaf9b0784c8f21a4d7f6b99fb, type: 2}
+  healthConfig: {fileID: 11400000, guid: f3a291bc7d4e05c2b8a16e3d9f742081, type: 2}
   attackConfig: {fileID: 11400000, guid: 51a6dc6e2cf64757ad0d6bd395968534, type: 2}
   moveSpeed: 3
   jumpForce: 3
