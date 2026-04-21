@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class GameManager : SingletonBehaviour<GameManager>
 {
@@ -12,6 +14,9 @@ public class GameManager : SingletonBehaviour<GameManager>
     [SerializeField] private PlayerAbilityCatalog abilityCatalog;
     [SerializeField] private GameHudController hudController;
     [SerializeField] private AudioManager audioManager;
+
+    [Header("Scene Names")]
+    [SerializeField] private string mainMenuSceneName = "MainMenu";
 
     [Header("Death FX")]
     [SerializeField] private GameObject enemyDeathFXPrefab;
@@ -28,6 +33,9 @@ public class GameManager : SingletonBehaviour<GameManager>
 
     private bool waitingForNextWave;
     private bool shopOpen;
+    private bool isPaused;
+    private bool isGameOver;
+    private HealthSystem playerHealth;
     private ExperienceSystem playerExperience;
     private PlayerAbilityController playerAbilities;
 
@@ -35,6 +43,8 @@ public class GameManager : SingletonBehaviour<GameManager>
     public int AliveEnemyCount => aliveEnemies.Count;
     public IReadOnlyList<PlayerAbilityDefinition> OfferedAbilities => offeredAbilities;
     public bool ShopOpen => shopOpen;
+    public bool IsPaused => isPaused;
+    public bool IsGameOver => isGameOver;
 
     private void Start()
     {
@@ -42,11 +52,38 @@ public class GameManager : SingletonBehaviour<GameManager>
         {
             playerExperience = PlayerController.Instance.GetComponent<ExperienceSystem>();
             playerAbilities = PlayerController.Instance.GetComponent<PlayerAbilityController>();
+            playerHealth = PlayerController.Instance.GetComponent<HealthSystem>();
+
+            if (playerHealth != null)
+            {
+                playerHealth.Died += HandlePlayerDeath;
+            }
         }
 
         hudController?.Bind(this, PlayerController.Instance);
         audioManager?.PlayBackgroundMusic();
         StartNextWave();
+    }
+
+    private void Update()
+    {
+        if (isGameOver)
+        {
+            return;
+        }
+
+        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            TogglePause();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (playerHealth != null)
+        {
+            playerHealth.Died -= HandlePlayerDeath;
+        }
     }
 
     private void StartNextWave()
@@ -399,6 +436,77 @@ public class GameManager : SingletonBehaviour<GameManager>
 
         enemyController?.ApplyDifficultyMultiplier(moveSpeedMultiplier);
         enemyController?.SetEnemyType(type);
+    }
+
+    private void HandlePlayerDeath(HealthSystem _)
+    {
+        TriggerGameOver();
+    }
+
+    private void TriggerGameOver()
+    {
+        if (isGameOver)
+        {
+            return;
+        }
+
+        isGameOver = true;
+        isPaused = false;
+        Time.timeScale = 0f;
+        hudController?.ShowGameOver(CurrentWave);
+    }
+
+    public void TogglePause()
+    {
+        if (shopOpen)
+        {
+            return;
+        }
+
+        isPaused = !isPaused;
+
+        if (isPaused)
+        {
+            Time.timeScale = 0f;
+            hudController?.ShowPause();
+        }
+        else
+        {
+            Time.timeScale = 1f;
+            hudController?.HidePause();
+        }
+    }
+
+    public void ResumeGame()
+    {
+        if (!isPaused)
+        {
+            return;
+        }
+
+        isPaused = false;
+        Time.timeScale = 1f;
+        hudController?.HidePause();
+    }
+
+    public void RestartGame()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void QuitToMenu()
+    {
+        Time.timeScale = 1f;
+
+        if (!string.IsNullOrEmpty(mainMenuSceneName))
+        {
+            SceneManager.LoadScene(mainMenuSceneName);
+        }
+        else
+        {
+            Application.Quit();
+        }
     }
 
     private void OnValidate()

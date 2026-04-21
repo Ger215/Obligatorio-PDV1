@@ -16,7 +16,6 @@ public class Projectile : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        Debug.Log($"[Projectile] Spawned at {transform.position}");
     }
 
     public void Launch(Vector2 dir, int dmg, LayerMask layers)
@@ -51,7 +50,6 @@ public class Projectile : MonoBehaviour
         }
 
         bool isTarget = ((1 << other.layer) & targetLayers.value) != 0;
-        Debug.Log($"[Projectile] Hit {other.name} layer={other.layer} isTarget={isTarget} tag={other.tag}");
 
         if (isTarget)
         {

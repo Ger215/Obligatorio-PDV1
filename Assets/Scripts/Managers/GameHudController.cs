@@ -24,6 +24,18 @@ public class GameHudController : SingletonBehaviour<GameHudController>
     [SerializeField] private TMP_Text[] abilityButtonTexts;
     [SerializeField] private Button skipShopButton;
 
+    [Header("Game Over")]
+    [SerializeField] private CanvasGroup gameOverGroup;
+    [SerializeField] private TMP_Text gameOverWaveText;
+    [SerializeField] private float gameOverFadeDuration = 1.2f;
+    [SerializeField] private Button restartButton;
+    [SerializeField] private Button quitFromGameOverButton;
+
+    [Header("Pause")]
+    [SerializeField] private GameObject pausePanel;
+    [SerializeField] private Button resumeButton;
+    [SerializeField] private Button quitFromPauseButton;
+
     public void Bind(GameManager gameManager, PlayerController player)
     {
         if (player != null)
@@ -50,6 +62,103 @@ public class GameHudController : SingletonBehaviour<GameHudController>
                 AudioManager.Instance?.PlayButton(true);
                 GameManager.Instance?.SkipAbilityShop();
             });
+        }
+
+        if (restartButton != null)
+        {
+            restartButton.onClick.RemoveAllListeners();
+            restartButton.onClick.AddListener(() =>
+            {
+                AudioManager.Instance?.PlayButton(true);
+                GameManager.Instance?.RestartGame();
+            });
+        }
+
+        if (quitFromGameOverButton != null)
+        {
+            quitFromGameOverButton.onClick.RemoveAllListeners();
+            quitFromGameOverButton.onClick.AddListener(() =>
+            {
+                AudioManager.Instance?.PlayButton(true);
+                GameManager.Instance?.QuitToMenu();
+            });
+        }
+
+        if (resumeButton != null)
+        {
+            resumeButton.onClick.RemoveAllListeners();
+            resumeButton.onClick.AddListener(() =>
+            {
+                AudioManager.Instance?.PlayButton(true);
+                GameManager.Instance?.ResumeGame();
+            });
+        }
+
+        if (quitFromPauseButton != null)
+        {
+            quitFromPauseButton.onClick.RemoveAllListeners();
+            quitFromPauseButton.onClick.AddListener(() =>
+            {
+                AudioManager.Instance?.PlayButton(true);
+                GameManager.Instance?.QuitToMenu();
+            });
+        }
+
+        if (gameOverGroup != null)
+        {
+            gameOverGroup.alpha = 0f;
+            gameOverGroup.gameObject.SetActive(false);
+        }
+
+        if (pausePanel != null)
+        {
+            pausePanel.SetActive(false);
+        }
+    }
+
+    public void ShowGameOver(int waveReached)
+    {
+        if (gameOverWaveText != null)
+        {
+            gameOverWaveText.text = $"Oleada alcanzada: {waveReached}";
+        }
+
+        if (gameOverGroup != null)
+        {
+            StopCoroutine("FadeInGameOver");
+            StartCoroutine("FadeInGameOver");
+        }
+    }
+
+    private IEnumerator FadeInGameOver()
+    {
+        gameOverGroup.alpha = 0f;
+        gameOverGroup.gameObject.SetActive(true);
+
+        float elapsed = 0f;
+        while (elapsed < gameOverFadeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            gameOverGroup.alpha = Mathf.Clamp01(elapsed / gameOverFadeDuration);
+            yield return null;
+        }
+
+        gameOverGroup.alpha = 1f;
+    }
+
+    public void ShowPause()
+    {
+        if (pausePanel != null)
+        {
+            pausePanel.SetActive(true);
+        }
+    }
+
+    public void HidePause()
+    {
+        if (pausePanel != null)
+        {
+            pausePanel.SetActive(false);
         }
     }
 

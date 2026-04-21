@@ -20,7 +20,7 @@ public class AttackSystem : MonoBehaviour
     [SerializeField] private float knockbackForce = 6f;
 
     [Header("Debug")]
-    [SerializeField] private bool debugAttackLogs = true;
+    [SerializeField] private bool debugAttackLogs = false;
 
     private float lastAttackTime = -Mathf.Infinity;
     private float bonusDamageMultiplier = 1f;

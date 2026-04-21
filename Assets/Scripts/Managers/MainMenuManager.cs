@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI; 
+using UnityEngine.UI;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 
@@ -57,7 +57,6 @@ public class MainMenuManager : MonoBehaviour
     }
     public void QuitGame()
     {
-        Debug.Log("Saliendo del juego...");
         Application.Quit();
     }
 }

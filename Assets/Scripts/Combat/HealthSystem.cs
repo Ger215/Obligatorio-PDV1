@@ -37,7 +37,6 @@ public class HealthSystem : MonoBehaviour
         int finalDamage = Mathf.Max(1, Mathf.RoundToInt(damageAmount * incomingDamageMultiplier));
         CurrentHealth = Mathf.Max(CurrentHealth - finalDamage, 0);
         Damaged?.Invoke(CurrentHealth, maxHealth);
-        Debug.Log($"{name} took {finalDamage} damage. Health: {CurrentHealth}/{maxHealth}");
 
         if (CurrentHealth <= 0)
         {
@@ -93,7 +92,6 @@ public class HealthSystem : MonoBehaviour
         }
 
         isDead = true;
-        Debug.Log($"{name} died.");
         Died?.Invoke(this);
 
         if (destroyOnDeath)

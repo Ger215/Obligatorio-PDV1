@@ -122,7 +122,7 @@ public class PlayerController : SingletonBehaviour<PlayerController>
 
     private void Update()
     {
-        if (isDead)
+        if (isDead || (GameManager.Instance != null && (GameManager.Instance.IsPaused || GameManager.Instance.IsGameOver)))
         {
             return;
         }
@@ -138,7 +138,7 @@ public class PlayerController : SingletonBehaviour<PlayerController>
 
     private void FixedUpdate()
     {
-        if (isDead)
+        if (isDead || (GameManager.Instance != null && (GameManager.Instance.IsPaused || GameManager.Instance.IsGameOver)))
         {
             rb.linearVelocity = Vector2.zero;
             return;
