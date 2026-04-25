@@ -5,10 +5,12 @@ public class SpriteFrameAnimator : MonoBehaviour
 {
     [SerializeField] private Sprite[] frames;
     [SerializeField] private float fps = 12f;
+    [SerializeField] private bool playOnce = false;
 
     private SpriteRenderer spriteRenderer;
     private float timer;
     private int currentFrame;
+    private bool finished;
 
     private void Awake()
     {
@@ -19,14 +21,22 @@ public class SpriteFrameAnimator : MonoBehaviour
 
     private void Update()
     {
-        if (frames == null || frames.Length < 2) return;
+        if (finished || frames == null || frames.Length < 2) return;
 
         timer += Time.deltaTime;
         float frameDuration = 1f / fps;
         if (timer >= frameDuration)
         {
             timer -= frameDuration;
-            currentFrame = (currentFrame + 1) % frames.Length;
+            int nextFrame = currentFrame + 1;
+
+            if (playOnce && nextFrame >= frames.Length)
+            {
+                finished = true;
+                return;
+            }
+
+            currentFrame = nextFrame % frames.Length;
             spriteRenderer.sprite = frames[currentFrame];
         }
     }
