@@ -10,8 +10,13 @@ public class HealthSystem : MonoBehaviour
     [SerializeField] private bool deactivateOnDeath;
     [SerializeField] private float destroyDelay;
 
+    [Header("Invincibility")]
+    [SerializeField] private bool useInvincibility = false;
+    [SerializeField] private float invincibilityDuration = 1.5f;
+
     private bool isDead;
     private float incomingDamageMultiplier = 1f;
+    private float invincibleUntil = -1f;
 
     public event Action<HealthSystem> Died;
     public event Action<int, int> Damaged;
@@ -20,6 +25,8 @@ public class HealthSystem : MonoBehaviour
     public int MaxHealth => maxHealth;
     public int CurrentHealth { get; private set; }
     public bool IsDead => isDead;
+    public bool IsInvincible => useInvincibility && Time.time < invincibleUntil;
+    public float InvincibilityDuration => invincibilityDuration;
 
     private void Awake()
     {
@@ -29,13 +36,15 @@ public class HealthSystem : MonoBehaviour
 
     public void TakeDamage(int damageAmount)
     {
-        if (isDead || damageAmount <= 0)
+        if (isDead || damageAmount <= 0 || IsInvincible)
         {
             return;
         }
 
         int finalDamage = Mathf.Max(1, Mathf.RoundToInt(damageAmount * incomingDamageMultiplier));
         CurrentHealth = Mathf.Max(CurrentHealth - finalDamage, 0);
+        if (useInvincibility)
+            invincibleUntil = Time.time + invincibilityDuration;
         Damaged?.Invoke(CurrentHealth, maxHealth);
 
         if (CurrentHealth <= 0)

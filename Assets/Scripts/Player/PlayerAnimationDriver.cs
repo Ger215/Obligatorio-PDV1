@@ -27,6 +27,7 @@ public class PlayerAnimationDriver : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private bool wasDashing;
     private Coroutine hurtExitCoroutine;
+    private Coroutine blinkCoroutine;
 
     private void Awake()
     {
@@ -92,7 +93,8 @@ public class PlayerAnimationDriver : MonoBehaviour
 
         if (spriteRenderer != null)
         {
-            StartCoroutine(HitFlash());
+            if (blinkCoroutine != null) StopCoroutine(blinkCoroutine);
+            blinkCoroutine = StartCoroutine(InvincibilityBlink());
         }
     }
 
@@ -102,10 +104,21 @@ public class PlayerAnimationDriver : MonoBehaviour
         animator.CrossFade(recoveryStateName, 0.15f);
     }
 
-    private System.Collections.IEnumerator HitFlash()
+    private System.Collections.IEnumerator InvincibilityBlink()
     {
         spriteRenderer.color = new Color(1f, 0.2f, 0.2f, 1f);
         yield return new WaitForSeconds(hitFlashDuration);
+
+        bool showGhost = true;
+
+        while (healthSystem.IsInvincible)
+        {
+            spriteRenderer.color = showGhost ? new Color(1f, 1f, 1f, 0f) : Color.white;
+            showGhost = !showGhost;
+            yield return new WaitForSeconds(0.2f);
+        }
+
         spriteRenderer.color = Color.white;
+        blinkCoroutine = null;
     }
 }
