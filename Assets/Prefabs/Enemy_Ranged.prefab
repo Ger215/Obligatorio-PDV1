@@ -169,6 +169,7 @@ MonoBehaviour:
   baseDamage: 1
   criticalChance: 0.15
   criticalMultiplier: 2
+  knockbackForce: 6
   debugAttackLogs: 1
 --- !u!114 &2766487229391979447
 MonoBehaviour:
@@ -194,6 +195,13 @@ MonoBehaviour:
     m_Bits: 64
   groundCheckRadius: 0.15
   attackPointDistance: 0.6
+  wallCheckDistance: 0.35
+  ceilingCheckDistance: 1.5
+  groundAheadDistance: 0.6
+  stuckCheckInterval: 0.5
+  stuckMoveThreshold: 0.12
+  separationRadius: 1
+  separationForce: 4
 --- !u!212 &8741199782492536330
 SpriteRenderer:
   serializedVersion: 2
@@ -263,7 +271,7 @@ CapsuleCollider2D:
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: f86c0c3a46e77465ba42b931981fb3d9, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -304,7 +312,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileLauncher
   projectilePrefab: {fileID: 2594636052371397479, guid: b53f393ce7df3654e9f12adf7061e2d6, type: 3}
   cooldown: 3.5
-  projectileSpeed: 8
   damage: 1
   targetLayers:
     serializedVersion: 2
