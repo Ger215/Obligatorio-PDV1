@@ -2578,7 +2578,7 @@ MonoBehaviour:
   floatingTextPrefab: {fileID: 298158651408366755, guid: 1b5612ab19f72a844b32f4bc72587b74, type: 3}
   hudCanvas: {fileID: 351401694}
   xpFloatingTextColor: {r: 0.3, g: 1, b: 0.4, a: 1}
-  spawnRadius: 1.21
+  spawnRadius: 1
 --- !u!1 &950736013
 GameObject:
   m_ObjectHideFlags: 0
@@ -4649,7 +4649,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3cf0037fae8ef12439abd5602adf08e8, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HealthSystem
   config: {fileID: 11400000, guid: abc60ecfaf9b0784c8f21a4d7f6b99fb, type: 2}
   maxHealth: 5
@@ -5932,7 +5932,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.705
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -6029,9 +6029,9 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.831
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0

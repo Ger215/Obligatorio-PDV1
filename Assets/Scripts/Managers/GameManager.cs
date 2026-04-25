@@ -76,6 +76,26 @@ public class GameManager : SingletonBehaviour<GameManager>
         {
             TogglePause();
         }
+
+        if (!waitingForNextWave && !isPaused)
+        {
+            ValidateAliveEnemies();
+        }
+    }
+
+    private void ValidateAliveEnemies()
+    {
+        for (int i = aliveEnemies.Count - 1; i >= 0; i--)
+        {
+            HealthSystem e = aliveEnemies[i];
+            if (e == null || e.IsDead || !e.gameObject.activeInHierarchy)
+            {
+                aliveEnemies.RemoveAt(i);
+            }
+        }
+
+        hudController?.RefreshWaveState(CurrentWave, aliveEnemies.Count);
+        CheckWaveCleared();
     }
 
     private void OnDestroy()
@@ -104,8 +124,12 @@ public class GameManager : SingletonBehaviour<GameManager>
         shopOpen = false;
         Time.timeScale = 1f;
         CurrentWave++;
+        aliveEnemies.Clear();
+        enemyXpRewards.Clear();
 
-        int enemiesToSpawn = waveConfig.startingEnemyCount + ((CurrentWave - 1) * waveConfig.additionalEnemiesPerWave);
+        int enemiesToSpawn = Mathf.Min(
+            waveConfig.startingEnemyCount + ((CurrentWave - 1) * waveConfig.additionalEnemiesPerWave),
+            waveConfig.maxEnemiesPerWave);
 
         for (int i = 0; i < enemiesToSpawn; i++)
         {
@@ -166,6 +190,12 @@ public class GameManager : SingletonBehaviour<GameManager>
             }
         }
 
+        EnemyType[] fallback = waveConfig.fallbackTypes;
+        if (fallback != null && fallback.Length > 0)
+        {
+            return fallback[Random.Range(0, fallback.Length)];
+        }
+
         return EnemyType.Chaser;
     }
 
@@ -210,20 +240,28 @@ public class GameManager : SingletonBehaviour<GameManager>
         }
 
         float offsetX = (enemyIndex % 2 == 0 ? 1f : -1f) * (1f + enemyIndex * 0.8f);
-        return basePosition + new Vector3(offsetX, 0f, 0f);
+        float spawnX = basePosition.x + offsetX;
+
+        if (Camera.main != null)
+        {
+            float halfWidth = Camera.main.orthographicSize * Camera.main.aspect;
+            float camX = Camera.main.transform.position.x;
+            spawnX = Mathf.Clamp(spawnX, camX - halfWidth + 1f, camX + halfWidth - 1f);
+        }
+
+        return new Vector3(spawnX, basePosition.y, basePosition.z);
     }
 
     private void HandleEnemyDeath(HealthSystem deadEnemy)
     {
-        if (deadEnemy == null)
+        if (deadEnemy != null)
         {
-            return;
+            deadEnemy.Died -= HandleEnemyDeath;
         }
 
-        deadEnemy.Died -= HandleEnemyDeath;
         aliveEnemies.Remove(deadEnemy);
 
-        if (enemyDeathFXPrefab != null)
+        if (deadEnemy != null && enemyDeathFXPrefab != null)
         {
             Vector3 spawnPos = deadEnemy.transform.position + Vector3.up * 0.5f;
             GameObject fx = Instantiate(enemyDeathFXPrefab, spawnPos, Quaternion.identity);
@@ -235,18 +273,35 @@ public class GameManager : SingletonBehaviour<GameManager>
             Destroy(fx, 0.35f);
         }
 
-        RewardPlayerForEnemyDeath(deadEnemy, deadEnemy.transform.position);
-        hudController?.RefreshWaveState(CurrentWave, aliveEnemies.Count);
-
-        if (aliveEnemies.Count == 0 && !waitingForNextWave)
+        if (deadEnemy != null)
         {
+            RewardPlayerForEnemyDeath(deadEnemy, deadEnemy.transform.position);
+        }
+
+        hudController?.RefreshWaveState(CurrentWave, aliveEnemies.Count);
+        CheckWaveCleared();
+    }
+
+    private void CheckWaveCleared()
+    {
+        if (waitingForNextWave || isGameOver)
+        {
+            return;
+        }
+
+        if (aliveEnemies.Count == 0)
+        {
+            waitingForNextWave = true;
             StartCoroutine(StartNextWaveAfterDelay());
         }
     }
 
+
     private IEnumerator StartNextWaveAfterDelay()
     {
         waitingForNextWave = true;
+
+        HealPlayerEndOfWave();
 
         if (TryOpenAbilityShop())
         {
@@ -255,6 +310,29 @@ public class GameManager : SingletonBehaviour<GameManager>
 
         yield return new WaitForSeconds(waveConfig.timeBetweenWaves);
         StartNextWave();
+    }
+
+    private void HealPlayerEndOfWave()
+    {
+        if (waveConfig == null || waveConfig.hpRewardPerWave <= 0 || playerHealth == null)
+        {
+            return;
+        }
+
+        playerHealth.Heal(waveConfig.hpRewardPerWave);
+
+        if (floatingTextPrefab != null && hudCanvas != null && PlayerController.Instance != null)
+        {
+            Vector3 worldPos = PlayerController.Instance.transform.position + Vector3.up * 1.5f;
+            GameObject instance = Instantiate(floatingTextPrefab, hudCanvas.transform);
+            Vector2 screenPoint = Camera.main.WorldToScreenPoint(worldPos);
+            Camera uiCamera = hudCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : hudCanvas.worldCamera;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                (RectTransform)hudCanvas.transform, screenPoint, uiCamera, out Vector2 canvasPos);
+            ((RectTransform)instance.transform).anchoredPosition = canvasPos;
+            FloatingText floatingText = instance.GetComponent<FloatingText>();
+            floatingText?.Play($"+{waveConfig.hpRewardPerWave} HP", new Color(0.4f, 0.9f, 1f));
+        }
     }
 
     public void Configure(
@@ -392,10 +470,10 @@ public class GameManager : SingletonBehaviour<GameManager>
 
     private void ApplyWaveScaling(GameObject enemyInstance, EnemyConfig config, EnemyType type)
     {
-        int waveIndex = Mathf.Max(0, CurrentWave - 1);
-        float healthMultiplier = 1f + (waveConfig.enemyHealthMultiplierPerWave * waveIndex);
-        float damageMultiplier = 1f + (waveConfig.enemyDamageMultiplierPerWave * waveIndex);
-        float moveSpeedMultiplier = 1f + (waveConfig.enemyMoveSpeedMultiplierPerWave * waveIndex);
+        int scalingIndex = Mathf.Max(0, CurrentWave - waveConfig.scalingStartWave);
+        float healthMultiplier = 1f + (waveConfig.enemyHealthMultiplierPerWave * scalingIndex);
+        float damageMultiplier = 1f + (waveConfig.enemyDamageMultiplierPerWave * scalingIndex);
+        float moveSpeedMultiplier = 1f + (waveConfig.enemyMoveSpeedMultiplierPerWave * scalingIndex);
 
         GetTypeMultipliers(type, out float typeHealth, out float typeDamage);
         healthMultiplier *= typeHealth;

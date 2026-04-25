@@ -14,14 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WaveConfig
   startingEnemyCount: 2
   additionalEnemiesPerWave: 1
+  maxEnemiesPerWave: 6
   timeBetweenWaves: 2
-  enemyHealthMultiplierPerWave: 0.18
-  enemyDamageMultiplierPerWave: 0.12
-  enemyMoveSpeedMultiplierPerWave: 0.05
+  scalingStartWave: 4
+  enemyHealthMultiplierPerWave: 0.1
+  enemyDamageMultiplierPerWave: 0.07
+  enemyMoveSpeedMultiplierPerWave: 0.03
   bonusExperiencePerWave: 1
   offeredAbilitiesCount: 3
+  hpRewardPerWave: 2
   waveDefinitions:
   - allowedTypes: 00000000
-  - allowedTypes: 02000000
-  - allowedTypes: 01000000
-  - allowedTypes: 03000000
+  - allowedTypes: 0000000001000000
+  - allowedTypes: 0000000002000000
+  - allowedTypes: 000000000100000002000000
+  - allowedTypes: 00000000010000000200000003000000
+  fallbackTypes: 00000000010000000200000003000000
