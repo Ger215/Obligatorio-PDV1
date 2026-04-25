@@ -134,8 +134,9 @@ public class EnemyController : MonoBehaviour
 
     public void ApplyKnockback(float forceX)
     {
+        rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
         rb.AddForce(new Vector2(forceX * knockbackMultiplier, 0f), ForceMode2D.Impulse);
-        knockbackEndTime = Time.time + 0.2f;
+        knockbackEndTime = Time.time + 0.3f;
     }
 
     private void FixedUpdate()
@@ -396,7 +397,7 @@ public class EnemyController : MonoBehaviour
             case EnemyType.Tank:
                 moveSpeed *= 0.5f;
                 attackDistance *= 1.4f;
-                knockbackMultiplier = 1.4f;
+                knockbackMultiplier = 0.4f;
                 break;
             case EnemyType.Ranged:
                 attackDistance *= 4f;

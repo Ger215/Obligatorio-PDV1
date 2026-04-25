@@ -17,7 +17,7 @@ public class AttackSystem : MonoBehaviour
     [SerializeField] private float criticalMultiplier = 2f;
 
     [Header("Knockback")]
-    [SerializeField] private float knockbackForce = 6f;
+    [SerializeField] private float knockbackForce = 100f;
 
     [Header("Debug")]
     [SerializeField] private bool debugAttackLogs = false;
