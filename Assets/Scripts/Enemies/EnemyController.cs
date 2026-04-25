@@ -182,16 +182,20 @@ public class EnemyController : MonoBehaviour
         bool groundAhead = CheckGroundAhead();
         bool playerBelow = verticalDistance < -verticalAttackTolerance;
         bool playerAttackable = Mathf.Abs(deltaToPlayer.y) <= verticalAttackTolerance;
-
-        // Force movement: under a platform (ceiling+wall) or walking off a ledge toward player below
+        bool isFalling = !isGrounded && rb.linearVelocity.y < 0f;
         bool forceHorizontal = (ceilingAbove && wallAhead) || (playerBelow && !groundAhead);
-        float horizontalVelocity = (!forceHorizontal && horizontalDistance <= attackDistance && playerAttackable)
-            ? 0f
-            : horizontalDirection * moveSpeed;
-        rb.linearVelocity = new Vector2(horizontalVelocity, rb.linearVelocity.y);
 
-        if (enemyType == EnemyType.Fast)
-            TryFastDash(horizontalDistance, horizontalDirection);
+        if (!isFalling)
+        {
+            // Force movement: under a platform (ceiling+wall) or walking off a ledge toward player below
+            float horizontalVelocity = (!forceHorizontal && horizontalDistance <= attackDistance && playerAttackable)
+                ? 0f
+                : horizontalDirection * moveSpeed;
+            rb.linearVelocity = new Vector2(horizontalVelocity, rb.linearVelocity.y);
+
+            if (enemyType == EnemyType.Fast)
+                TryFastDash(horizontalDistance, horizontalDirection);
+        }
 
         // Only jump if no ceiling is blocking the path
         bool shouldJump = isGrounded && !jumpConsumed && enemyType != EnemyType.Fast
