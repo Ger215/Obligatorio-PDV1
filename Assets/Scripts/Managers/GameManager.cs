@@ -225,8 +225,14 @@ public class GameManager : SingletonBehaviour<GameManager>
 
         if (enemyDeathFXPrefab != null)
         {
-            GameObject fx = Instantiate(enemyDeathFXPrefab, deadEnemy.transform.position, Quaternion.identity);
-            Destroy(fx, 1f);
+            Vector3 spawnPos = deadEnemy.transform.position + Vector3.up * 0.5f;
+            GameObject fx = Instantiate(enemyDeathFXPrefab, spawnPos, Quaternion.identity);
+            float scale = Random.Range(2.5f, 3.5f);
+            fx.transform.localScale = new Vector3(scale, scale, 1f);
+            Animator fxAnimator = fx.GetComponent<Animator>();
+            if (fxAnimator != null)
+                fxAnimator.speed = 1.5f;
+            Destroy(fx, 0.35f);
         }
 
         RewardPlayerForEnemyDeath(deadEnemy, deadEnemy.transform.position);

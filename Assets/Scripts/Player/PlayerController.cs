@@ -424,7 +424,7 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         }
 
         float currentY = attackSystem.AttackPointTransform.localPosition.y;
-        attackSystem.AttackPointTransform.localPosition = new Vector3(facingDirection * attackPointDistance, currentY, 0f);
+        attackSystem.AttackPointTransform.localPosition = new Vector3(attackPointDistance, currentY, 0f);
     }
 
     private void HandleDeath(HealthSystem deadHealthSystem)

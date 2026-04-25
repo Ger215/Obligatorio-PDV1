@@ -134,8 +134,9 @@ public class EnemyController : MonoBehaviour
 
     public void ApplyKnockback(float forceX)
     {
+        rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
         rb.AddForce(new Vector2(forceX * knockbackMultiplier, 0f), ForceMode2D.Impulse);
-        knockbackEndTime = Time.time + 0.2f;
+        knockbackEndTime = Time.time + 0.3f;
     }
 
     private void FixedUpdate()
@@ -181,16 +182,20 @@ public class EnemyController : MonoBehaviour
         bool groundAhead = CheckGroundAhead();
         bool playerBelow = verticalDistance < -verticalAttackTolerance;
         bool playerAttackable = Mathf.Abs(deltaToPlayer.y) <= verticalAttackTolerance;
-
-        // Force movement: under a platform (ceiling+wall) or walking off a ledge toward player below
+        bool isFalling = !isGrounded && rb.linearVelocity.y < 0f;
         bool forceHorizontal = (ceilingAbove && wallAhead) || (playerBelow && !groundAhead);
-        float horizontalVelocity = (!forceHorizontal && horizontalDistance <= attackDistance && playerAttackable)
-            ? 0f
-            : horizontalDirection * moveSpeed;
-        rb.linearVelocity = new Vector2(horizontalVelocity, rb.linearVelocity.y);
 
-        if (enemyType == EnemyType.Fast)
-            TryFastDash(horizontalDistance, horizontalDirection);
+        if (!isFalling)
+        {
+            // Force movement: under a platform (ceiling+wall) or walking off a ledge toward player below
+            float horizontalVelocity = (!forceHorizontal && horizontalDistance <= attackDistance && playerAttackable)
+                ? 0f
+                : horizontalDirection * moveSpeed;
+            rb.linearVelocity = new Vector2(horizontalVelocity, rb.linearVelocity.y);
+
+            if (enemyType == EnemyType.Fast)
+                TryFastDash(horizontalDistance, horizontalDirection);
+        }
 
         // Only jump if no ceiling is blocking the path
         bool shouldJump = isGrounded && !jumpConsumed && enemyType != EnemyType.Fast
@@ -396,7 +401,7 @@ public class EnemyController : MonoBehaviour
             case EnemyType.Tank:
                 moveSpeed *= 0.5f;
                 attackDistance *= 1.4f;
-                knockbackMultiplier = 1.4f;
+                knockbackMultiplier = 0.4f;
                 break;
             case EnemyType.Ranged:
                 attackDistance *= 4f;
