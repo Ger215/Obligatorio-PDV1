@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 7b8b4e342f6fa734e92d9dadd1ee0c46
+guid: d2c69da8a3beb2a4f8e486a79815469e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7811420379279004223
-    second: HowToPlayInstructionsAsset_0
+      213: 51816767143090738
+    second: IniciarJuegoIconAsset_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -139,13 +139,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: HowToPlayInstructionsAsset_0
+      name: IniciarJuegoIconAsset_0
       rect:
         serializedVersion: 2
-        x: 173
-        y: 34
-        width: 2563
-        height: 1390
+        x: 431
+        y: 283
+        width: 1959
+        height: 979
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f321c22c27db76c60800000000000000
-      internalID: 7811420379279004223
+      spriteID: 23a19fe331718b000800000000000000
+      internalID: 51816767143090738
       vertices: []
       indices: 
       edges: []
@@ -174,7 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      HowToPlayInstructionsAsset_0: 7811420379279004223
+      IniciarJuegoIconAsset_0: 51816767143090738
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 13ed7a5190e129e409ccbb6077b5bb23
+guid: 82cd30462377bf540a0793f42e92a790
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5122467588652407166
-    second: SFXLabel_0
+      213: -5327425948274733938
+    second: PauseIconAsset_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -139,13 +139,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: SFXLabel_0
+      name: PauseIconAsset_0
       rect:
         serializedVersion: 2
-        x: 324
-        y: 482
-        width: 1797
-        height: 823
+        x: 431
+        y: 283
+        width: 1957
+        height: 979
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 286ebec3ed659e8b0800000000000000
-      internalID: -5122467588652407166
+      spriteID: e8cc2e1735e2116b0800000000000000
+      internalID: -5327425948274733938
       vertices: []
       indices: 
       edges: []
@@ -164,7 +164,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -174,7 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      SFXLabel_0: -5122467588652407166
+      PauseIconAsset_0: -5327425948274733938
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
