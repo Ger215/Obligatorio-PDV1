@@ -77,6 +77,14 @@ public class GameManager : SingletonBehaviour<GameManager>
             TogglePause();
         }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (Keyboard.current != null && Keyboard.current.cKey.wasPressedThisFrame
+            && !isGameOver && !isPaused && !shopOpen && !waitingForNextWave)
+        {
+            CheatSkipWave();
+        }
+#endif
+
         if (!waitingForNextWave && !isPaused)
         {
             ValidateAliveEnemies();
@@ -592,6 +600,20 @@ public class GameManager : SingletonBehaviour<GameManager>
             Application.Quit();
         }
     }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    private void CheatSkipWave()
+    {
+        HealthSystem[] enemies = aliveEnemies.ToArray();
+        foreach (HealthSystem enemy in enemies)
+        {
+            if (enemy != null && !enemy.IsDead)
+            {
+                enemy.TakeDamage(999999);
+            }
+        }
+    }
+#endif
 
     private void OnValidate()
     {
