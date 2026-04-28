@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: f6dbd81799bbb024083893a46f28d26b
+guid: 1625b7399b49f1f47be3b0f6da3eabdc
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7425656889886017617
-    second: SalirIconAsset_0
+      213: -1461995883721903896
+    second: HowToPlayRefactored (1)_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -139,13 +139,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: SalirIconAsset_0
+      name: HowToPlayRefactored (1)_0
       rect:
         serializedVersion: 2
-        x: 431
-        y: 283
-        width: 1957
-        height: 979
+        x: 96
+        y: 19
+        width: 2639
+        height: 1468
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fa77966c664c2f890800000000000000
-      internalID: -7425656889886017617
+      spriteID: 8e03caf5d72f5bbe0800000000000000
+      internalID: -1461995883721903896
       vertices: []
       indices: 
       edges: []
@@ -174,7 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      SalirIconAsset_0: -7425656889886017617
+      HowToPlayRefactored (1)_0: -1461995883721903896
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
