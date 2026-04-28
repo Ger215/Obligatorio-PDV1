@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: e1406d0070c057443b79109cf2985507
+guid: ee2964f494047654fbdfe12903c7535c
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 483085312497255490
-    second: StartGameBtnAsset Background Removed_0
+      213: 3738517557001778979
+    second: HowToPlayIconAsset_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -139,13 +139,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: StartGameBtnAsset Background Removed_0
+      name: HowToPlayIconAsset_0
       rect:
         serializedVersion: 2
-        x: 74
-        y: 85
-        width: 2668
-        height: 1330
+        x: 431
+        y: 283
+        width: 1957
+        height: 979
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2448b9f388344b600800000000000000
-      internalID: 483085312497255490
+      spriteID: 327f6ab19e1e1e330800000000000000
+      internalID: 3738517557001778979
       vertices: []
       indices: 
       edges: []
@@ -164,7 +164,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -174,7 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      StartGameBtnAsset Background Removed_0: 483085312497255490
+      HowToPlayIconAsset_0: 3738517557001778979
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 877d0c0aec18a1a49a8af3ec506a8cfa
+guid: e33a13292ab028f4b963b48796061ac1
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8763262760020934756
-    second: HowToPlayInstructionsAsset corrected_0
+      213: 358203340871224216
+    second: SFXIconAsset_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -139,13 +139,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: HowToPlayInstructionsAsset corrected_0
+      name: SFXIconAsset_0
       rect:
         serializedVersion: 2
-        x: 173
-        y: 34
-        width: 2563
-        height: 1390
+        x: 8
+        y: 1
+        width: 2798
+        height: 1531
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 460057cec0d5d9970800000000000000
-      internalID: 8763262760020934756
+      spriteID: 89bccf96a0898f400800000000000000
+      internalID: 358203340871224216
       vertices: []
       indices: 
       edges: []
@@ -174,7 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      HowToPlayInstructionsAsset corrected_0: 8763262760020934756
+      SFXIconAsset_0: 358203340871224216
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
