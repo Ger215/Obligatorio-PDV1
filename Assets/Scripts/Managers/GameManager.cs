@@ -77,13 +77,12 @@ public class GameManager : SingletonBehaviour<GameManager>
             TogglePause();
         }
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (Keyboard.current != null && Keyboard.current.cKey.wasPressedThisFrame
             && !isGameOver && !isPaused && !shopOpen && !waitingForNextWave)
         {
             CheatSkipWave();
         }
-#endif
+
 
         if (!waitingForNextWave && !isPaused)
         {
@@ -601,7 +600,6 @@ public class GameManager : SingletonBehaviour<GameManager>
         }
     }
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
     private void CheatSkipWave()
     {
         HealthSystem[] enemies = aliveEnemies.ToArray();
@@ -613,7 +611,6 @@ public class GameManager : SingletonBehaviour<GameManager>
             }
         }
     }
-#endif
 
     private void OnValidate()
     {
