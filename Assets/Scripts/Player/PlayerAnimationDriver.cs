@@ -12,6 +12,7 @@ public class PlayerAnimationDriver : MonoBehaviour
     [SerializeField] private string groundedParameter = "Grounded";
     [SerializeField] private string verticalVelocityParameter = "VerticalVelocity";
     [SerializeField] private string attackTrigger = "Attack";
+    [SerializeField] private string attackStateName = "Attack";
     [SerializeField] private string dashStateName = "Dash";
     [SerializeField] private string hurtStateName = "Hurt";
 
@@ -26,6 +27,7 @@ public class PlayerAnimationDriver : MonoBehaviour
     private HealthSystem healthSystem;
     private SpriteRenderer spriteRenderer;
     private bool wasDashing;
+    private bool wasGrounded;
     private Coroutine hurtExitCoroutine;
     private Coroutine blinkCoroutine;
 
@@ -45,12 +47,14 @@ public class PlayerAnimationDriver : MonoBehaviour
 
     private void OnEnable()
     {
+        attackSystem.AttackStarted += HandleAttackStarted;
         attackSystem.AttackResolved += HandleAttackResolved;
         healthSystem.Damaged += HandleDamaged;
     }
 
     private void OnDisable()
     {
+        attackSystem.AttackStarted -= HandleAttackStarted;
         attackSystem.AttackResolved -= HandleAttackResolved;
         healthSystem.Damaged -= HandleDamaged;
     }
@@ -60,6 +64,26 @@ public class PlayerAnimationDriver : MonoBehaviour
         animator.SetFloat(speedParameter, Mathf.Abs(playerController.HorizontalInput));
         animator.SetBool(groundedParameter, playerController.IsGrounded);
         animator.SetFloat(verticalVelocityParameter, playerController.VerticalVelocity);
+
+        bool grounded = playerController.IsGrounded;
+        if (grounded && !wasGrounded)
+        {
+            animator.ResetTrigger(attackTrigger);
+            if (animator.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
+            {
+                animator.CrossFade(recoveryStateName, 0.1f);
+                attackSystem.CancelAttack();
+            }
+        }
+        wasGrounded = grounded;
+
+        if (!grounded && attackSystem.IsAttacking && !animator.IsInTransition(0))
+        {
+            if (!animator.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
+            {
+                attackSystem.CancelAttack();
+            }
+        }
 
         if (playerController.IsDashing && !wasDashing)
         {
@@ -76,13 +100,26 @@ public class PlayerAnimationDriver : MonoBehaviour
         }
     }
 
+    private void HandleAttackStarted()
+    {
+        animator.ResetTrigger(attackTrigger);
+        animator.SetTrigger(attackTrigger);
+    }
+
+    // Llamado desde Animation Event en el frame del golpe
+    public void OnAttackHitFrame()
+    {
+        attackSystem.TriggerHit();
+    }
+
     private void HandleAttackResolved(bool critical, int damage, int targetsHit)
     {
-        animator.SetTrigger(attackTrigger);
     }
 
     private void HandleDamaged(int currentHealth, int maxHealth)
     {
+        attackSystem.CancelAttack();
+
         if (!string.IsNullOrWhiteSpace(hurtStateName))
         {
             animator.CrossFade(hurtStateName, 0.05f);

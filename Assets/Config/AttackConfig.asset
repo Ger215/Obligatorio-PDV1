@@ -13,9 +13,11 @@ MonoBehaviour:
   m_Name: AttackConfig
   m_EditorClassIdentifier: Assembly-CSharp::AttackConfig
   attackRange: 1.25
-  attackCooldown: 0.45
   baseDamage: 1
-  perfectHitMultiplier: 2
-  weakHitMultiplier: 0.5
-  useRhythmTiming: 0
+  criticalChance: 0.15
+  criticalMultiplier: 2
+  windUpDuration: 0.12
+  hitDuration: 0.08
+  recoveryDuration: 0.12
+  attackCooldown: 0.45
   debugAttackLogs: 1

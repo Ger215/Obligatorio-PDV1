@@ -49,6 +49,7 @@ public class PlayerController : SingletonBehaviour<PlayerController>
     private bool isGrounded;
     private bool jumpHeld;
     private bool hasDoubleJumped;
+    private bool usedAirAttack;
     private float coyoteTimeCounter;
     private float jumpBufferCounter;
     private float dashTimeRemaining;
@@ -101,7 +102,8 @@ public class PlayerController : SingletonBehaviour<PlayerController>
 
         healthSystem.Died += HandleDeath;
         healthSystem.Damaged += HandleDamaged;
-        attackSystem.AttackResolved += HandleAttackResolved;
+        attackSystem.AttackStarted += HandleAttackStarted;
+        attackSystem.AttackResolved += HandleAttackHit;
     }
 
     private void OnDisable()
@@ -116,7 +118,8 @@ public class PlayerController : SingletonBehaviour<PlayerController>
 
         if (attackSystem != null)
         {
-            attackSystem.AttackResolved -= HandleAttackResolved;
+            attackSystem.AttackStarted -= HandleAttackStarted;
+            attackSystem.AttackResolved -= HandleAttackHit;
         }
     }
 
@@ -179,6 +182,7 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         {
             coyoteTimeCounter = coyoteTime;
             hasDoubleJumped = false;
+            usedAirAttack = false;
         }
         else
         {
@@ -314,11 +318,21 @@ public class PlayerController : SingletonBehaviour<PlayerController>
                              (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame) ||
                              (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame);
 
-        if (attackPressed && attackSystem.TryAttack())
+        if (attackPressed && (isGrounded || !usedAirAttack))
         {
-            AudioManager.Instance?.PlayAttack(attackSystem.LastAttackWasCritical);
-            ApplyKnockbackToNearbyEnemies();
+            if (attackSystem.TryAttack() && !isGrounded)
+                usedAirAttack = true;
         }
+    }
+
+    private void HandleAttackStarted()
+    {
+    }
+
+    private void HandleAttackHit(bool critical, int damage, int targetsHit)
+    {
+        AudioManager.Instance?.PlayAttack(critical);
+        ApplyKnockbackToNearbyEnemies();
     }
 
     private void ReadAbilityInput()
@@ -367,7 +381,7 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         AudioManager.Instance?.PlayDash();
     }
 
-    public void Configure(
+public void Configure(
         float newMoveSpeed,
         float newJumpForce,
         float newDashSpeed,
@@ -453,10 +467,6 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         }
     }
 
-    private void HandleAttackResolved(bool critical, int damage, int targetsHit)
-    {
-    }
-
     public int FacingDirection => facingDirection;
     public Rigidbody2D Rigidbody => rb;
     public AttackSystem AttackSystem => attackSystem;
@@ -464,6 +474,7 @@ public class PlayerController : SingletonBehaviour<PlayerController>
     public bool IsGrounded => isGrounded;
     public bool IsDashing => isDashing;
     public float VerticalVelocity => rb != null ? rb.linearVelocity.y : 0f;
+    public bool IsAttacking => attackSystem != null && attackSystem.IsAttacking;
     public float HorizontalInput => horizontalInput;
 
     private void OnValidate()

@@ -77,6 +77,7 @@ public class GameManager : SingletonBehaviour<GameManager>
             TogglePause();
         }
 
+
         if (Keyboard.current != null && Keyboard.current.cKey.wasPressedThisFrame
             && !isGameOver && !isPaused && !shopOpen && !waitingForNextWave)
         {
