@@ -27,6 +27,7 @@ public class PlayerAnimationDriver : MonoBehaviour
     private HealthSystem healthSystem;
     private SpriteRenderer spriteRenderer;
     private bool wasDashing;
+    private bool wasGrounded;
     private Coroutine hurtExitCoroutine;
     private Coroutine blinkCoroutine;
 
@@ -64,9 +65,24 @@ public class PlayerAnimationDriver : MonoBehaviour
         animator.SetBool(groundedParameter, playerController.IsGrounded);
         animator.SetFloat(verticalVelocityParameter, playerController.VerticalVelocity);
 
-        if (!playerController.IsGrounded)
+        bool grounded = playerController.IsGrounded;
+        if (grounded && !wasGrounded)
         {
             animator.ResetTrigger(attackTrigger);
+            if (animator.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
+            {
+                animator.CrossFade(recoveryStateName, 0.1f);
+                attackSystem.CancelAttack();
+            }
+        }
+        wasGrounded = grounded;
+
+        if (!grounded && attackSystem.IsAttacking && !animator.IsInTransition(0))
+        {
+            if (!animator.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
+            {
+                attackSystem.CancelAttack();
+            }
         }
 
         if (playerController.IsDashing && !wasDashing)
@@ -87,10 +103,7 @@ public class PlayerAnimationDriver : MonoBehaviour
     private void HandleAttackStarted()
     {
         animator.ResetTrigger(attackTrigger);
-        if (!string.IsNullOrWhiteSpace(attackStateName))
-            animator.Play(attackStateName, 0, 0f);
-        else
-            animator.SetTrigger(attackTrigger);
+        animator.SetTrigger(attackTrigger);
     }
 
     // Llamado desde Animation Event en el frame del golpe
