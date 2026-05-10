@@ -12,6 +12,7 @@ public class PlayerAnimationDriver : MonoBehaviour
     [SerializeField] private string groundedParameter = "Grounded";
     [SerializeField] private string verticalVelocityParameter = "VerticalVelocity";
     [SerializeField] private string attackTrigger = "Attack";
+    [SerializeField] private string attackStateName = "Attack";
     [SerializeField] private string dashStateName = "Dash";
     [SerializeField] private string hurtStateName = "Hurt";
 
@@ -45,12 +46,14 @@ public class PlayerAnimationDriver : MonoBehaviour
 
     private void OnEnable()
     {
+        attackSystem.AttackStarted += HandleAttackStarted;
         attackSystem.AttackResolved += HandleAttackResolved;
         healthSystem.Damaged += HandleDamaged;
     }
 
     private void OnDisable()
     {
+        attackSystem.AttackStarted -= HandleAttackStarted;
         attackSystem.AttackResolved -= HandleAttackResolved;
         healthSystem.Damaged -= HandleDamaged;
     }
@@ -60,6 +63,11 @@ public class PlayerAnimationDriver : MonoBehaviour
         animator.SetFloat(speedParameter, Mathf.Abs(playerController.HorizontalInput));
         animator.SetBool(groundedParameter, playerController.IsGrounded);
         animator.SetFloat(verticalVelocityParameter, playerController.VerticalVelocity);
+
+        if (!playerController.IsGrounded)
+        {
+            animator.ResetTrigger(attackTrigger);
+        }
 
         if (playerController.IsDashing && !wasDashing)
         {
@@ -76,13 +84,29 @@ public class PlayerAnimationDriver : MonoBehaviour
         }
     }
 
+    private void HandleAttackStarted()
+    {
+        animator.ResetTrigger(attackTrigger);
+        if (!string.IsNullOrWhiteSpace(attackStateName))
+            animator.Play(attackStateName, 0, 0f);
+        else
+            animator.SetTrigger(attackTrigger);
+    }
+
+    // Llamado desde Animation Event en el frame del golpe
+    public void OnAttackHitFrame()
+    {
+        attackSystem.TriggerHit();
+    }
+
     private void HandleAttackResolved(bool critical, int damage, int targetsHit)
     {
-        animator.SetTrigger(attackTrigger);
     }
 
     private void HandleDamaged(int currentHealth, int maxHealth)
     {
+        attackSystem.CancelAttack();
+
         if (!string.IsNullOrWhiteSpace(hurtStateName))
         {
             animator.CrossFade(hurtStateName, 0.05f);

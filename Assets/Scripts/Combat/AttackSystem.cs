@@ -1,6 +1,15 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+public enum AttackPhase
+{
+    None,
+    WindUp,
+    Active,
+    Recovery
+}
 
 public class AttackSystem : MonoBehaviour
 {
@@ -11,6 +20,11 @@ public class AttackSystem : MonoBehaviour
     [SerializeField] private float attackRange = 1.25f;
     [SerializeField] private float attackCooldown = 0.45f;
 
+    [Header("Attack Timing")]
+    [SerializeField] private float windUpDuration = 0.12f;
+    [SerializeField] private float hitDuration = 0.08f;
+    [SerializeField] private float recoveryDuration = 0.25f;
+
     [Header("Damage")]
     [SerializeField] private int baseDamage = 1;
     [SerializeField] private float criticalChance = 0.15f;
@@ -18,6 +32,9 @@ public class AttackSystem : MonoBehaviour
 
     [Header("Knockback")]
     [SerializeField] private float knockbackForce = 100f;
+
+    [Header("Hit Timing")]
+    [SerializeField] private bool useAnimationEvent = false;
 
     [Header("Debug")]
     [SerializeField] private bool debugAttackLogs = false;
@@ -27,13 +44,23 @@ public class AttackSystem : MonoBehaviour
     private float bonusCriticalChance;
     private float bonusCriticalMultiplier = 1f;
     private HealthSystem ownerHealth;
+    private Coroutine attackRoutine;
+    private AttackPhase currentPhase = AttackPhase.None;
+    private bool hitEventReceived;
 
     public Transform AttackPointTransform => attackPoint;
     public float AttackCooldown => attackCooldown;
     public float AttackRange => attackRange;
     public float KnockbackForce => knockbackForce;
     public bool LastAttackWasCritical { get; private set; }
+    public AttackPhase CurrentPhase => currentPhase;
+    public bool IsAttacking => currentPhase != AttackPhase.None;
+    public float WindUpDuration => windUpDuration;
+    public float RecoveryDuration => recoveryDuration;
+
+    public event Action AttackStarted;
     public event Action<bool, int, int> AttackResolved;
+    public event Action AttackCompleted;
 
     private void Awake()
     {
@@ -48,12 +75,70 @@ public class AttackSystem : MonoBehaviour
 
     public bool TryAttack()
     {
-        if (Time.time < lastAttackTime + attackCooldown)
+        if (IsAttacking)
+        {
+            return false;
+        }
+
+        float totalCooldown = attackCooldown > 0.01f ? attackCooldown : windUpDuration + hitDuration + recoveryDuration;
+        if (Time.time < lastAttackTime + totalCooldown)
         {
             return false;
         }
 
         lastAttackTime = Time.time;
+        currentPhase = AttackPhase.WindUp;
+        AttackStarted?.Invoke();
+
+        if (attackRoutine != null)
+        {
+            StopCoroutine(attackRoutine);
+        }
+        attackRoutine = StartCoroutine(AttackRoutine());
+
+        return true;
+    }
+
+    public void TriggerHit()
+    {
+        hitEventReceived = true;
+    }
+
+    public void CancelAttack()
+    {
+        if (attackRoutine != null)
+        {
+            StopCoroutine(attackRoutine);
+            attackRoutine = null;
+        }
+
+        currentPhase = AttackPhase.None;
+        hitEventReceived = false;
+    }
+
+    private IEnumerator AttackRoutine()
+    {
+        currentPhase = AttackPhase.WindUp;
+        hitEventReceived = false;
+
+        if (useAnimationEvent)
+        {
+            while (!hitEventReceived)
+            {
+                yield return null;
+            }
+        }
+        else
+        {
+            float elapsed = 0f;
+            while (!hitEventReceived && elapsed < windUpDuration)
+            {
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+        }
+
+        currentPhase = AttackPhase.Active;
         LastAttackWasCritical = RollCritical();
         int finalDamage = CalculateDamage(LastAttackWasCritical);
         int hitCount = ApplyDamage(attackPoint.position, attackRange, targetLayers, finalDamage);
@@ -64,7 +149,15 @@ public class AttackSystem : MonoBehaviour
             Debug.Log($"{name} attacked for {finalDamage} damage. Critical: {LastAttackWasCritical}. Targets hit: {hitCount}.");
         }
 
-        return true;
+        yield return new WaitForSeconds(hitDuration);
+
+        currentPhase = AttackPhase.Recovery;
+
+        yield return new WaitForSeconds(recoveryDuration);
+
+        currentPhase = AttackPhase.None;
+        attackRoutine = null;
+        AttackCompleted?.Invoke();
     }
 
     public int DealAreaDamage(Vector2 center, float radius, LayerMask targets, int damage, bool canCrit)
@@ -120,6 +213,13 @@ public class AttackSystem : MonoBehaviour
         debugAttackLogs = shouldDebugAttackLogs;
     }
 
+    public void ConfigureTiming(float newWindUp, float newHitDuration, float newRecovery)
+    {
+        windUpDuration = Mathf.Max(0f, newWindUp);
+        hitDuration = Mathf.Max(0.01f, newHitDuration);
+        recoveryDuration = Mathf.Max(0f, newRecovery);
+    }
+
     private int ApplyDamage(Vector2 center, float radius, LayerMask targets, int damage)
     {
         Collider2D[] hitColliders = Physics2D.OverlapCircleAll(center, radius, targets);
@@ -171,11 +271,14 @@ public class AttackSystem : MonoBehaviour
         }
 
         attackRange = Mathf.Max(0.1f, newConfig.attackRange);
-        attackCooldown = Mathf.Max(0.01f, newConfig.attackCooldown);
+        attackCooldown = newConfig.EffectiveCooldown;
         baseDamage = Mathf.Max(1, newConfig.baseDamage);
         criticalChance = Mathf.Clamp01(newConfig.criticalChance);
         criticalMultiplier = Mathf.Max(1f, newConfig.criticalMultiplier);
         debugAttackLogs = newConfig.debugAttackLogs;
+        windUpDuration = Mathf.Max(0f, newConfig.windUpDuration);
+        hitDuration = Mathf.Max(0.01f, newConfig.hitDuration);
+        recoveryDuration = Mathf.Max(0f, newConfig.recoveryDuration);
     }
 
     private void OnDrawGizmosSelected()
@@ -193,5 +296,8 @@ public class AttackSystem : MonoBehaviour
         baseDamage = Mathf.Max(1, baseDamage);
         criticalChance = Mathf.Clamp01(criticalChance);
         criticalMultiplier = Mathf.Max(1f, criticalMultiplier);
+        windUpDuration = Mathf.Max(0f, windUpDuration);
+        hitDuration = Mathf.Max(0.01f, hitDuration);
+        recoveryDuration = Mathf.Max(0f, recoveryDuration);
     }
 }
