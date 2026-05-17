@@ -12,7 +12,7 @@ public class PlayerAnimationDriver : MonoBehaviour
     [SerializeField] private string groundedParameter = "Grounded";
     [SerializeField] private string verticalVelocityParameter = "VerticalVelocity";
     [SerializeField] private string attackTrigger = "Attack";
-    [SerializeField] private string attackStateName = "Attack";
+
     [SerializeField] private string dashStateName = "Dash";
     [SerializeField] private string hurtStateName = "Hurt";
 
