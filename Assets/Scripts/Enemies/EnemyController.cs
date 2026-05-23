@@ -21,6 +21,19 @@ public class EnemyController : MonoBehaviour
     [Header("Combat Facing")]
     [SerializeField] private float attackPointDistance = 0.6f;
 
+    [Header("Aggro")]
+    [Tooltip("Radio dentro del cual el enemigo detecta y persigue al player. Fuera de este radio queda idle/wander.")]
+    [SerializeField] private float aggroRadius = 8f;
+    [Tooltip("Si true, deambula al azar cuando no detecta al player. Si false, se queda quieto.")]
+    [SerializeField] private bool wanderWhenIdle = false;
+    [Tooltip("Distancia máxima que se aleja del punto de spawn al deambular.")]
+    [SerializeField] private float wanderRange = 3f;
+    [Tooltip("Segundos entre cambios de dirección al deambular.")]
+    [SerializeField] private float wanderChangeInterval = 2f;
+    [Tooltip("Multiplicador de velocidad al deambular (0.5 = mitad de moveSpeed).")]
+    [Range(0.1f, 1f)]
+    [SerializeField] private float wanderSpeedMultiplier = 0.5f;
+
     [Header("Navigation")]
     [SerializeField] private float wallCheckDistance = 0.35f;
     [SerializeField] private float ceilingCheckDistance = 1.5f;
@@ -49,6 +62,10 @@ public class EnemyController : MonoBehaviour
     private Vector3 stuckCheckPosition;
     private float dashEndTime;
     private float nextDashTime;
+    private Vector3 spawnPosition;
+    private int wanderDirection;
+    private float nextWanderChangeTime;
+    private bool isAggroed;
 
     private void Awake()
     {
@@ -82,8 +99,14 @@ public class EnemyController : MonoBehaviour
     {
         attackDistance += Random.Range(-0.3f, 0.3f);
         stuckCheckPosition = transform.position;
+        spawnPosition = transform.position;
         FindPlayerTarget();
         UpdateAttackPointPosition();
+    }
+
+    private bool IsPlayerInAggroRange(Vector2 deltaToPlayer)
+    {
+        return deltaToPlayer.sqrMagnitude <= aggroRadius * aggroRadius;
     }
 
     private void Update()
@@ -103,10 +126,18 @@ public class EnemyController : MonoBehaviour
 
         if (playerTarget == null)
         {
+            isAggroed = false;
             return;
         }
 
         Vector2 deltaToPlayer = playerTarget.position - transform.position;
+        isAggroed = IsPlayerInAggroRange(deltaToPlayer);
+
+        if (!isAggroed)
+        {
+            // Fuera de rango: no actualizamos facing/attack según el player.
+            return;
+        }
 
         if (Mathf.Abs(deltaToPlayer.x) > 0.05f)
         {
@@ -159,6 +190,13 @@ public class EnemyController : MonoBehaviour
         }
 
         Vector2 deltaToPlayer = playerTarget.position - transform.position;
+
+        if (!IsPlayerInAggroRange(deltaToPlayer))
+        {
+            ApplyIdleOrWander();
+            return;
+        }
+
         float horizontalDistance = Mathf.Abs(deltaToPlayer.x);
         float verticalDistance = deltaToPlayer.y;
         float horizontalDirection = Mathf.Sign(deltaToPlayer.x);
@@ -228,6 +266,64 @@ public class EnemyController : MonoBehaviour
         ApplySeparation();
     }
 
+    private void ApplyIdleOrWander()
+    {
+        // Ranged flota; idle = quieto (corta el sin wave y la velocidad).
+        if (enemyType == EnemyType.Ranged)
+        {
+            rb.linearVelocity = new Vector2(0f, 0f);
+            return;
+        }
+
+        if (!wanderWhenIdle)
+        {
+            // Idle puro: cortar horizontal, dejar gravedad
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+            return;
+        }
+
+        // Wander: cambiar dirección cada wanderChangeInterval. 30% chance de pausar.
+        if (Time.time >= nextWanderChangeTime)
+        {
+            float r = Random.value;
+            if (r < 0.3f) wanderDirection = 0;
+            else wanderDirection = Random.value < 0.5f ? -1 : 1;
+            nextWanderChangeTime = Time.time + wanderChangeInterval;
+        }
+
+        // Cortar si nos alejamos del spawn
+        float distFromSpawn = transform.position.x - spawnPosition.x;
+        if (distFromSpawn > wanderRange && wanderDirection > 0) wanderDirection = -1;
+        else if (distFromSpawn < -wanderRange && wanderDirection < 0) wanderDirection = 1;
+
+        bool groundAheadCheck = true;
+        bool wallAheadCheck = false;
+
+        if (wanderDirection != 0)
+        {
+            facingDirection = wanderDirection;
+            // Evitar caer al vacío o chocar contra pared
+            groundAheadCheck = CheckGroundAhead();
+            wallAheadCheck = CheckWallAhead();
+            if (!groundAheadCheck || wallAheadCheck)
+            {
+                wanderDirection = -wanderDirection;
+                facingDirection = wanderDirection;
+            }
+
+            if (spriteRenderer != null) spriteRenderer.flipX = facingDirection == -1;
+        }
+
+        float targetVx = wanderDirection * moveSpeed * wanderSpeedMultiplier;
+        rb.linearVelocity = new Vector2(targetVx, rb.linearVelocity.y);
+
+        // Log 1/seg de las variables que más importan
+        if (Time.frameCount % 30 == 0)
+        {
+            Debug.Log($"[EnemyController:{name}] Wander apply — moveSpeed={moveSpeed:F2}, multiplier={wanderSpeedMultiplier:F2}, targetVx={targetVx:F2}, realVx={rb.linearVelocity.x:F2}, groundAhead={groundAheadCheck}, wallAhead={wallAheadCheck}, isGrounded={isGrounded}, groundLayers={groundLayers.value}", this);
+        }
+    }
+
     private void TryFastDash(float horizontalDistance, float horizontalDirection)
     {
         float dashTriggerRange = attackDistance * 3.5f;
@@ -294,8 +390,10 @@ public class EnemyController : MonoBehaviour
     private bool CheckGroundAhead()
     {
         if (groundLayers == 0) return true;
-        Vector2 ahead = (Vector2)transform.position + Vector2.right * facingDirection * 0.4f;
-        return Physics2D.Raycast(ahead, Vector2.down, groundAheadDistance, groundLayers).collider != null;
+        // Disparamos desde los pies (groundCheck) un poco arriba para no nacer dentro del suelo.
+        Vector2 footPos = groundCheck != null ? (Vector2)groundCheck.position : (Vector2)transform.position;
+        Vector2 ahead = footPos + Vector2.right * facingDirection * 0.4f + Vector2.up * 0.1f;
+        return Physics2D.Raycast(ahead, Vector2.down, groundAheadDistance + 0.2f, groundLayers).collider != null;
     }
 
     private void ApplySeparation()
@@ -431,12 +529,22 @@ public class EnemyController : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        if (groundCheck == null)
+        // Aggro radius
+        Gizmos.color = isAggroed ? Color.red : new Color(1f, 0.5f, 0f, 0.8f);
+        Gizmos.DrawWireSphere(transform.position, aggroRadius);
+
+        // Wander range (solo si está activado)
+        if (wanderWhenIdle)
         {
-            return;
+            Gizmos.color = Color.cyan;
+            Vector3 spawn = Application.isPlaying ? spawnPosition : transform.position;
+            Gizmos.DrawLine(spawn + Vector3.left * wanderRange, spawn + Vector3.right * wanderRange);
         }
 
-        Gizmos.color = isGrounded ? Color.green : Color.yellow;
-        Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        if (groundCheck != null)
+        {
+            Gizmos.color = isGrounded ? Color.green : Color.yellow;
+            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        }
     }
 }

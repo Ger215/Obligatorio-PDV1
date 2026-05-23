@@ -30,6 +30,26 @@ public class PlayerController : SingletonBehaviour<PlayerController>
     [SerializeField] private LayerMask groundLayers;
     [SerializeField] private float groundCheckRadius = 0.15f;
 
+    [Header("Slope Sliding")]
+    [Tooltip("Ángulo mínimo (grados) de la pendiente para que el player empiece a deslizarse.")]
+    [SerializeField] private float minSlideAngle = 10f;
+    [Tooltip("Ángulo máximo. Por encima se considera pared, no piso.")]
+    [SerializeField] private float maxSlideAngle = 60f;
+    [Tooltip("Aceleración del slide en m/s². El slide se va acelerando solo.")]
+    [SerializeField] private float slideAcceleration = 10f;
+    [Tooltip("Velocidad tope del slide.")]
+    [SerializeField] private float maxSlideSpeed = 14f;
+    [Tooltip("Distancia del raycast para detectar la normal de la pendiente.")]
+    [SerializeField] private float slideRayDistance = 0.6f;
+    [Tooltip("Segundos que tarda en empezar a deslizar después de soltar input estando quieto en pendiente.")]
+    [SerializeField] private float slideStartDelay = 0.4f;
+    [Tooltip("Ancho horizontal del check de pendiente: lanza 3 raycasts a -W, 0, +W desde groundCheck. " +
+             "Más ancho = más permisivo con colliders irregulares.")]
+    [SerializeField] private float slideCheckWidth = 0.25f;
+    [Tooltip("Tiempo de gracia: una vez deslizando, sigue deslizando aunque pierda detección de pendiente. " +
+             "Evita cortes feos por colliders irregulares.")]
+    [SerializeField] private float slideExitGrace = 0.15f;
+
     [Header("Wall Check")]
     [SerializeField] private float wallCheckDistance = 0.35f;
     [SerializeField] private Vector2 wallCheckSize = new Vector2(0.1f, 0.8f);
@@ -55,6 +75,12 @@ public class PlayerController : SingletonBehaviour<PlayerController>
     private float dashTimeRemaining;
     private float lastDashTime = -Mathf.Infinity;
     private float defaultGravityScale;
+    private bool isOnSlope;
+    private bool isSliding;
+    private Vector2 slopeNormal = Vector2.up;
+    private float currentSlideSpeed;
+    private float slideDelayTimer;
+    private float slideGraceTimer;
 
     protected override void Awake()
     {
@@ -162,9 +188,116 @@ public class PlayerController : SingletonBehaviour<PlayerController>
             return;
         }
 
-        ApplyHorizontalMovement();
+        CheckSlope();
+        UpdateSlideDelay();
+
+        if (ShouldSlide())
+        {
+            ApplySlide();
+        }
+        else
+        {
+            isSliding = false;
+            currentSlideSpeed = 0f;
+            ApplyHorizontalMovement();
+        }
+
         ApplyGravityModifiers();
         TryJump();
+    }
+
+    private void UpdateSlideDelay()
+    {
+        // Condiciones para que el delay corra (sin disparar slide todavía)
+        bool waiting = isGrounded && isOnSlope && Mathf.Abs(horizontalInput) < 0.01f;
+
+        if (waiting)
+        {
+            slideDelayTimer += Time.fixedDeltaTime;
+        }
+        else
+        {
+            slideDelayTimer = 0f;
+        }
+    }
+
+    private void CheckSlope()
+    {
+        Vector2 basePos = groundCheck != null ? (Vector2)groundCheck.position : (Vector2)transform.position;
+
+        // 3 raycasts: izquierda, centro, derecha. Nos quedamos con el de mayor ángulo (la rampa real).
+        Vector2[] origins = {
+            basePos + Vector2.left * slideCheckWidth,
+            basePos,
+            basePos + Vector2.right * slideCheckWidth
+        };
+
+        float bestAngle = 0f;
+        Vector2 bestNormal = Vector2.up;
+        bool anyHit = false;
+
+        for (int i = 0; i < origins.Length; i++)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(origins[i], Vector2.down, slideRayDistance, groundLayers);
+            if (hit.collider == null) continue;
+
+            anyHit = true;
+            float angle = Vector2.Angle(hit.normal, Vector2.up);
+            if (angle > bestAngle && angle < maxSlideAngle)
+            {
+                bestAngle = angle;
+                bestNormal = hit.normal;
+            }
+        }
+
+        if (anyHit && bestAngle > minSlideAngle)
+        {
+            slopeNormal = bestNormal;
+            isOnSlope = true;
+            slideGraceTimer = slideExitGrace; // recargar el grace cada vez que SÍ detectamos pendiente
+        }
+        else
+        {
+            // No detecta pendiente, pero si veníamos deslizando damos un margen
+            if (slideGraceTimer > 0f)
+            {
+                slideGraceTimer -= Time.fixedDeltaTime;
+                // mantenemos isOnSlope y slopeNormal del último frame válido
+            }
+            else
+            {
+                isOnSlope = false;
+                slopeNormal = Vector2.up;
+            }
+        }
+    }
+
+    private bool ShouldSlide()
+    {
+        return isGrounded && isOnSlope && Mathf.Abs(horizontalInput) < 0.01f && slideDelayTimer >= slideStartDelay;
+    }
+
+    private void ApplySlide()
+    {
+        isSliding = true;
+
+        // Vector tangente a la pendiente apuntando cuesta abajo
+        Vector2 slopeDir = new Vector2(slopeNormal.y, -slopeNormal.x);
+        if (slopeDir.y > 0f) slopeDir = -slopeDir;
+
+        // Forzar al jugador a mirar hacia donde se desliza (cuesta abajo)
+        if (Mathf.Abs(slopeDir.x) > 0.01f)
+        {
+            int slideFacing = slopeDir.x > 0f ? 1 : -1;
+            if (facingDirection != slideFacing)
+            {
+                facingDirection = slideFacing;
+                UpdateAttackPointPosition();
+            }
+        }
+
+        currentSlideSpeed = Mathf.Min(currentSlideSpeed + slideAcceleration * Time.fixedDeltaTime, maxSlideSpeed);
+        rb.linearVelocity = slopeDir * currentSlideSpeed;
     }
 
     private bool IsTouchingWall(int dir)
@@ -473,6 +606,8 @@ public void Configure(
     public HealthSystem HealthSystem => healthSystem;
     public bool IsGrounded => isGrounded;
     public bool IsDashing => isDashing;
+    public bool IsSliding => isSliding;
+    public float CurrentSlideSpeed => currentSlideSpeed;
     public float VerticalVelocity => rb != null ? rb.linearVelocity.y : 0f;
     public bool IsAttacking => attackSystem != null && attackSystem.IsAttacking;
     public float HorizontalInput => horizontalInput;

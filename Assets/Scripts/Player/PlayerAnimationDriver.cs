@@ -11,6 +11,7 @@ public class PlayerAnimationDriver : MonoBehaviour
     [SerializeField] private string speedParameter = "Speed";
     [SerializeField] private string groundedParameter = "Grounded";
     [SerializeField] private string verticalVelocityParameter = "VerticalVelocity";
+    [SerializeField] private string slidingParameter = "Sliding";
     [SerializeField] private string attackTrigger = "Attack";
 
     [SerializeField] private string dashStateName = "Dash";
@@ -64,6 +65,7 @@ public class PlayerAnimationDriver : MonoBehaviour
         animator.SetFloat(speedParameter, Mathf.Abs(playerController.HorizontalInput));
         animator.SetBool(groundedParameter, playerController.IsGrounded);
         animator.SetFloat(verticalVelocityParameter, playerController.VerticalVelocity);
+        animator.SetBool(slidingParameter, playerController.IsSliding);
 
         bool grounded = playerController.IsGrounded;
         if (grounded && !wasGrounded)

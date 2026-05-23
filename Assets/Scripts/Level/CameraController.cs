@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -20,6 +21,12 @@ public class CameraController : SingletonBehaviour<CameraController>
 
     public bool IsTransitioning => isTransitioning;
     public RoomBoundary CurrentRoom => currentRoom;
+
+    /// <summary>
+    /// Se dispara cada vez que el room activo cambia (entrada inicial, snap, o fin de transición).
+    /// Los suscriptores reciben el room NUEVO. Útil para parallax por room, audio, iluminación, etc.
+    /// </summary>
+    public static event Action<RoomBoundary> RoomChanged;
 
     protected override void Awake()
     {
@@ -65,6 +72,7 @@ public class CameraController : SingletonBehaviour<CameraController>
             cam.transform.position = ComputeRestingPosition(room, cam.transform.position.z);
             followVelocity = Vector3.zero;
         }
+        RoomChanged?.Invoke(currentRoom);
     }
 
     public void TransitionToRoom(RoomBoundary newRoom)
@@ -83,6 +91,7 @@ public class CameraController : SingletonBehaviour<CameraController>
             cam.transform.position = ComputeRestingPosition(room, cam.transform.position.z);
             followVelocity = Vector3.zero;
         }
+        RoomChanged?.Invoke(currentRoom);
     }
 
     private IEnumerator TransitionRoutine(RoomBoundary newRoom)
@@ -127,6 +136,7 @@ public class CameraController : SingletonBehaviour<CameraController>
         followVelocity = Vector3.zero;
         Time.timeScale = 1f;
         isTransitioning = false;
+        RoomChanged?.Invoke(currentRoom);
     }
 
     private Vector3 ComputeRestingPosition(RoomBoundary room, float zDepth)

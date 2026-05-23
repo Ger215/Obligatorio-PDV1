@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: HealthConfig
   m_EditorClassIdentifier: Assembly-CSharp::HealthConfig
   maxHealth: 5
-  destroyOnDeath: 0
+  destroyOnDeath: 1
   deactivateOnDeath: 0
   destroyDelay: 0

@@ -6,18 +6,17 @@ using UnityEngine.UI;
 
 public class GameHudController : SingletonBehaviour<GameHudController>
 {
-    [Header("Wave Announcement")]
-    [SerializeField] private CanvasGroup waveAnnouncerGroup;
-    [SerializeField] private TMP_Text waveAnnouncerText;
-    [SerializeField] private float announceFadeInDuration = 0.4f;
-    [SerializeField] private float announceHoldDuration = 1.2f;
-    [SerializeField] private float announceFadeOutDuration = 0.5f;
-
     [Header("HUD")]
     [SerializeField] private TMP_Text healthText;
     [SerializeField] private TMP_Text experienceText;
-    [SerializeField] private TMP_Text waveText;
-    [SerializeField] private TMP_Text enemiesText;
+
+    [Header("XP Animation")]
+    [Tooltip("Duración del count-up del contador de XP.")]
+    [SerializeField] private float xpCountUpDuration = 0.35f;
+    [Tooltip("Escala pico del punch al recibir XP (1 = sin punch).")]
+    [SerializeField] private float xpPunchScale = 1.25f;
+    [Tooltip("Duración total del punch (subir + bajar).")]
+    [SerializeField] private float xpPunchDuration = 0.18f;
     [SerializeField] private TMP_Text[] abilitySlotTexts;
     [SerializeField] private GameObject abilityShopPanel;
     [SerializeField] private Button[] abilityButtons;
@@ -116,11 +115,11 @@ public class GameHudController : SingletonBehaviour<GameHudController>
         }
     }
 
-    public void ShowGameOver(int waveReached)
+    public void ShowGameOver()
     {
         if (gameOverWaveText != null)
         {
-            gameOverWaveText.text = $"Oleada alcanzada: {waveReached}";
+            gameOverWaveText.text = "Game Over";
         }
 
         if (gameOverGroup != null)
@@ -159,70 +158,6 @@ public class GameHudController : SingletonBehaviour<GameHudController>
         if (pausePanel != null)
         {
             pausePanel.SetActive(false);
-        }
-    }
-
-    public void ShowWaveAnnouncement(int wave)
-    {
-        if (waveAnnouncerGroup == null || waveAnnouncerText == null)
-        {
-            return;
-        }
-
-        if (waveAnnouncerText != null)
-        {
-            waveAnnouncerText.text = $"WAVE {wave}";
-        }
-
-        StopCoroutine("AnimateWaveAnnouncer");
-        StartCoroutine("AnimateWaveAnnouncer");
-    }
-
-    private IEnumerator AnimateWaveAnnouncer()
-    {
-        waveAnnouncerGroup.alpha = 0f;
-        waveAnnouncerGroup.gameObject.SetActive(true);
-        waveAnnouncerGroup.transform.localScale = Vector3.one * 1.6f;
-
-        float t = 0f;
-        while (t < announceFadeInDuration)
-        {
-            t += Time.deltaTime;
-            float progress = t / announceFadeInDuration;
-            waveAnnouncerGroup.alpha = progress;
-            waveAnnouncerGroup.transform.localScale = Vector3.one * Mathf.Lerp(1.6f, 1f, progress);
-            yield return null;
-        }
-
-        waveAnnouncerGroup.alpha = 1f;
-        waveAnnouncerGroup.transform.localScale = Vector3.one;
-
-        yield return new WaitForSeconds(announceHoldDuration);
-
-        t = 0f;
-        while (t < announceFadeOutDuration)
-        {
-            t += Time.deltaTime;
-            float progress = t / announceFadeOutDuration;
-            waveAnnouncerGroup.alpha = 1f - progress;
-            waveAnnouncerGroup.transform.localScale = Vector3.one * Mathf.Lerp(1f, 0.8f, progress);
-            yield return null;
-        }
-
-        waveAnnouncerGroup.alpha = 0f;
-        waveAnnouncerGroup.gameObject.SetActive(false);
-    }
-
-    public void RefreshWaveState(int currentWave, int enemiesAlive)
-    {
-        if (waveText != null)
-        {
-            waveText.text = $"Wave: {currentWave}";
-        }
-
-        if (enemiesText != null)
-        {
-            enemiesText.text = $"Enemies: {enemiesAlive}";
         }
     }
 
@@ -319,11 +254,88 @@ public class GameHudController : SingletonBehaviour<GameHudController>
         }
     }
 
+    private int displayedExperience;
+    private bool xpInitialized;
+    private Coroutine xpCountCoroutine;
+    private Coroutine xpPunchCoroutine;
+    private Vector3 xpTextBaseScale = Vector3.one;
+
     private void HandleExperienceChanged(int currentExperience, int totalExperience)
     {
-        if (experienceText != null)
+        if (experienceText == null) return;
+
+        // Primera vez (bind inicial): seteamos sin animar
+        if (!xpInitialized)
         {
+            displayedExperience = currentExperience;
             experienceText.text = $"XP: {currentExperience}";
+            xpTextBaseScale = experienceText.rectTransform.localScale;
+            xpInitialized = true;
+            return;
         }
+
+        // Count-up animado desde el valor mostrado hasta el nuevo
+        if (xpCountCoroutine != null) StopCoroutine(xpCountCoroutine);
+        xpCountCoroutine = StartCoroutine(CountUpExperience(displayedExperience, currentExperience));
+
+        // Solo hacemos punch cuando SUBE (ganaste XP), no cuando bajás (gastaste)
+        if (currentExperience > displayedExperience)
+        {
+            if (xpPunchCoroutine != null) StopCoroutine(xpPunchCoroutine);
+            xpPunchCoroutine = StartCoroutine(PunchExperienceScale());
+        }
+    }
+
+    private IEnumerator CountUpExperience(int from, int to)
+    {
+        float elapsed = 0f;
+        float duration = Mathf.Max(0.01f, xpCountUpDuration);
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            // Ease-out cuadrático: arranca rápido, frena al final
+            float eased = 1f - (1f - t) * (1f - t);
+            int value = Mathf.RoundToInt(Mathf.Lerp(from, to, eased));
+            experienceText.text = $"XP: {value}";
+            yield return null;
+        }
+
+        experienceText.text = $"XP: {to}";
+        displayedExperience = to;
+        xpCountCoroutine = null;
+    }
+
+    private IEnumerator PunchExperienceScale()
+    {
+        Transform t = experienceText.rectTransform;
+        float duration = Mathf.Max(0.01f, xpPunchDuration);
+        float half = duration * 0.5f;
+        float elapsed = 0f;
+
+        // Sube de 1 al pico
+        while (elapsed < half)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float k = Mathf.Clamp01(elapsed / half);
+            float s = Mathf.Lerp(1f, xpPunchScale, k);
+            t.localScale = xpTextBaseScale * s;
+            yield return null;
+        }
+
+        // Baja del pico a 1
+        elapsed = 0f;
+        while (elapsed < half)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float k = Mathf.Clamp01(elapsed / half);
+            float s = Mathf.Lerp(xpPunchScale, 1f, k);
+            t.localScale = xpTextBaseScale * s;
+            yield return null;
+        }
+
+        t.localScale = xpTextBaseScale;
+        xpPunchCoroutine = null;
     }
 }
