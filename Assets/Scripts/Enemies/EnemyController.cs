@@ -48,6 +48,12 @@ public class EnemyController : MonoBehaviour
     private HealthSystem healthSystem;
     private ProjectileLauncher projectileLauncher;
     private SpriteRenderer spriteRenderer;
+    private Animator animator;
+
+    private static readonly int AnimIsWalking = Animator.StringToHash("isWalking");
+    private static readonly int AnimAttack    = Animator.StringToHash("attack");
+    private static readonly int AnimHit       = Animator.StringToHash("hit");
+    private static readonly int AnimDie       = Animator.StringToHash("die");
 
     private EnemyType enemyType;
     private float knockbackMultiplier = 1f;
@@ -74,6 +80,7 @@ public class EnemyController : MonoBehaviour
         healthSystem = GetComponent<HealthSystem>();
         projectileLauncher = GetComponent<ProjectileLauncher>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        animator = GetComponent<Animator>();
 
         if (groundCheck == null)
         {
@@ -158,7 +165,8 @@ public class EnemyController : MonoBehaviour
             }
             else
             {
-                attackSystem.TryAttack();
+                if (attackSystem.TryAttack())
+                    animator?.SetTrigger(AnimAttack);
             }
         }
     }
@@ -194,6 +202,7 @@ public class EnemyController : MonoBehaviour
         if (!IsPlayerInAggroRange(deltaToPlayer))
         {
             ApplyIdleOrWander();
+            animator?.SetBool(AnimIsWalking, Mathf.Abs(rb.linearVelocity.x) > 0.1f);
             return;
         }
 
@@ -236,7 +245,7 @@ public class EnemyController : MonoBehaviour
         }
 
         // Only jump if no ceiling is blocking the path
-        bool shouldJump = isGrounded && !jumpConsumed && enemyType != EnemyType.Fast
+        bool shouldJump = isGrounded && !jumpConsumed && enemyType != EnemyType.Fast && enemyType != EnemyType.Walker
             && !ceilingAbove
             && (verticalDistance > jumpTriggerHeight || wallAhead);
 
@@ -253,7 +262,7 @@ public class EnemyController : MonoBehaviour
         {
             float moved = Vector3.Distance(transform.position, stuckCheckPosition);
             if (tryingToMove && moved < stuckMoveThreshold && isGrounded && !jumpConsumed
-                && enemyType != EnemyType.Fast && !ceilingAbove)
+                && enemyType != EnemyType.Fast && enemyType != EnemyType.Walker && !ceilingAbove)
             {
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
                 isGrounded = false;
@@ -264,6 +273,7 @@ public class EnemyController : MonoBehaviour
         }
 
         ApplySeparation();
+        animator?.SetBool(AnimIsWalking, Mathf.Abs(rb.linearVelocity.x) > 0.1f);
     }
 
     private void ApplyIdleOrWander()
@@ -296,16 +306,11 @@ public class EnemyController : MonoBehaviour
         if (distFromSpawn > wanderRange && wanderDirection > 0) wanderDirection = -1;
         else if (distFromSpawn < -wanderRange && wanderDirection < 0) wanderDirection = 1;
 
-        bool groundAheadCheck = true;
-        bool wallAheadCheck = false;
-
         if (wanderDirection != 0)
         {
             facingDirection = wanderDirection;
             // Evitar caer al vacío o chocar contra pared
-            groundAheadCheck = CheckGroundAhead();
-            wallAheadCheck = CheckWallAhead();
-            if (!groundAheadCheck || wallAheadCheck)
+            if (!CheckGroundAhead() || CheckWallAhead())
             {
                 wanderDirection = -wanderDirection;
                 facingDirection = wanderDirection;
@@ -314,14 +319,7 @@ public class EnemyController : MonoBehaviour
             if (spriteRenderer != null) spriteRenderer.flipX = facingDirection == -1;
         }
 
-        float targetVx = wanderDirection * moveSpeed * wanderSpeedMultiplier;
-        rb.linearVelocity = new Vector2(targetVx, rb.linearVelocity.y);
-
-        // Log 1/seg de las variables que más importan
-        if (Time.frameCount % 30 == 0)
-        {
-            Debug.Log($"[EnemyController:{name}] Wander apply — moveSpeed={moveSpeed:F2}, multiplier={wanderSpeedMultiplier:F2}, targetVx={targetVx:F2}, realVx={rb.linearVelocity.x:F2}, groundAhead={groundAheadCheck}, wallAhead={wallAheadCheck}, isGrounded={isGrounded}, groundLayers={groundLayers.value}", this);
-        }
+        rb.linearVelocity = new Vector2(wanderDirection * moveSpeed * wanderSpeedMultiplier, rb.linearVelocity.y);
     }
 
     private void TryFastDash(float horizontalDistance, float horizontalDirection)
@@ -447,6 +445,7 @@ public class EnemyController : MonoBehaviour
     private void HandleDamaged(int current, int max)
     {
         AudioManager.Instance?.PlayEnemyDamaged();
+        animator?.SetTrigger(AnimHit);
         if (spriteRenderer != null)
         {
             StartCoroutine(HitFlash());
@@ -465,6 +464,7 @@ public class EnemyController : MonoBehaviour
         isDead = true;
         rb.linearVelocity = Vector2.zero;
         AudioManager.Instance?.PlayEnemyDeath();
+        animator?.SetTrigger(AnimDie);
     }
 
     public void ApplyMovementConfig(float newMoveSpeed, float newJumpForce, float newAttackDistance,
@@ -509,6 +509,10 @@ public class EnemyController : MonoBehaviour
             case EnemyType.Chaser:
                 knockbackMultiplier = 1f;
                 break;
+            case EnemyType.Walker:
+                wanderWhenIdle = true;   // siempre patrulla
+                knockbackMultiplier = 0.5f;
+                break;
         }
 
         moveSpeed = Mathf.Max(0.1f, moveSpeed);
@@ -545,6 +549,13 @@ public class EnemyController : MonoBehaviour
         {
             Gizmos.color = isGrounded ? Color.green : Color.yellow;
             Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        }
+
+        // Walker: dirección de movimiento
+        if (enemyType == EnemyType.Walker)
+        {
+            Gizmos.color = Color.white;
+            Gizmos.DrawRay(transform.position, Vector3.right * facingDirection * 0.8f);
         }
     }
 }

@@ -54,6 +54,10 @@ public class PlayerController : SingletonBehaviour<PlayerController>
     [SerializeField] private float wallCheckDistance = 0.35f;
     [SerializeField] private Vector2 wallCheckSize = new Vector2(0.1f, 0.8f);
 
+    [Header("Ladder")]
+    [SerializeField] private float climbSpeed = 3f;
+    [SerializeField] private LayerMask ladderLayers;
+
     [Header("Combat Facing")]
     [SerializeField] private float attackPointDistance = 0.75f;
 
@@ -63,6 +67,9 @@ public class PlayerController : SingletonBehaviour<PlayerController>
     private PlayerAbilityController abilityController;
 
     private float horizontalInput;
+    private float verticalInput;
+    private bool isInLadderZone;
+    private bool isOnLadder;
     private int facingDirection = 1;
     private bool isDashing;
     private bool isDead;
@@ -163,6 +170,7 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         ReadAttackInput();
         ReadDashInput();
         ReadAbilityInput();
+        UpdateLadder();
     }
 
     private void FixedUpdate()
@@ -185,6 +193,13 @@ public class PlayerController : SingletonBehaviour<PlayerController>
                 rb.gravityScale = defaultGravityScale;
             }
 
+            return;
+        }
+
+        if (isOnLadder)
+        {
+            rb.gravityScale = 0f;
+            rb.linearVelocity = new Vector2(0f, verticalInput * climbSpeed);
             return;
         }
 
@@ -420,13 +435,22 @@ public class PlayerController : SingletonBehaviour<PlayerController>
 
         float rawGamepad = Gamepad.current != null ? Gamepad.current.leftStick.ReadValue().x : 0f;
         float gamepadInput = Mathf.Abs(rawGamepad) > 0.2f ? rawGamepad : 0f;
-        horizontalInput = Mathf.Clamp(keyboardInput + gamepadInput, -1f, 1f);
+        horizontalInput = isOnLadder ? 0f : Mathf.Clamp(keyboardInput + gamepadInput, -1f, 1f);
 
         if (Mathf.Abs(horizontalInput) > 0.01f)
         {
             facingDirection = horizontalInput > 0f ? 1 : -1;
             UpdateAttackPointPosition();
         }
+
+        float verticalKeyboard = 0f;
+        if (Keyboard.current != null)
+        {
+            if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)   verticalKeyboard += 1f;
+            if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) verticalKeyboard -= 1f;
+        }
+        float verticalGamepad = Gamepad.current != null ? Gamepad.current.leftStick.ReadValue().y : 0f;
+        verticalInput = Mathf.Clamp(verticalKeyboard + (Mathf.Abs(verticalGamepad) > 0.2f ? verticalGamepad : 0f), -1f, 1f);
     }
 
     private void ReadJumpInput()
@@ -441,6 +465,11 @@ public class PlayerController : SingletonBehaviour<PlayerController>
 
         if (jumpPressed)
         {
+            if (isOnLadder)
+            {
+                ExitLadder();
+                isInLadderZone = false; // evita re-entrar inmediatamente
+            }
             jumpBufferCounter = jumpBufferTime;
         }
     }
@@ -488,6 +517,44 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         if (Keyboard.current.digit3Key.wasPressedThisFrame)
         {
             abilityController.TryUseAbilitySlot(2);
+        }
+    }
+
+    private void UpdateLadder()
+    {
+        if (!isInLadderZone)
+        {
+            if (isOnLadder) ExitLadder();
+            return;
+        }
+
+        // Entrar a la escalera presionando arriba o abajo
+        if (!isOnLadder && Mathf.Abs(verticalInput) > 0.1f)
+        {
+            isOnLadder = true;
+            rb.gravityScale = 0f;
+            jumpBufferCounter = 0f;
+        }
+    }
+
+    private void ExitLadder()
+    {
+        isOnLadder = false;
+        rb.gravityScale = defaultGravityScale;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (((1 << other.gameObject.layer) & ladderLayers) != 0)
+            isInLadderZone = true;
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (((1 << other.gameObject.layer) & ladderLayers) != 0)
+        {
+            isInLadderZone = false;
+            ExitLadder();
         }
     }
 
@@ -600,6 +667,8 @@ public void Configure(
         }
     }
 
+    public bool IsOnLadder => isOnLadder;
+    public float VerticalInput => verticalInput;
     public int FacingDirection => facingDirection;
     public Rigidbody2D Rigidbody => rb;
     public AttackSystem AttackSystem => attackSystem;

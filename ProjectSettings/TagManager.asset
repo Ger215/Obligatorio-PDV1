@@ -16,7 +16,7 @@ TagManager:
   - Ground
   - Player
   - Enemy
-  - 
+  - Ladder
   - 
   - 
   - 
@@ -54,6 +54,9 @@ TagManager:
     locked: 0
   - name: Ground
     uniqueID: 1673022989
+    locked: 0
+  - name: Ladder
+    uniqueID: 432527229
     locked: 0
   - name: Character
     uniqueID: 1787564491
