@@ -60,6 +60,8 @@ public class EnemyController : MonoBehaviour
     private Transform playerTarget;
     private bool isDead;
     private bool isGrounded;
+
+    public bool IsGrounded => isGrounded;
     private bool jumpConsumed;
     private int facingDirection = 1;
     private float nextPathRefreshTime;

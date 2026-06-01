@@ -29,6 +29,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     private bool shopOpen;
     private bool isPaused;
     private bool isGameOver;
+    private bool isVictory;
     private HealthSystem playerHealth;
     private ExperienceSystem playerExperience;
     private PlayerAbilityController playerAbilities;
@@ -37,6 +38,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     public bool ShopOpen => shopOpen;
     public bool IsPaused => isPaused;
     public bool IsGameOver => isGameOver;
+    public bool IsVictory => isVictory;
 
     private void Start()
     {
@@ -58,7 +60,7 @@ public class GameManager : SingletonBehaviour<GameManager>
 
     private void Update()
     {
-        if (isGameOver)
+        if (isGameOver || isVictory)
         {
             return;
         }
@@ -196,9 +198,18 @@ public class GameManager : SingletonBehaviour<GameManager>
         hudController?.ShowGameOver();
     }
 
+    public void TriggerVictory()
+    {
+        if (isGameOver || isVictory) return;
+
+        isVictory = true;
+        Time.timeScale = 0f;
+        hudController?.ShowVictory();
+    }
+
     public void TogglePause()
     {
-        if (shopOpen) return;
+        if (shopOpen || isVictory) return;
 
         isPaused = !isPaused;
 

@@ -161,6 +161,27 @@ public class CameraController : SingletonBehaviour<CameraController>
         return new Vector3(x, y, zDepth);
     }
 
+    public void Shake(float duration, float magnitude)
+    {
+        StopCoroutine("ShakeRoutine");
+        StartCoroutine(ShakeRoutine(duration, magnitude));
+    }
+
+    private IEnumerator ShakeRoutine(float duration, float magnitude)
+    {
+        if (cam == null) yield break;
+
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float strength = Mathf.Lerp(magnitude, 0f, elapsed / duration);
+            Vector2 offset = UnityEngine.Random.insideUnitCircle * strength;
+            cam.transform.position += new Vector3(offset.x, offset.y, 0f);
+            yield return null;
+        }
+    }
+
     private void OnValidate()
     {
         transitionDuration = Mathf.Max(0.1f, transitionDuration);

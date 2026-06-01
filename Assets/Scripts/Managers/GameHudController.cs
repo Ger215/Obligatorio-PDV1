@@ -35,6 +35,17 @@ public class GameHudController : SingletonBehaviour<GameHudController>
     [SerializeField] private Button resumeButton;
     [SerializeField] private Button quitFromPauseButton;
 
+    [Header("Boss Health Bar")]
+    [SerializeField] private GameObject bossHealthBarPanel;
+    [SerializeField] private TMP_Text bossNameText;
+    [SerializeField] private Image bossHealthBarFill;
+
+    [Header("Victory")]
+    [SerializeField] private CanvasGroup victoryGroup;
+    [SerializeField] private float victoryFadeDuration = 1.2f;
+    [SerializeField] private Button restartFromVictoryButton;
+    [SerializeField] private Button quitFromVictoryButton;
+
     public void Bind(GameManager gameManager, PlayerController player)
     {
         if (player != null)
@@ -103,16 +114,97 @@ public class GameHudController : SingletonBehaviour<GameHudController>
             });
         }
 
+        if (restartFromVictoryButton != null)
+        {
+            restartFromVictoryButton.onClick.RemoveAllListeners();
+            restartFromVictoryButton.onClick.AddListener(() =>
+            {
+                AudioManager.Instance?.PlayButton(true);
+                GameManager.Instance?.RestartGame();
+            });
+        }
+
+        if (quitFromVictoryButton != null)
+        {
+            quitFromVictoryButton.onClick.RemoveAllListeners();
+            quitFromVictoryButton.onClick.AddListener(() =>
+            {
+                AudioManager.Instance?.PlayButton(true);
+                GameManager.Instance?.QuitToMenu();
+            });
+        }
+
         if (gameOverGroup != null)
         {
             gameOverGroup.alpha = 0f;
             gameOverGroup.gameObject.SetActive(false);
         }
 
+        if (victoryGroup != null)
+        {
+            victoryGroup.alpha = 0f;
+            victoryGroup.gameObject.SetActive(false);
+        }
+
+        if (bossHealthBarPanel != null)
+        {
+            bossHealthBarPanel.SetActive(false);
+        }
+
         if (pausePanel != null)
         {
             pausePanel.SetActive(false);
         }
+    }
+
+    public void ShowBossHealthBar(string bossName, int current, int max)
+    {
+        if (bossHealthBarPanel != null)
+            bossHealthBarPanel.SetActive(true);
+
+        if (bossNameText != null)
+            bossNameText.text = bossName;
+
+        UpdateBossHealthBar(current, max);
+    }
+
+    public void UpdateBossHealthBar(int current, int max)
+    {
+        if (bossHealthBarFill != null && max > 0)
+            bossHealthBarFill.fillAmount = (float)current / max;
+    }
+
+    public void HideBossHealthBar()
+    {
+        if (bossHealthBarPanel != null)
+            bossHealthBarPanel.SetActive(false);
+    }
+
+    public void ShowVictory()
+    {
+        HideBossHealthBar();
+
+        if (victoryGroup != null)
+        {
+            StopCoroutine("FadeInVictory");
+            StartCoroutine("FadeInVictory");
+        }
+    }
+
+    private IEnumerator FadeInVictory()
+    {
+        victoryGroup.alpha = 0f;
+        victoryGroup.gameObject.SetActive(true);
+
+        float elapsed = 0f;
+        while (elapsed < victoryFadeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            victoryGroup.alpha = Mathf.Clamp01(elapsed / victoryFadeDuration);
+            yield return null;
+        }
+
+        victoryGroup.alpha = 1f;
     }
 
     public void ShowGameOver()
