@@ -23,6 +23,9 @@ public class BossController : MonoBehaviour
     [Header("Slam Trigger")]
     [SerializeField] private float slamTriggerRange = 6f;
 
+    [Header("Activation")]
+    [SerializeField] private float activationRange = 10f;
+
     private EnemyController enemyController;
     private HealthSystem healthSystem;
     private Rigidbody2D rb;
@@ -61,6 +64,18 @@ public class BossController : MonoBehaviour
 
     private void Update()
     {
+        if (!isActive)
+        {
+            if (PlayerController.Instance != null)
+            {
+                float distToPlayer = Vector2.Distance(transform.position, PlayerController.Instance.transform.position);
+                if (distToPlayer <= activationRange)
+                {
+                    Activate();
+                }
+            }
+        }
+
         if (!isActive || isDead) return;
 
         UpdateHealthBarVisibility();
@@ -135,7 +150,13 @@ public class BossController : MonoBehaviour
 
     private void HandleDamaged(int current, int max)
     {
-        if (healthBarVisible)
+        // Always update (or show) the boss health bar when damaged so hits are reflected in the UI
+        if (!healthBarVisible)
+        {
+            healthBarVisible = true;
+            GameHudController.Instance?.ShowBossHealthBar(bossName, current, max);
+        }
+        else
         {
             GameHudController.Instance?.UpdateBossHealthBar(current, max);
         }
