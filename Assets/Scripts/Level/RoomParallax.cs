@@ -2,8 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// Asocia un ParallaxController a un RoomBoundary específico.
-/// Se activa cuando el player entra al room y se desactiva al salir.
-/// Poner en el GameObject del WorldBackground hijo de cada RoomBoundary.
+/// El swap de fondo ocurre en CameraController.RoomChanged, que sucede bajo el negro del fundido.
 /// </summary>
 [RequireComponent(typeof(ParallaxController))]
 public class RoomParallax : MonoBehaviour
@@ -12,18 +11,22 @@ public class RoomParallax : MonoBehaviour
     [SerializeField] private RoomBoundary owningRoom;
 
     private ParallaxController controller;
+    private SpriteRenderer[] sprites;
+    private bool isOwned;
 
     private void Awake()
     {
         controller = GetComponent<ParallaxController>();
+        sprites = GetComponentsInChildren<SpriteRenderer>(true);
+
         if (owningRoom == null) owningRoom = GetComponentInParent<RoomBoundary>();
         if (owningRoom == null)
         {
             Debug.LogWarning($"[RoomParallax:{name}] No encontré RoomBoundary en los padres.");
             return;
         }
-        // Arranca apagado; se activa cuando el CameraController lo pide
-        SetActive(false);
+
+        SetVisible(false);
     }
 
     private void OnEnable()
@@ -36,16 +39,19 @@ public class RoomParallax : MonoBehaviour
         CameraController.RoomChanged -= HandleRoomChanged;
     }
 
+    // RoomChanged ocurre bajo el negro (o en el arranque): swap instantáneo, invisible para el jugador.
     private void HandleRoomChanged(RoomBoundary newRoom)
     {
-        SetActive(newRoom == owningRoom);
+        bool shouldBeActive = newRoom == owningRoom;
+        if (shouldBeActive == isOwned) return;
+        isOwned = shouldBeActive;
+        SetVisible(isOwned);
     }
 
-    private void SetActive(bool active)
+    private void SetVisible(bool active)
     {
+        foreach (SpriteRenderer sr in sprites)
+            sr.enabled = active;
         controller.enabled = active;
-        // También apagamos los renderers para que no se vean cuando no es el room activo
-        Renderer[] rs = GetComponentsInChildren<Renderer>(true);
-        for (int i = 0; i < rs.Length; i++) rs[i].enabled = active;
     }
 }

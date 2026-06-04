@@ -10,9 +10,8 @@ public class CameraController : SingletonBehaviour<CameraController>
 
     [Header("Transition")]
     [SerializeField] private RoomBoundary startingRoom;
-    [SerializeField] private float transitionDuration = 0.4f;
-    [SerializeField] private float pauseBeforePan = 0.05f;
-    [SerializeField] private float pauseAfterPan = 0.05f;
+    [Tooltip("Tiempo que la pantalla queda cubierta por el fundido antes de saltar al nuevo room. Debe ser >= Fade Out Duration del ScreenFader.")]
+    [SerializeField] private float coverDuration = 0.25f;
 
     private Camera cam;
     private RoomBoundary currentRoom;
@@ -27,6 +26,7 @@ public class CameraController : SingletonBehaviour<CameraController>
     /// Los suscriptores reciben el room NUEVO. Útil para parallax por room, audio, iluminación, etc.
     /// </summary>
     public static event Action<RoomBoundary> RoomChanged;
+    public static event Action<RoomBoundary> TransitionStarted;
 
     protected override void Awake()
     {
@@ -96,47 +96,32 @@ public class CameraController : SingletonBehaviour<CameraController>
 
     private IEnumerator TransitionRoutine(RoomBoundary newRoom)
     {
-        yield return null;
-
         isTransitioning = true;
-        if (cam == null) cam = Camera.main;
-
-        Vector3 startPos = cam.transform.position;
-        Vector3 endPos = ComputeRestingPosition(newRoom, startPos.z);
-
         Time.timeScale = 0f;
 
+        // El ScreenFader arranca el fade out al recibir esto.
+        TransitionStarted?.Invoke(newRoom);
+
+        // Esperar a que el fundido cubra la pantalla por completo.
         float elapsed = 0f;
-        while (elapsed < pauseBeforePan)
+        while (elapsed < coverDuration)
         {
-            cam.transform.position = startPos;
             elapsed += Time.unscaledDeltaTime;
             yield return null;
         }
 
-        elapsed = 0f;
-        while (elapsed < transitionDuration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / transitionDuration));
-            cam.transform.position = Vector3.Lerp(startPos, endPos, t);
-            yield return null;
-        }
-        cam.transform.position = endPos;
-
-        elapsed = 0f;
-        while (elapsed < pauseAfterPan)
-        {
-            cam.transform.position = endPos;
-            elapsed += Time.unscaledDeltaTime;
-            yield return null;
-        }
-
+        // Bajo el negro: salto de cámara + cambio de room (el parallax swapea acá).
+        if (cam == null) cam = Camera.main;
         currentRoom = newRoom;
-        followVelocity = Vector3.zero;
+        if (cam != null)
+        {
+            cam.transform.position = ComputeRestingPosition(newRoom, cam.transform.position.z);
+            followVelocity = Vector3.zero;
+        }
+        RoomChanged?.Invoke(currentRoom);
+
         Time.timeScale = 1f;
         isTransitioning = false;
-        RoomChanged?.Invoke(currentRoom);
     }
 
     private Vector3 ComputeRestingPosition(RoomBoundary room, float zDepth)
@@ -184,9 +169,7 @@ public class CameraController : SingletonBehaviour<CameraController>
 
     private void OnValidate()
     {
-        transitionDuration = Mathf.Max(0.1f, transitionDuration);
-        pauseBeforePan = Mathf.Max(0f, pauseBeforePan);
-        pauseAfterPan = Mathf.Max(0f, pauseAfterPan);
+        coverDuration = Mathf.Max(0f, coverDuration);
         followSmoothTime = Mathf.Max(0f, followSmoothTime);
     }
 }

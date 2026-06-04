@@ -9,6 +9,11 @@ public class RoomTrigger : MonoBehaviour
     [Header("One Way")]
     [SerializeField] private bool oneWay;
 
+    [Header("Direction Override")]
+    [Tooltip("Si está tildado, usa ManualDirection en vez de calcularla automáticamente.")]
+    [SerializeField] private bool overrideDirection;
+    [SerializeField] private Direction manualDirection = Direction.Down;
+
     private bool triggered;
 
     private enum Direction
@@ -22,27 +27,46 @@ public class RoomTrigger : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         PlayerController player = other.GetComponentInParent<PlayerController>();
-        if (player == null || targetRoom == null)
+        if (player == null)
         {
+            Debug.Log($"[RoomTrigger:{name}] OnTriggerEnter2D — colisionó '{other.name}' pero NO tiene PlayerController.", this);
+            return;
+        }
+
+        if (targetRoom == null)
+        {
+            Debug.LogWarning($"[RoomTrigger:{name}] targetRoom NO está asignado en el Inspector.", this);
             return;
         }
 
         if (triggered)
         {
+            Debug.Log($"[RoomTrigger:{name}] Ya fue disparado (oneWay), ignorando.", this);
             return;
         }
 
-        Direction requiredDirection = GetDirectionToTargetRoom();
+        Direction requiredDirection = overrideDirection ? manualDirection : GetDirectionToTargetRoom();
+        Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
+        Vector2 vel = rb != null ? rb.linearVelocity : Vector2.zero;
+        bool movingCorrectly = IsPlayerMovingInDirection(player, requiredDirection);
 
-        if (!IsPlayerMovingInDirection(player, requiredDirection))
+        Debug.Log($"[RoomTrigger:{name}] Player entró. targetRoom={targetRoom.name}, requiredDir={requiredDirection}, velocity={vel}, movingCorrectly={movingCorrectly}, CameraController={(CameraController.Instance != null ? "OK" : "NULL")}, currentRoom={(CameraController.Instance?.CurrentRoom != null ? CameraController.Instance.CurrentRoom.name : "NULL")}", this);
+
+        if (!movingCorrectly)
         {
+            Debug.Log($"[RoomTrigger:{name}] Transición bloqueada — el player no se mueve en dirección {requiredDirection} (vel={vel}).", this);
             return;
         }
 
         CameraController camera = CameraController.Instance;
         if (camera != null && camera.CurrentRoom != targetRoom)
         {
+            Debug.Log($"[RoomTrigger:{name}] Iniciando TransitionToRoom → {targetRoom.name}", this);
             camera.TransitionToRoom(targetRoom);
+        }
+        else
+        {
+            Debug.LogWarning($"[RoomTrigger:{name}] No se inicia transición — camera={(camera != null ? "OK" : "NULL")}, currentRoom ya es targetRoom={camera?.CurrentRoom == targetRoom}", this);
         }
 
         if (oneWay)
