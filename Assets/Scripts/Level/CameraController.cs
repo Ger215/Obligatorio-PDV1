@@ -2,6 +2,15 @@ using System;
 using System.Collections;
 using UnityEngine;
 
+/// <summary>Estilo de transición entre rooms.</summary>
+public enum TransitionStyle
+{
+    /// Corte con fundido a negro (lugares distintos: paisaje ↔ cueva).
+    FadeCut,
+    /// Paneo suave estilo Metroid (pantallas adyacentes del mismo bioma).
+    Pan
+}
+
 public class CameraController : SingletonBehaviour<CameraController>
 {
     [Header("Follow")]
@@ -10,8 +19,10 @@ public class CameraController : SingletonBehaviour<CameraController>
 
     [Header("Transition")]
     [SerializeField] private RoomBoundary startingRoom;
-    [Tooltip("Tiempo que la pantalla queda cubierta por el fundido antes de saltar al nuevo room. Debe ser >= Fade Out Duration del ScreenFader.")]
+    [Tooltip("FadeCut: tiempo que la pantalla queda cubierta por el fundido antes de saltar. Debe ser >= Fade Out Duration del ScreenFader.")]
     [SerializeField] private float coverDuration = 0.25f;
+    [Tooltip("Pan (Metroid): duración del paneo suave entre rooms adyacentes.")]
+    [SerializeField] private float panDuration = 0.9f;
 
     private Camera cam;
     private RoomBoundary currentRoom;
@@ -27,6 +38,13 @@ public class CameraController : SingletonBehaviour<CameraController>
     /// </summary>
     public static event Action<RoomBoundary> RoomChanged;
     public static event Action<RoomBoundary> TransitionStarted;
+
+    /// <summary>
+    /// Se dispara al comenzar un paneo (Pan), antes de mover la cámara. Entrega el room destino
+    /// y la posición de reposo de la cámara al final del paneo. El parallax lo usa para congelar
+    /// los fondos en el mundo y revelar el room entrante. No se dispara en FadeCut.
+    /// </summary>
+    public static event Action<RoomBoundary, Vector3> PanBegan;
 
     protected override void Awake()
     {
@@ -75,10 +93,12 @@ public class CameraController : SingletonBehaviour<CameraController>
         RoomChanged?.Invoke(currentRoom);
     }
 
-    public void TransitionToRoom(RoomBoundary newRoom)
+    public void TransitionToRoom(RoomBoundary newRoom) => TransitionToRoom(newRoom, TransitionStyle.FadeCut);
+
+    public void TransitionToRoom(RoomBoundary newRoom, TransitionStyle style)
     {
         if (newRoom == null || isTransitioning || newRoom == currentRoom) return;
-        StartCoroutine(TransitionRoutine(newRoom));
+        StartCoroutine(style == TransitionStyle.Pan ? PanRoutine(newRoom) : TransitionRoutine(newRoom));
     }
 
     public void SnapToRoom(RoomBoundary room)
@@ -118,6 +138,38 @@ public class CameraController : SingletonBehaviour<CameraController>
             cam.transform.position = ComputeRestingPosition(newRoom, cam.transform.position.z);
             followVelocity = Vector3.zero;
         }
+        RoomChanged?.Invoke(currentRoom);
+
+        Time.timeScale = 1f;
+        isTransitioning = false;
+    }
+
+    // Paneo suave estilo Metroid: la cámara se desliza del room viejo al nuevo, sin negro.
+    private IEnumerator PanRoutine(RoomBoundary newRoom)
+    {
+        isTransitioning = true;
+        Time.timeScale = 0f;
+
+        if (cam == null) cam = Camera.main;
+        Vector3 startPos = cam.transform.position;
+        Vector3 endPos = ComputeRestingPosition(newRoom, startPos.z);
+
+        // Avisar al parallax antes de mover la cámara: congela el fondo saliente en su lugar
+        // y muestra el entrante world-locked en endPos, para que el paneo lo revele sin duplicar.
+        PanBegan?.Invoke(newRoom, endPos);
+
+        float elapsed = 0f;
+        while (elapsed < panDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / panDuration));
+            cam.transform.position = Vector3.Lerp(startPos, endPos, t);
+            yield return null;
+        }
+        cam.transform.position = endPos;
+
+        currentRoom = newRoom;
+        followVelocity = Vector3.zero;
         RoomChanged?.Invoke(currentRoom);
 
         Time.timeScale = 1f;
@@ -170,6 +222,7 @@ public class CameraController : SingletonBehaviour<CameraController>
     private void OnValidate()
     {
         coverDuration = Mathf.Max(0f, coverDuration);
+        panDuration = Mathf.Max(0.05f, panDuration);
         followSmoothTime = Mathf.Max(0f, followSmoothTime);
     }
 }

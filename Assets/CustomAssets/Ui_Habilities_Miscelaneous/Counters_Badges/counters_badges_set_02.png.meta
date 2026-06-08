@@ -1,0 +1,533 @@
+fileFormatVersion: 2
+guid: 1a1765de808d5964baa9d9100bfab8e0
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -9138852986542195844
+    second: counters_badges_set_02_0
+  - first:
+      213: -7310082216420284208
+    second: counters_badges_set_02_1
+  - first:
+      213: 5963060252005450512
+    second: counters_badges_set_02_2
+  - first:
+      213: 6587038831074423524
+    second: counters_badges_set_02_3
+  - first:
+      213: -2780347819850918880
+    second: counters_badges_set_02_4
+  - first:
+      213: 3964978915805350872
+    second: counters_badges_set_02_5
+  - first:
+      213: -947793038619439308
+    second: counters_badges_set_02_6
+  - first:
+      213: 6231056376055660799
+    second: counters_badges_set_02_7
+  - first:
+      213: 3558908029434511647
+    second: counters_badges_set_02_8
+  - first:
+      213: 1139163756961546721
+    second: counters_badges_set_02_9
+  - first:
+      213: 8308806784563205090
+    second: counters_badges_set_02_10
+  - first:
+      213: -134001923291944047
+    second: counters_badges_set_02_11
+  - first:
+      213: 9028899395798493738
+    second: counters_badges_set_02_12
+  - first:
+      213: -5001144982643579540
+    second: counters_badges_set_02_13
+  - first:
+      213: -831638025260736425
+    second: counters_badges_set_02_14
+  - first:
+      213: 6499685521187901757
+    second: counters_badges_set_02_15
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: counters_badges_set_02_0
+      rect:
+        serializedVersion: 2
+        x: 106
+        y: 508
+        width: 186
+        height: 408
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7b72a2e0a54c2180800000000000000
+      internalID: -9138852986542195844
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: counters_badges_set_02_1
+      rect:
+        serializedVersion: 2
+        x: 398
+        y: 504
+        width: 229
+        height: 409
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0d86e5364fe5d8a90800000000000000
+      internalID: -7310082216420284208
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: counters_badges_set_02_2
+      rect:
+        serializedVersion: 2
+        x: 710
+        y: 521
+        width: 226
+        height: 394
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 013490f94bb01c250800000000000000
+      internalID: 5963060252005450512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: counters_badges_set_02_3
+      rect:
+        serializedVersion: 2
+        x: 929
+        y: 784
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e235efcaecd96b50800000000000000
+      internalID: 6587038831074423524
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: counters_badges_set_02_4
+      rect:
+        serializedVersion: 2
+        x: 269
+        y: 710
+        width: 32
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02411c583683a69d0800000000000000
+      internalID: -2780347819850918880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: counters_badges_set_02_5
+      rect:
+        serializedVersion: 2
+        x: 92
+        y: 256
+        width: 207
+        height: 182
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8dbcd7a015f660730800000000000000
+      internalID: 3964978915805350872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: counters_badges_set_02_6
+      rect:
+        serializedVersion: 2
+        x: 412
+        y: 401
+        width: 28
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 43f0084c043c8d2f0800000000000000
+      internalID: -947793038619439308
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: counters_badges_set_02_7
+      rect:
+        serializedVersion: 2
+        x: 585
+        y: 402
+        width: 28
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff00b3ea2c8297650800000000000000
+      internalID: 6231056376055660799
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: counters_badges_set_02_8
+      rect:
+        serializedVersion: 2
+        x: 710
+        y: 108
+        width: 235
+        height: 346
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f11cab23ff7c36130800000000000000
+      internalID: 3558908029434511647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: counters_badges_set_02_9
+      rect:
+        serializedVersion: 2
+        x: 377
+        y: 165
+        width: 270
+        height: 229
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e141b2c66f1fcf00800000000000000
+      internalID: 1139163756961546721
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: counters_badges_set_02_10
+      rect:
+        serializedVersion: 2
+        x: 381
+        y: 369
+        width: 31
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e3de35afbfce4370800000000000000
+      internalID: 8308806784563205090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: counters_badges_set_02_11
+      rect:
+        serializedVersion: 2
+        x: 83
+        y: 186
+        width: 67
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19be6f2f5fde32ef0800000000000000
+      internalID: -134001923291944047
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: counters_badges_set_02_12
+      rect:
+        serializedVersion: 2
+        x: 169
+        y: 111
+        width: 68
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2aee4fc9281d4d70800000000000000
+      internalID: 9028899395798493738
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: counters_badges_set_02_13
+      rect:
+        serializedVersion: 2
+        x: 248
+        y: 187
+        width: 68
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c656d4fa22d589ab0800000000000000
+      internalID: -5001144982643579540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: counters_badges_set_02_14
+      rect:
+        serializedVersion: 2
+        x: 417
+        y: 138
+        width: 55
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75060aa4f9d6574f0800000000000000
+      internalID: -831638025260736425
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: counters_badges_set_02_15
+      rect:
+        serializedVersion: 2
+        x: 553
+        y: 139
+        width: 55
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3197227b85833a50800000000000000
+      internalID: 6499685521187901757
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      counters_badges_set_02_0: -9138852986542195844
+      counters_badges_set_02_1: -7310082216420284208
+      counters_badges_set_02_10: 8308806784563205090
+      counters_badges_set_02_11: -134001923291944047
+      counters_badges_set_02_12: 9028899395798493738
+      counters_badges_set_02_13: -5001144982643579540
+      counters_badges_set_02_14: -831638025260736425
+      counters_badges_set_02_15: 6499685521187901757
+      counters_badges_set_02_2: 5963060252005450512
+      counters_badges_set_02_3: 6587038831074423524
+      counters_badges_set_02_4: -2780347819850918880
+      counters_badges_set_02_5: 3964978915805350872
+      counters_badges_set_02_6: -947793038619439308
+      counters_badges_set_02_7: 6231056376055660799
+      counters_badges_set_02_8: 3558908029434511647
+      counters_badges_set_02_9: 1139163756961546721
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

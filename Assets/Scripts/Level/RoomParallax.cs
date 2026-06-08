@@ -32,20 +32,36 @@ public class RoomParallax : MonoBehaviour
     private void OnEnable()
     {
         CameraController.RoomChanged += HandleRoomChanged;
+        CameraController.PanBegan += HandlePanBegan;
     }
 
     private void OnDisable()
     {
         CameraController.RoomChanged -= HandleRoomChanged;
+        CameraController.PanBegan -= HandlePanBegan;
     }
 
-    // RoomChanged ocurre bajo el negro (o en el arranque): swap instantáneo, invisible para el jugador.
+    // RoomChanged ocurre bajo el negro (FadeCut), al final del paneo (Pan) o en el arranque.
     private void HandleRoomChanged(RoomBoundary newRoom)
     {
-        bool shouldBeActive = newRoom == owningRoom;
-        if (shouldBeActive == isOwned) return;
-        isOwned = shouldBeActive;
+        isOwned = newRoom == owningRoom;
+        controller.ResumeAfterPan(); // limpia cualquier freeze de paneo y re-ancla sin saltos
         SetVisible(isOwned);
+    }
+
+    // Inicio de un paneo: el fondo entrante se muestra congelado en el destino y el saliente
+    // se congela en su lugar, así la cámara los revela/oculta deslizándose, sin duplicar.
+    private void HandlePanBegan(RoomBoundary destRoom, Vector3 destCameraPos)
+    {
+        if (owningRoom == destRoom)
+        {
+            SetVisible(true);
+            controller.FreezeForPan(destCameraPos);
+        }
+        else if (isOwned)
+        {
+            controller.FreezeForPan();
+        }
     }
 
     private void SetVisible(bool active)

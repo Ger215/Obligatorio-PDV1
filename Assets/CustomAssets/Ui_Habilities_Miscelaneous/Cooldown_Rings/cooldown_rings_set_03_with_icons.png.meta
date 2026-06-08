@@ -1,0 +1,325 @@
+fileFormatVersion: 2
+guid: 0ac3ffb5caef30142bbe41a147228f26
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 6954526964358735149
+    second: cooldown_rings_set_03_with_icons_0
+  - first:
+      213: -1874674209424440731
+    second: cooldown_rings_set_03_with_icons_1
+  - first:
+      213: 7227059426352730329
+    second: cooldown_rings_set_03_with_icons_2
+  - first:
+      213: 6163369623780727046
+    second: cooldown_rings_set_03_with_icons_3
+  - first:
+      213: -2128225654585903509
+    second: cooldown_rings_set_03_with_icons_4
+  - first:
+      213: 2928475519273130052
+    second: cooldown_rings_set_03_with_icons_5
+  - first:
+      213: -8518578734820279196
+    second: cooldown_rings_set_03_with_icons_6
+  - first:
+      213: 6763477084947145729
+    second: cooldown_rings_set_03_with_icons_7
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: cooldown_rings_set_03_with_icons_0
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 613
+        width: 176
+        height: 179
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d256a7b6d61738060800000000000000
+      internalID: 6954526964358735149
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cooldown_rings_set_03_with_icons_1
+      rect:
+        serializedVersion: 2
+        x: 303
+        y: 610
+        width: 178
+        height: 183
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5628bad2db1dbf5e0800000000000000
+      internalID: -1874674209424440731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cooldown_rings_set_03_with_icons_2
+      rect:
+        serializedVersion: 2
+        x: 546
+        y: 612
+        width: 180
+        height: 180
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9d09466f14cab4460800000000000000
+      internalID: 7227059426352730329
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cooldown_rings_set_03_with_icons_3
+      rect:
+        serializedVersion: 2
+        x: 781
+        y: 610
+        width: 180
+        height: 182
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60912e49400b88550800000000000000
+      internalID: 6163369623780727046
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cooldown_rings_set_03_with_icons_4
+      rect:
+        serializedVersion: 2
+        x: 71
+        y: 243
+        width: 171
+        height: 176
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b66b8800b060772e0800000000000000
+      internalID: -2128225654585903509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cooldown_rings_set_03_with_icons_5
+      rect:
+        serializedVersion: 2
+        x: 307
+        y: 242
+        width: 171
+        height: 177
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 448d3b318f804a820800000000000000
+      internalID: 2928475519273130052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cooldown_rings_set_03_with_icons_6
+      rect:
+        serializedVersion: 2
+        x: 535
+        y: 241
+        width: 188
+        height: 178
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 46c37d726cde7c980800000000000000
+      internalID: -8518578734820279196
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cooldown_rings_set_03_with_icons_7
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 241
+        width: 168
+        height: 177
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 104e4c60392bcdd50800000000000000
+      internalID: 6763477084947145729
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      cooldown_rings_set_03_with_icons_0: 6954526964358735149
+      cooldown_rings_set_03_with_icons_1: -1874674209424440731
+      cooldown_rings_set_03_with_icons_2: 7227059426352730329
+      cooldown_rings_set_03_with_icons_3: 6163369623780727046
+      cooldown_rings_set_03_with_icons_4: -2128225654585903509
+      cooldown_rings_set_03_with_icons_5: 2928475519273130052
+      cooldown_rings_set_03_with_icons_6: -8518578734820279196
+      cooldown_rings_set_03_with_icons_7: 6763477084947145729
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

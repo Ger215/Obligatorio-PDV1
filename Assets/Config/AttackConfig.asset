@@ -19,5 +19,5 @@ MonoBehaviour:
   windUpDuration: 0.12
   hitDuration: 0.08
   recoveryDuration: 0.12
-  attackCooldown: 0.45
+  attackCooldown: 0.4
   debugAttackLogs: 1

@@ -4,7 +4,13 @@ public class RoomTrigger : MonoBehaviour
 {
     [Header("Transition")]
     [SerializeField] private RoomBoundary targetRoom;
-    [SerializeField] private float transitionDuration = 0.35f;
+    [Tooltip("FadeCut: corte con fundido a negro (lugares distintos). Pan: paneo suave estilo Metroid (mismo bioma).")]
+    [SerializeField] private TransitionStyle transitionStyle = TransitionStyle.FadeCut;
+
+    [Header("Bidireccional (opcional)")]
+    [Tooltip("Si se asigna, al moverse en la dirección OPUESTA el trigger manda a este room. " +
+             "Útil para escaleras/pasajes que se cruzan en ambos sentidos. Dejar vacío para trigger de una sola dirección.")]
+    [SerializeField] private RoomBoundary reverseRoom;
 
     [Header("One Way")]
     [SerializeField] private bool oneWay;
@@ -26,48 +32,51 @@ public class RoomTrigger : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        EvaluateTransition(other);
+    }
+
+    // Se reevalúa cada frame mientras el player está DENTRO del trigger. Necesario para
+    // escaleras/pasajes donde el player cambia de sentido (sube y baja) sin salir del collider:
+    // OnTriggerEnter2D solo se dispara al entrar, así que no detectaría el cambio de dirección.
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        EvaluateTransition(other);
+    }
+
+    private void EvaluateTransition(Collider2D other)
+    {
         PlayerController player = other.GetComponentInParent<PlayerController>();
-        if (player == null)
+        if (player == null || targetRoom == null || triggered)
         {
-            Debug.Log($"[RoomTrigger:{name}] OnTriggerEnter2D — colisionó '{other.name}' pero NO tiene PlayerController.", this);
-            return;
-        }
-
-        if (targetRoom == null)
-        {
-            Debug.LogWarning($"[RoomTrigger:{name}] targetRoom NO está asignado en el Inspector.", this);
-            return;
-        }
-
-        if (triggered)
-        {
-            Debug.Log($"[RoomTrigger:{name}] Ya fue disparado (oneWay), ignorando.", this);
             return;
         }
 
         Direction requiredDirection = overrideDirection ? manualDirection : GetDirectionToTargetRoom();
-        Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
-        Vector2 vel = rb != null ? rb.linearVelocity : Vector2.zero;
-        bool movingCorrectly = IsPlayerMovingInDirection(player, requiredDirection);
 
-        Debug.Log($"[RoomTrigger:{name}] Player entró. targetRoom={targetRoom.name}, requiredDir={requiredDirection}, velocity={vel}, movingCorrectly={movingCorrectly}, CameraController={(CameraController.Instance != null ? "OK" : "NULL")}, currentRoom={(CameraController.Instance?.CurrentRoom != null ? CameraController.Instance.CurrentRoom.name : "NULL")}", this);
-
-        if (!movingCorrectly)
+        // Resolver hacia qué room ir según el sentido del movimiento.
+        RoomBoundary destination = null;
+        if (IsPlayerMovingInDirection(player, requiredDirection))
         {
-            Debug.Log($"[RoomTrigger:{name}] Transición bloqueada — el player no se mueve en dirección {requiredDirection} (vel={vel}).", this);
+            destination = targetRoom;
+        }
+        else if (reverseRoom != null && IsPlayerMovingInDirection(player, Opposite(requiredDirection)))
+        {
+            destination = reverseRoom;
+        }
+
+        if (destination == null)
+        {
             return;
         }
 
         CameraController camera = CameraController.Instance;
-        if (camera != null && camera.CurrentRoom != targetRoom)
+        if (camera == null || camera.CurrentRoom == destination)
         {
-            Debug.Log($"[RoomTrigger:{name}] Iniciando TransitionToRoom → {targetRoom.name}", this);
-            camera.TransitionToRoom(targetRoom);
+            return;
         }
-        else
-        {
-            Debug.LogWarning($"[RoomTrigger:{name}] No se inicia transición — camera={(camera != null ? "OK" : "NULL")}, currentRoom ya es targetRoom={camera?.CurrentRoom == targetRoom}", this);
-        }
+
+        Debug.Log($"[RoomTrigger:{name}] TransitionToRoom → {destination.name} ({transitionStyle})", this);
+        camera.TransitionToRoom(destination, transitionStyle);
 
         if (oneWay)
         {
@@ -88,6 +97,17 @@ public class RoomTrigger : MonoBehaviour
         else
         {
             return delta.y >= 0f ? Direction.Up : Direction.Down;
+        }
+    }
+
+    private static Direction Opposite(Direction direction)
+    {
+        switch (direction)
+        {
+            case Direction.Right: return Direction.Left;
+            case Direction.Left: return Direction.Right;
+            case Direction.Up: return Direction.Down;
+            default: return Direction.Up;
         }
     }
 
@@ -138,8 +158,4 @@ public class RoomTrigger : MonoBehaviour
         }
     }
 
-    private void OnValidate()
-    {
-        transitionDuration = Mathf.Max(0.05f, transitionDuration);
-    }
 }
