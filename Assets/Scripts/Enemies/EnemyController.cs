@@ -20,6 +20,8 @@ public class EnemyController : MonoBehaviour
 
     [Header("Combat Facing")]
     [SerializeField] private float attackPointDistance = 0.6f;
+    [Tooltip("Activar si el arte del sprite mira a la IZQUIERDA por defecto. Flipea con flipX, nunca con rotación/escala del transform.")]
+    [SerializeField] private bool spriteFacesLeft = false;
 
     [Header("Aggro")]
     [Tooltip("Radio dentro del cual el enemigo detecta y persigue al player. Fuera de este radio queda idle/wander.")]
@@ -55,7 +57,9 @@ public class EnemyController : MonoBehaviour
     private static readonly int AnimHit       = Animator.StringToHash("hit");
     private static readonly int AnimDie       = Animator.StringToHash("die");
 
-    private EnemyType enemyType;
+    [Header("Type")]
+    [Tooltip("Tipo de enemigo. Walker y Fast NO saltan. Walker patrulla (usá Wander When Idle).")]
+    [SerializeField] private EnemyType enemyType = EnemyType.Chaser;
     private float knockbackMultiplier = 1f;
     private Transform playerTarget;
     private bool isDead;
@@ -152,11 +156,6 @@ public class EnemyController : MonoBehaviour
         {
             facingDirection = deltaToPlayer.x > 0f ? 1 : -1;
             UpdateAttackPointPosition();
-
-            if (spriteRenderer != null)
-            {
-                spriteRenderer.flipX = facingDirection == -1;
-            }
         }
 
         if (Mathf.Abs(deltaToPlayer.x) <= attackDistance && Mathf.Abs(deltaToPlayer.y) <= verticalAttackTolerance)
@@ -171,6 +170,20 @@ public class EnemyController : MonoBehaviour
                     animator?.SetTrigger(AnimAttack);
             }
         }
+    }
+
+    // Facing por ROTACIÓN Y del root, en LateUpdate (después del Animator, que no toca la
+    // rotación del transform). Inmune a Write Defaults / keyframes de flipX. La rotación
+    // arrastra al attackPoint (hijo) al lado correcto. spriteFacesLeft compensa el arte
+    // que mira a la izquierda por defecto.
+    private void LateUpdate()
+    {
+        if (isDead) return;
+        float yaw = (facingDirection == 1) == spriteFacesLeft ? 180f : 0f;
+        transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+
+        // El attackPoint se reubica DESPUÉS de rotar, en mundo, para que la rotación no lo arrastre.
+        UpdateAttackPointPosition();
     }
 
     public void ApplyKnockback(float forceX)
@@ -317,8 +330,6 @@ public class EnemyController : MonoBehaviour
                 wanderDirection = -wanderDirection;
                 facingDirection = wanderDirection;
             }
-
-            if (spriteRenderer != null) spriteRenderer.flipX = facingDirection == -1;
         }
 
         rb.linearVelocity = new Vector2(wanderDirection * moveSpeed * wanderSpeedMultiplier, rb.linearVelocity.y);
@@ -434,9 +445,10 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
-        float scale = Mathf.Abs(transform.localScale.x);
-        float localDist = scale > 0.001f ? attackPointDistance / scale : attackPointDistance;
-        attackSystem.AttackPointTransform.localPosition = new Vector3(facingDirection * localDist, 0f, 0f);
+        // Posición en MUNDO según facingDirection, independiente de la rotación Y del root y
+        // de la orientación del arte. Así el attackPoint siempre cae del lado real al que mira.
+        Transform ap = attackSystem.AttackPointTransform;
+        ap.position = transform.position + Vector3.right * (facingDirection * attackPointDistance);
     }
 
     private void HandleAttackResolved(bool critical, int damage, int targetsHit)

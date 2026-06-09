@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class AudioManager : SingletonBehaviour<AudioManager>
@@ -6,6 +7,21 @@ public class AudioManager : SingletonBehaviour<AudioManager>
     [SerializeField] private AudioSource musicSource;
     [SerializeField] private AudioSource sfxSource;
 
+    [Header("Música")]
+    [Tooltip("Duración del crossfade al cambiar de tema (por room).")]
+    [SerializeField] private float musicFadeDuration = 0.6f;
+
+    private float baseMusicVolume = 1f;
+    private Coroutine musicFadeRoutine;
+
+    private void Start()
+    {
+        if (musicSource != null)
+        {
+            baseMusicVolume = musicSource.volume <= 0.01f ? 1f : musicSource.volume;
+        }
+    }
+
     public void PlayBackgroundMusic()
     {
         if (audioConfig == null || musicSource == null || audioConfig.backgroundMusic == null)
@@ -13,14 +29,56 @@ public class AudioManager : SingletonBehaviour<AudioManager>
             return;
         }
 
-        if (musicSource.clip == audioConfig.backgroundMusic && musicSource.isPlaying)
+        PlayMusic(audioConfig.backgroundMusic);
+    }
+
+    /// <summary>
+    /// Cambia el tema de fondo con crossfade. Pensado para música por room.
+    /// clip null = no cambia nada. Si ya está sonando ese clip, no hace nada.
+    /// </summary>
+    public void PlayMusic(AudioClip clip, bool loop = true)
+    {
+        if (musicSource == null || clip == null) return;
+        if (musicSource.clip == clip && musicSource.isPlaying) return;
+
+        if (musicFadeRoutine != null) StopCoroutine(musicFadeRoutine);
+        musicFadeRoutine = StartCoroutine(CrossfadeTo(clip, loop));
+    }
+
+    private IEnumerator CrossfadeTo(AudioClip clip, bool loop)
+    {
+        // Fade out del tema actual (en tiempo no escalado: las transiciones usan timeScale = 0).
+        if (musicSource.isPlaying && musicFadeDuration > 0f)
         {
-            return;
+            float t = 0f;
+            float startVol = musicSource.volume;
+            while (t < musicFadeDuration)
+            {
+                t += Time.unscaledDeltaTime;
+                musicSource.volume = Mathf.Lerp(startVol, 0f, t / musicFadeDuration);
+                yield return null;
+            }
         }
 
-        musicSource.clip = audioConfig.backgroundMusic;
-        musicSource.loop = true;
+        musicSource.clip = clip;
+        musicSource.loop = loop;
+        musicSource.volume = 0f;
         musicSource.Play();
+
+        // Fade in del tema nuevo.
+        if (musicFadeDuration > 0f)
+        {
+            float t = 0f;
+            while (t < musicFadeDuration)
+            {
+                t += Time.unscaledDeltaTime;
+                musicSource.volume = Mathf.Lerp(0f, baseMusicVolume, t / musicFadeDuration);
+                yield return null;
+            }
+        }
+
+        musicSource.volume = baseMusicVolume;
+        musicFadeRoutine = null;
     }
 
     public void PlayJump() => PlayClip(audioConfig != null ? audioConfig.jump : null);

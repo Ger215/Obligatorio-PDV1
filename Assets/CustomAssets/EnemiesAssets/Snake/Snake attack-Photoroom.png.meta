@@ -1,7 +1,25 @@
 fileFormatVersion: 2
-guid: a17fd815ac446494aa07992233bb6a05
+guid: f54d3d207bf04af40ae29db5ccf1b61f
 TextureImporter:
-  internalIDToNameTable: []
+  internalIDToNameTable:
+  - first:
+      213: -8710316244260272045
+    second: Snake attack-Photoroom_0
+  - first:
+      213: 5890895764639988410
+    second: Snake attack-Photoroom_1
+  - first:
+      213: 4309231686245995968
+    second: Snake attack-Photoroom_2
+  - first:
+      213: -8491168336710650924
+    second: Snake attack-Photoroom_3
+  - first:
+      213: -115045457082293552
+    second: Snake attack-Photoroom_4
+  - first:
+      213: 2889603150899120636
+    second: Snake attack-Photoroom_5
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -34,7 +52,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -67,21 +85,8 @@ TextureImporter:
   swizzle: 50462976
   cookieLightType: 0
   platformSettings:
-  - serializedVersion: 3
+  - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: 4
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 3
-    buildTarget: Standalone
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -93,8 +98,8 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 3
-    buildTarget: WebGL
+  - serializedVersion: 4
+    buildTarget: Standalone
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -110,201 +115,159 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Obj_chest_0
+      name: Snake attack-Photoroom_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 32
-        width: 16
-        height: 16
+        x: 42
+        y: 51
+        width: 136
+        height: 96
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 70d232a0c1d307b4597836fcbdcd6bbf
-      internalID: 448799341
+      spriteID: 3584d8b668dbe1780800000000000000
+      internalID: -8710316244260272045
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Obj_chest_1
+      name: Snake attack-Photoroom_1
       rect:
         serializedVersion: 2
-        x: 16
-        y: 32
-        width: 16
-        height: 16
+        x: 234
+        y: 51
+        width: 136
+        height: 96
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 38e70e28af61dd643b72986becdf0e57
-      internalID: 336359500
+      spriteID: aba38349c7aa0c150800000000000000
+      internalID: 5890895764639988410
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Obj_chest_2
+      name: Snake attack-Photoroom_2
       rect:
         serializedVersion: 2
-        x: 32
-        y: 32
-        width: 16
-        height: 16
+        x: 434
+        y: 51
+        width: 128
+        height: 88
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: ef1b0e6d9c38ec74ab0baf4a99eaee21
-      internalID: -198950500
+      spriteID: 0c5dc8923677dcb30800000000000000
+      internalID: 4309231686245995968
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Obj_chest_3
+      name: Snake attack-Photoroom_3
       rect:
         serializedVersion: 2
-        x: 0
-        y: 16
-        width: 16
-        height: 16
+        x: 586
+        y: 51
+        width: 168
+        height: 104
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: ca6f3f9cc91eea84fac5d2ca58954e60
-      internalID: 996864198
+      spriteID: 4d3315ac26f492a80800000000000000
+      internalID: -8491168336710650924
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Obj_chest_4
+      name: Snake attack-Photoroom_4
       rect:
         serializedVersion: 2
-        x: 16
-        y: 16
-        width: 16
-        height: 16
+        x: 758
+        y: 51
+        width: 188
+        height: 80
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 7743d1925e50dd34a9a817ffec8230e1
-      internalID: -2043782318
+      spriteID: 0d2669d24c6476ef0800000000000000
+      internalID: -115045457082293552
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Obj_chest_5
+      name: Snake attack-Photoroom_5
       rect:
         serializedVersion: 2
-        x: 32
-        y: 16
-        width: 16
-        height: 16
+        x: 978
+        y: 51
+        width: 160
+        height: 88
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 07bcb27c08088e44e9a464d746d4e803
-      internalID: -1522184078
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Obj_chest_6
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: ca8dfc573c1c09e4a853331d6a696f18
-      internalID: -2065246461
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Obj_chest_7
-      rect:
-        serializedVersion: 2
-        x: 16
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: c7a5da8ecc01b3149b32f772e0fbbaf4
-      internalID: -1414184853
+      spriteID: cf9013781cee91820800000000000000
+      internalID: 2889603150899120636
       vertices: []
       indices: 
       edges: []
       weights: []
     outline: []
+    customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
     nameFileIdTable:
-      Obj_chest_0: 448799341
-      Obj_chest_1: 336359500
-      Obj_chest_2: -198950500
-      Obj_chest_3: 996864198
-      Obj_chest_4: -2043782318
-      Obj_chest_5: -1522184078
-      Obj_chest_6: -2065246461
-      Obj_chest_7: -1414184853
+      Snake attack-Photoroom_0: -8710316244260272045
+      Snake attack-Photoroom_1: 5890895764639988410
+      Snake attack-Photoroom_2: 4309231686245995968
+      Snake attack-Photoroom_3: -8491168336710650924
+      Snake attack-Photoroom_4: -115045457082293552
+      Snake attack-Photoroom_5: 2889603150899120636
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 254632
-  packageName: 2D TileSet Platformer
-  packageVersion: 1.0
-  assetPath: Assets/PlatformerTileset/Objects/Obj_chest.png
-  uploadId: 694875
