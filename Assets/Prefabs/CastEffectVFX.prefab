@@ -1,0 +1,125 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5024635126401171358
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5780769264609709456}
+  - component: {fileID: 3175318662732815891}
+  - component: {fileID: 1702842003924195566}
+  m_Layer: 0
+  m_Name: CastEffectVFX
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5780769264609709456
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5024635126401171358}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 213.65523, y: -12.71464, z: 0}
+  m_LocalScale: {x: 5.2691, y: 5.2691, z: 5.2691}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &3175318662732815891
+SpriteRenderer:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5024635126401171358}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: -4909067000698195473, guid: 0e5732615d897c34e87026e5db57cc37, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 0.34, y: 0.21}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
+--- !u!114 &1702842003924195566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5024635126401171358}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd9d4f2f85c5f4fbcb737a79da78d579, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpriteFrameAnimator
+  frames:
+  - {fileID: -4909067000698195473, guid: 0e5732615d897c34e87026e5db57cc37, type: 3}
+  - {fileID: 6649554112912812771, guid: 823397ee5741dbe44afc0e5f328cf0a1, type: 3}
+  - {fileID: -596167150087806187, guid: a47426c80915a1541936530c60b2dee4, type: 3}
+  - {fileID: 2550147045783443552, guid: d21effae7aacc1e4684b1391f8e9046c, type: 3}
+  - {fileID: 2972648613405437155, guid: ffa5748edf2d4e945816f47ce1c0f526, type: 3}
+  - {fileID: 7240000706786194456, guid: c3dfbeee0ba2c6743a60d4a012bedb27, type: 3}
+  - {fileID: -5307842839225028199, guid: b4d72b0fa09be274ea57b0f97347046b, type: 3}
+  - {fileID: -2152956272236675824, guid: 68946d68668ee9c46a400b71711134d4, type: 3}
+  - {fileID: -5918034676887165958, guid: 4395316080a329a4aa66d8544bb14977, type: 3}
+  - {fileID: -8441987826522407378, guid: 29a36dc9daa970a419f4165a3dda05f0, type: 3}
+  - {fileID: -5157609965727380732, guid: 772ab5c4f79c680449f4cfa246ba6d0f, type: 3}
+  - {fileID: -4385610531820949842, guid: b980c3562daf60d4e8719c19628f7e1a, type: 3}
+  - {fileID: 3896934606138413405, guid: 2d912446857d5ae48a274a631e930a94, type: 3}
+  - {fileID: -6511305824925704814, guid: 8962b753ac386484db317d0325d3bb99, type: 3}
+  - {fileID: 2183660777929729226, guid: 03bd8769022be4d4bb717f78056effd4, type: 3}
+  - {fileID: 3104976303508066234, guid: 6e91b5d2e2c30c04eb9de7001502cb02, type: 3}
+  fps: 16
+  playOnce: 0
