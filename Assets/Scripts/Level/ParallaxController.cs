@@ -44,11 +44,19 @@ public class ParallaxController : MonoBehaviour
     private float farthestBack;
     private Vector3 lastCamPos;
     private int frameCount;
+    private bool frozen;
 
-    private void Start()
+    private bool initialized;
+
+    private void Start() => EnsureInitialized();
+
+    // Setup idempotente. Se llama desde Start (room visible) y desde FreezeForPan (room entrante
+    // de un pan), para que el primer pan tenga materiales/UV/velocidades listos igual que los siguientes.
+    private void EnsureInitialized()
     {
+        if (initialized) return;
         if (cam == null && Camera.main != null) cam = Camera.main.transform;
-        if (cam == null) { Debug.LogError($"[Parallax:{name}] Sin cámara, desactivando."); enabled = false; return; }
+        if (cam == null) return; // sin cámara todavía: reintenta en el próximo llamado
 
         int count = transform.childCount;
         backgrounds = new Transform[count];
@@ -106,6 +114,7 @@ public class ParallaxController : MonoBehaviour
         }
 
         lastCamPos = cam.position;
+        initialized = true;
     }
 
     private string DetectTextureProperty(Material m)
@@ -116,9 +125,51 @@ public class ParallaxController : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Congela el parallax para un paneo (Pan): deja de seguir la cámara y de scrollear UV,
+    /// quedando fijo en el mundo para que la cámara lo revele al deslizarse. No afecta FadeCut.
+    /// </summary>
+    public void FreezeForPan()
+    {
+        EnsureInitialized();
+        frozen = true;
+    }
+
+    /// <summary>
+    /// Igual que FreezeForPan() pero reposiciona el fondo EXACTAMENTE donde lo dejaría LateUpdate
+    /// al reanudar (aplicando followCameraX/followCameraY sobre la pos de cámara destino) y resetea
+    /// el UV. Así el room entrante se revela ya en su posición final y no pega salto al terminar el
+    /// pan — clave cuando los rooms tienen alturas distintas y followCameraY está activo.
+    /// </summary>
+    public void FreezeForPan(Vector3 cameraPos)
+    {
+        EnsureInitialized();
+        frozen = true;
+
+        float x = followCameraX ? cameraPos.x : transform.position.x;
+        float y = followCameraY ? cameraPos.y : transform.position.y;
+        transform.position = new Vector3(x, y, transform.position.z);
+
+        if (mats == null) return;
+        for (int i = 0; i < mats.Length; i++)
+        {
+            if (mats[i] == null || texProps[i] == null) continue;
+            accumOffset[i] = Vector2.zero;
+            mats[i].SetTextureOffset(texProps[i], Vector2.zero);
+        }
+    }
+
+    /// <summary>Vuelve al parallax normal tras el paneo, sin saltos (re-ancla lastCamPos).</summary>
+    public void ResumeAfterPan()
+    {
+        frozen = false;
+        if (cam != null) lastCamPos = cam.position;
+    }
+
     private void LateUpdate()
     {
-        if (cam == null) return;
+        EnsureInitialized();
+        if (cam == null || frozen) return;
 
         if (followCameraX || followCameraY)
         {

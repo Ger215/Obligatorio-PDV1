@@ -4,10 +4,21 @@ public class RoomTrigger : MonoBehaviour
 {
     [Header("Transition")]
     [SerializeField] private RoomBoundary targetRoom;
-    [SerializeField] private float transitionDuration = 0.35f;
+    [Tooltip("FadeCut: corte con fundido a negro (lugares distintos). Pan: paneo suave estilo Metroid (mismo bioma).")]
+    [SerializeField] private TransitionStyle transitionStyle = TransitionStyle.FadeCut;
+
+    [Header("Bidireccional (opcional)")]
+    [Tooltip("Si se asigna, al moverse en la dirección OPUESTA el trigger manda a este room. " +
+             "Útil para escaleras/pasajes que se cruzan en ambos sentidos. Dejar vacío para trigger de una sola dirección.")]
+    [SerializeField] private RoomBoundary reverseRoom;
 
     [Header("One Way")]
     [SerializeField] private bool oneWay;
+
+    [Header("Direction Override")]
+    [Tooltip("Si está tildado, usa ManualDirection en vez de calcularla automáticamente.")]
+    [SerializeField] private bool overrideDirection;
+    [SerializeField] private Direction manualDirection = Direction.Down;
 
     private bool triggered;
 
@@ -21,29 +32,51 @@ public class RoomTrigger : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        EvaluateTransition(other);
+    }
+
+    // Se reevalúa cada frame mientras el player está DENTRO del trigger. Necesario para
+    // escaleras/pasajes donde el player cambia de sentido (sube y baja) sin salir del collider:
+    // OnTriggerEnter2D solo se dispara al entrar, así que no detectaría el cambio de dirección.
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        EvaluateTransition(other);
+    }
+
+    private void EvaluateTransition(Collider2D other)
+    {
         PlayerController player = other.GetComponentInParent<PlayerController>();
-        if (player == null || targetRoom == null)
+        if (player == null || targetRoom == null || triggered)
         {
             return;
         }
 
-        if (triggered)
+        Direction requiredDirection = overrideDirection ? manualDirection : GetDirectionToTargetRoom();
+
+        // Resolver hacia qué room ir según el sentido del movimiento.
+        RoomBoundary destination = null;
+        if (IsPlayerMovingInDirection(player, requiredDirection))
         {
-            return;
+            destination = targetRoom;
+        }
+        else if (reverseRoom != null && IsPlayerMovingInDirection(player, Opposite(requiredDirection)))
+        {
+            destination = reverseRoom;
         }
 
-        Direction requiredDirection = GetDirectionToTargetRoom();
-
-        if (!IsPlayerMovingInDirection(player, requiredDirection))
+        if (destination == null)
         {
             return;
         }
 
         CameraController camera = CameraController.Instance;
-        if (camera != null && camera.CurrentRoom != targetRoom)
+        if (camera == null || camera.CurrentRoom == destination)
         {
-            camera.TransitionToRoom(targetRoom);
+            return;
         }
+
+        Debug.Log($"[RoomTrigger:{name}] TransitionToRoom → {destination.name} ({transitionStyle})", this);
+        camera.TransitionToRoom(destination, transitionStyle);
 
         if (oneWay)
         {
@@ -64,6 +97,17 @@ public class RoomTrigger : MonoBehaviour
         else
         {
             return delta.y >= 0f ? Direction.Up : Direction.Down;
+        }
+    }
+
+    private static Direction Opposite(Direction direction)
+    {
+        switch (direction)
+        {
+            case Direction.Right: return Direction.Left;
+            case Direction.Left: return Direction.Right;
+            case Direction.Up: return Direction.Down;
+            default: return Direction.Up;
         }
     }
 
@@ -114,8 +158,4 @@ public class RoomTrigger : MonoBehaviour
         }
     }
 
-    private void OnValidate()
-    {
-        transitionDuration = Mathf.Max(0.05f, transitionDuration);
-    }
 }

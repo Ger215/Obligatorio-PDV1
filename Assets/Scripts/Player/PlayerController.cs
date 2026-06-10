@@ -435,7 +435,16 @@ public class PlayerController : SingletonBehaviour<PlayerController>
 
         float rawGamepad = Gamepad.current != null ? Gamepad.current.leftStick.ReadValue().x : 0f;
         float gamepadInput = Mathf.Abs(rawGamepad) > 0.2f ? rawGamepad : 0f;
-        horizontalInput = isOnLadder ? 0f : Mathf.Clamp(keyboardInput + gamepadInput, -1f, 1f);
+        float combinedHorizontal = Mathf.Clamp(keyboardInput + gamepadInput, -1f, 1f);
+
+        // Desmontarse de la escalera dando un paso al costado (única forma de salir,
+        // ya que el salto está bloqueado en la escalera). Sirve para bajarse al llegar abajo.
+        if (isOnLadder && Mathf.Abs(combinedHorizontal) > 0.5f)
+        {
+            ExitLadder();
+        }
+
+        horizontalInput = isOnLadder ? 0f : combinedHorizontal;
 
         if (Mathf.Abs(horizontalInput) > 0.01f)
         {
@@ -463,13 +472,15 @@ public class PlayerController : SingletonBehaviour<PlayerController>
                    (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)) ||
                   (Gamepad.current != null && Gamepad.current.buttonNorth.isPressed);
 
+        // No se puede saltar desde la escalera ni dentro de su zona (la tecla de salto
+        // coincide con la de trepar y causa conflictos). El salto se ignora por completo.
+        if (isOnLadder || isInLadderZone)
+        {
+            return;
+        }
+
         if (jumpPressed)
         {
-            if (isOnLadder)
-            {
-                ExitLadder();
-                isInLadderZone = false; // evita re-entrar inmediatamente
-            }
             jumpBufferCounter = jumpBufferTime;
         }
     }
@@ -528,8 +539,9 @@ public class PlayerController : SingletonBehaviour<PlayerController>
             return;
         }
 
-        // Entrar a la escalera presionando arriba o abajo
-        if (!isOnLadder && Mathf.Abs(verticalInput) > 0.1f)
+        // Entrar a la escalera presionando arriba o abajo (pero no si se está dando
+        // un paso al costado para desmontarse, así no se re-engancha al instante).
+        if (!isOnLadder && Mathf.Abs(verticalInput) > 0.1f && Mathf.Abs(horizontalInput) < 0.5f)
         {
             isOnLadder = true;
             rb.gravityScale = 0f;

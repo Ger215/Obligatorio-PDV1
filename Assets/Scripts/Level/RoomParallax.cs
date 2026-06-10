@@ -2,8 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// Asocia un ParallaxController a un RoomBoundary específico.
-/// Se activa cuando el player entra al room y se desactiva al salir.
-/// Poner en el GameObject del WorldBackground hijo de cada RoomBoundary.
+/// El swap de fondo ocurre en CameraController.RoomChanged, que sucede bajo el negro del fundido.
 /// </summary>
 [RequireComponent(typeof(ParallaxController))]
 public class RoomParallax : MonoBehaviour
@@ -12,40 +11,63 @@ public class RoomParallax : MonoBehaviour
     [SerializeField] private RoomBoundary owningRoom;
 
     private ParallaxController controller;
+    private SpriteRenderer[] sprites;
+    private bool isOwned;
 
     private void Awake()
     {
         controller = GetComponent<ParallaxController>();
+        sprites = GetComponentsInChildren<SpriteRenderer>(true);
+
         if (owningRoom == null) owningRoom = GetComponentInParent<RoomBoundary>();
         if (owningRoom == null)
         {
             Debug.LogWarning($"[RoomParallax:{name}] No encontré RoomBoundary en los padres.");
             return;
         }
-        // Arranca apagado; se activa cuando el CameraController lo pide
-        SetActive(false);
+
+        SetVisible(false);
     }
 
     private void OnEnable()
     {
         CameraController.RoomChanged += HandleRoomChanged;
+        CameraController.PanBegan += HandlePanBegan;
     }
 
     private void OnDisable()
     {
         CameraController.RoomChanged -= HandleRoomChanged;
+        CameraController.PanBegan -= HandlePanBegan;
     }
 
+    // RoomChanged ocurre bajo el negro (FadeCut), al final del paneo (Pan) o en el arranque.
     private void HandleRoomChanged(RoomBoundary newRoom)
     {
-        SetActive(newRoom == owningRoom);
+        isOwned = newRoom == owningRoom;
+        controller.ResumeAfterPan(); // limpia cualquier freeze de paneo y re-ancla sin saltos
+        SetVisible(isOwned);
     }
 
-    private void SetActive(bool active)
+    // Inicio de un paneo: el fondo entrante se muestra congelado en el destino y el saliente
+    // se congela en su lugar, así la cámara los revela/oculta deslizándose, sin duplicar.
+    private void HandlePanBegan(RoomBoundary destRoom, Vector3 destCameraPos)
     {
+        if (owningRoom == destRoom)
+        {
+            SetVisible(true);
+            controller.FreezeForPan(destCameraPos);
+        }
+        else if (isOwned)
+        {
+            controller.FreezeForPan();
+        }
+    }
+
+    private void SetVisible(bool active)
+    {
+        foreach (SpriteRenderer sr in sprites)
+            sr.enabled = active;
         controller.enabled = active;
-        // También apagamos los renderers para que no se vean cuando no es el room activo
-        Renderer[] rs = GetComponentsInChildren<Renderer>(true);
-        for (int i = 0; i < rs.Length; i++) rs[i].enabled = active;
     }
 }
