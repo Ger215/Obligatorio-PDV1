@@ -7,7 +7,12 @@ using UnityEngine.UI;
 public class GameHudController : SingletonBehaviour<GameHudController>
 {
     [Header("HUD")]
+    [Tooltip("Opcional. Texto numérico de vida. Dejalo vacío si usás solo la barra.")]
     [SerializeField] private TMP_Text healthText;
+    [Tooltip("Relleno rojo de la barra de vida (Image con Image Type = Filled). Mismo patrón que la barra del boss.")]
+    [SerializeField] private Image healthBarFill;
+    [Tooltip("Duración del deslizamiento de la barra de vida hacia el nuevo valor. 0 = instantáneo.")]
+    [SerializeField] private float healthBarLerpDuration = 0.3f;
     [SerializeField] private TMP_Text experienceText;
 
     [Header("XP Animation")]
@@ -338,12 +343,49 @@ public class GameHudController : SingletonBehaviour<GameHudController>
         }
     }
 
+    private Coroutine healthBarCoroutine;
+
     private void HandleHealthChanged(int currentHealth, int maxHealth)
     {
         if (healthText != null)
         {
             healthText.text = $"HP: {currentHealth}/{maxHealth}";
         }
+
+        if (healthBarFill != null && maxHealth > 0)
+        {
+            float target = (float)currentHealth / maxHealth;
+
+            if (healthBarLerpDuration <= 0f)
+            {
+                healthBarFill.fillAmount = target;
+            }
+            else
+            {
+                if (healthBarCoroutine != null) StopCoroutine(healthBarCoroutine);
+                healthBarCoroutine = StartCoroutine(LerpHealthBar(target));
+            }
+        }
+    }
+
+    private IEnumerator LerpHealthBar(float target)
+    {
+        float from = healthBarFill.fillAmount;
+        float elapsed = 0f;
+        float duration = Mathf.Max(0.01f, healthBarLerpDuration);
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            // Ease-out: arranca rápido y frena al final
+            float eased = 1f - (1f - t) * (1f - t);
+            healthBarFill.fillAmount = Mathf.Lerp(from, target, eased);
+            yield return null;
+        }
+
+        healthBarFill.fillAmount = target;
+        healthBarCoroutine = null;
     }
 
     private int displayedExperience;

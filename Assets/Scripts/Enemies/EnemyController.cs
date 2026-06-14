@@ -64,8 +64,23 @@ public class EnemyController : MonoBehaviour
     private Transform playerTarget;
     private bool isDead;
     private bool isGrounded;
+    private bool isStunned;
 
     public bool IsGrounded => isGrounded;
+    public bool IsStunned => isStunned;
+
+    // Aturdimiento: frena movimiento y ataques, pero el componente sigue habilitado para que
+    // LateUpdate mantenga el lock de rotación (evita que el sprite gire). Usado por los jefes
+    // para abrir una ventana en la que el jugador puede golpearlos.
+    public void SetStunned(bool value)
+    {
+        isStunned = value;
+        if (isStunned)
+        {
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+        }
+    }
+
     private bool jumpConsumed;
     private int facingDirection = 1;
     private float nextPathRefreshTime;
@@ -110,8 +125,7 @@ public class EnemyController : MonoBehaviour
 
     private void Start()
     {
-        attackDistance += Random.Range(-0.3f, 0.3f);
-        stuckCheckPosition = transform.position;
+stuckCheckPosition = transform.position;
         spawnPosition = transform.position;
         FindPlayerTarget();
         UpdateAttackPointPosition();
@@ -131,6 +145,8 @@ public class EnemyController : MonoBehaviour
 
         isGrounded = CheckGrounded();
         UpdateJumpState();
+
+        if (isStunned) return;
 
         if (playerTarget == null && Time.time >= nextPathRefreshTime)
         {
@@ -198,6 +214,13 @@ public class EnemyController : MonoBehaviour
         if (isDead)
         {
             rb.linearVelocity = Vector2.zero;
+            return;
+        }
+
+        if (isStunned)
+        {
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+            animator?.SetBool(AnimIsWalking, false);
             return;
         }
 
@@ -458,6 +481,7 @@ public class EnemyController : MonoBehaviour
 
     private void HandleDamaged(int current, int max)
     {
+        attackSystem?.CancelAttack();
         AudioManager.Instance?.PlayEnemyDamaged();
         animator?.SetTrigger(AnimHit);
         if (spriteRenderer != null)

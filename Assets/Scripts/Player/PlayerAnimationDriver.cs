@@ -1,6 +1,5 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(PlayerController))]
 [RequireComponent(typeof(AttackSystem))]
 [RequireComponent(typeof(HealthSystem))]
@@ -19,6 +18,13 @@ public class PlayerAnimationDriver : MonoBehaviour
     [SerializeField] private string dashStateName = "Dash";
     [SerializeField] private string hurtStateName = "Hurt";
 
+    [Header("Flip")]
+    [Tooltip("Compensación horizontal SOLO al mirar a la izquierda. Para sprites cuyo cuerpo no " +
+             "está centrado en el pivot: al voltear, el cuerpo se espeja y 'salta'. Ajustá este " +
+             "número (en unidades locales del hijo Graphics) hasta que mirando a la izquierda el " +
+             "personaje quede en el mismo lugar que mirando a la derecha. Suele ser negativo.")]
+    [SerializeField] private float leftFlipOffsetX = 0f;
+
     [Header("Hit Flash")]
     [SerializeField] private float hitFlashDuration = 0.15f;
     [SerializeField] private float hurtStateDuration = 0.4f;
@@ -29,6 +35,8 @@ public class PlayerAnimationDriver : MonoBehaviour
     private AttackSystem attackSystem;
     private HealthSystem healthSystem;
     private SpriteRenderer spriteRenderer;
+    private Transform graphicsTransform;
+    private float baseGraphicsLocalX;
     private bool wasDashing;
     private bool wasGrounded;
     private Coroutine hurtExitCoroutine;
@@ -36,11 +44,15 @@ public class PlayerAnimationDriver : MonoBehaviour
 
     private void Awake()
     {
-        animator = GetComponent<Animator>();
+        animator = GetComponentInChildren<Animator>();
         playerController = GetComponent<PlayerController>();
         attackSystem = GetComponent<AttackSystem>();
         healthSystem = GetComponent<HealthSystem>();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        // El visual (SpriteRenderer + Animator) vive en un hijo "Graphics". El flip se hace
+        // sobre ESE hijo, no sobre el root, para que el Rigidbody/Collider del root no se muevan.
+        graphicsTransform = spriteRenderer != null ? spriteRenderer.transform : transform;
+        baseGraphicsLocalX = graphicsTransform.localPosition.x;
 
         if (animatorController != null)
         {
@@ -102,11 +114,18 @@ public class PlayerAnimationDriver : MonoBehaviour
 
         wasDashing = playerController.IsDashing;
 
-        if (playerController.FacingDirection != 0)
+        int facing = playerController.FacingDirection;
+        if (facing != 0)
         {
-            Vector3 scale = transform.localScale;
-            scale.x = Mathf.Abs(scale.x) * playerController.FacingDirection;
-            transform.localScale = scale;
+            Vector3 scale = graphicsTransform.localScale;
+            scale.x = Mathf.Abs(scale.x) * facing;
+            graphicsTransform.localScale = scale;
+
+            // Compensa el cuerpo descentrado: al voltear a la izquierda el sprite se espeja y
+            // 'salta'. Le sumamos un offset solo mirando a la izquierda para que no se mueva.
+            Vector3 pos = graphicsTransform.localPosition;
+            pos.x = facing < 0 ? baseGraphicsLocalX + leftFlipOffsetX : baseGraphicsLocalX;
+            graphicsTransform.localPosition = pos;
         }
     }
 

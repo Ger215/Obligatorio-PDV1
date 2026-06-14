@@ -40,35 +40,62 @@ public class BringerOfDeathController : MonoBehaviour
     [SerializeField] private float spellVfxLifetime = 1.5f;
     [SerializeField] private LayerMask playerLayer;
 
+    [Header("Aturdimiento tras el melee (ventana para golpearlo)")]
+    [Tooltip("Color del parpadeo de aturdimiento tras el guadañazo. Rojo intenso = vulnerable.")]
+    [SerializeField] private Color telegraphColor = new Color(1f, 0.25f, 0.05f);
+    [Tooltip("Velocidad del parpadeo. Más bajo = pulsos más lentos y visibles.")]
+    [SerializeField] private float telegraphBlinkSpeed = 9f;
+    [Tooltip("Segundos que el boss queda aturdido tras el guadañazo: no se mueve ni ataca, parpadea " +
+             "del color de aviso para mostrar que es el momento de pegarle.")]
+    [SerializeField] private float meleeStunDuration = 2f;
+    [Tooltip("Tramo final del aturdimiento en el que parpadea más rápido para avisar que la ventana " +
+             "se está por cerrar.")]
+    [SerializeField] private float stunWarningTime = 0.7f;
+    [Tooltip("Cuánto más rápido parpadea en ese tramo final (multiplicador sobre la velocidad normal).")]
+    [SerializeField] private float stunFastBlinkMultiplier = 2.75f;
+
     private static readonly int AnimCast = Animator.StringToHash("cast");
 
     private EnemyController enemyController;
     private HealthSystem healthSystem;
     private Animator animator;
+    private AttackSystem attackSystem;
+    private SpriteRenderer spriteRenderer;
 
     private bool isActive;
     private bool isDead;
     private bool isCasting;
     private float nextSpellTime;
     private bool healthBarVisible;
+    private Coroutine meleeStunRoutine;
 
     private void Awake()
     {
         enemyController = GetComponent<EnemyController>();
         healthSystem = GetComponent<HealthSystem>();
         animator = GetComponent<Animator>();
+        attackSystem = GetComponent<AttackSystem>();
+        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
     }
 
     private void OnEnable()
     {
         healthSystem.Damaged += HandleDamaged;
         healthSystem.Died += HandleDied;
+        if (attackSystem != null)
+        {
+            attackSystem.AttackCompleted += HandleAttackCompleted;
+        }
     }
 
     private void OnDisable()
     {
         healthSystem.Damaged -= HandleDamaged;
         healthSystem.Died -= HandleDied;
+        if (attackSystem != null)
+        {
+            attackSystem.AttackCompleted -= HandleAttackCompleted;
+        }
     }
 
     public void Activate()
@@ -136,6 +163,7 @@ public class BringerOfDeathController : MonoBehaviour
             ? PlayerController.Instance.transform.position
             : transform.position;
 
+        // El cast NO tiñe el sprite: solo espera la telegrafía de la animación.
         yield return new WaitForSeconds(castTime);
 
         // Por si murió o se desactivó durante el cast.
@@ -162,6 +190,54 @@ public class BringerOfDeathController : MonoBehaviour
         isCasting = false;
     }
 
+    // Tras terminar el guadañazo (AttackCompleted dispara después de tu animation event de golpe),
+    // el boss queda aturdido y vulnerable: frenado, parpadeando del color de aviso. En el tramo
+    // final parpadea más rápido para avisar que la ventana se cierra.
+    private void HandleAttackCompleted()
+    {
+        if (isDead || meleeStunDuration <= 0f) return;
+
+        if (meleeStunRoutine != null) StopCoroutine(meleeStunRoutine);
+        meleeStunRoutine = StartCoroutine(MeleeStun());
+    }
+
+    private IEnumerator MeleeStun()
+    {
+        if (enemyController != null) enemyController.SetStunned(true);
+
+        float elapsed = 0f;
+        while (elapsed < meleeStunDuration && !isDead)
+        {
+            float remaining = meleeStunDuration - elapsed;
+            // Cerca del final acelera el parpadeo para avisar que el aturdimiento se termina.
+            float speed = remaining <= stunWarningTime
+                ? telegraphBlinkSpeed * stunFastBlinkMultiplier
+                : telegraphBlinkSpeed;
+            BlinkTick(speed);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        RestoreColor();
+        if (enemyController != null) enemyController.SetStunned(false);
+        meleeStunRoutine = null;
+    }
+
+    private void BlinkTick(float speed)
+    {
+        if (spriteRenderer == null) return;
+        // Pulsa entre el color fuerte y una versión apenas más clara: nunca vuelve al blanco puro,
+        // así el aviso se ve intenso todo el tiempo en vez de "lavarse".
+        float t = Mathf.PingPong(Time.time * speed, 1f);
+        Color peak = Color.Lerp(telegraphColor, Color.white, 0.45f);
+        spriteRenderer.color = Color.Lerp(telegraphColor, peak, t);
+    }
+
+    private void RestoreColor()
+    {
+        if (spriteRenderer != null) spriteRenderer.color = Color.white;
+    }
+
     private void HandleDamaged(int current, int max)
     {
         if (!healthBarVisible)
@@ -180,6 +256,8 @@ public class BringerOfDeathController : MonoBehaviour
         if (isDead) return;
         isDead = true;
 
+        RestoreColor();
+        if (enemyController != null) enemyController.SetStunned(false);
         GameHudController.Instance?.HideBossHealthBar();
         GameManager.Instance?.TriggerVictory();
     }

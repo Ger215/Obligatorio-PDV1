@@ -649,8 +649,10 @@ public void Configure(
             return;
         }
 
+        // El root ya no se voltea (el flip va en el hijo Graphics), así que el attackPoint
+        // debe ubicarse a izq/der según facingDirection.
         float currentY = attackSystem.AttackPointTransform.localPosition.y;
-        attackSystem.AttackPointTransform.localPosition = new Vector3(attackPointDistance, currentY, 0f);
+        attackSystem.AttackPointTransform.localPosition = new Vector3(attackPointDistance * facingDirection, currentY, 0f);
     }
 
     private void HandleDeath(HealthSystem deadHealthSystem)

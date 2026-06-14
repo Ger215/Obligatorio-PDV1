@@ -3,7 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public class BossTrigger : MonoBehaviour
 {
-    [SerializeField] private BossController boss;
+    [SerializeField] private SkeletonKingController boss;
 
     private bool triggered;
 

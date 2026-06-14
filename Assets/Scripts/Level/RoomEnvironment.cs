@@ -19,7 +19,13 @@ public class RoomEnvironment : MonoBehaviour
              "Ej. cueva: azul oscuro con alpha ~0.4.")]
     [SerializeField] private Color ambientTint = new Color(0f, 0f, 0f, 0f);
 
-    [Tooltip("Duración del fade de música y de ambiente al entrar.")]
+    [Tooltip("Intensidad del Global Light 2D en este room. 1 = normal (superficie). ~0.05 = cueva oscura.")]
+    [SerializeField] private float globalLightIntensity = 1f;
+
+    [Tooltip("Si true, enciende el Light2D del player al entrar (efecto linterna en la cueva).")]
+    [SerializeField] private bool enablePlayerLight = false;
+
+    [Tooltip("Duración del fade de música, tinte y luz al entrar.")]
     [SerializeField] private float fadeDuration = 0.6f;
 
     private void Awake()
@@ -38,6 +44,7 @@ public class RoomEnvironment : MonoBehaviour
         if (newRoom != owningRoom) return;
 
         if (music != null) AudioManager.Instance?.PlayMusic(music);
-        if (RoomAmbience.Instance != null) RoomAmbience.Instance.SetAmbient(ambientTint, fadeDuration);
+        RoomAmbience.Instance?.SetAmbient(ambientTint, fadeDuration);
+        RoomLightingManager.Instance?.SetLighting(globalLightIntensity, enablePlayerLight, fadeDuration);
     }
 }
