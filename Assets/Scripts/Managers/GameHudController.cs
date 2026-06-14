@@ -28,6 +28,21 @@ public class GameHudController : SingletonBehaviour<GameHudController>
     [SerializeField] private TMP_Text[] abilityButtonTexts;
     [SerializeField] private Button skipShopButton;
 
+    [Header("Ability Slots (icon UI, generado en runtime)")]
+    [Tooltip("Tamaño en píxeles de cada slot de habilidad equipada.")]
+    [SerializeField] private Vector2 abilitySlotSize = new Vector2(72f, 72f);
+    [SerializeField] private float abilitySlotSpacing = 10f;
+    [Tooltip("Posición anclada (desde abajo-centro de la pantalla) de la fila de slots.")]
+    [SerializeField] private Vector2 abilitySlotsAnchoredPosition = new Vector2(0f, 24f);
+
+    private const int AbilitySlotCount = 3;
+    private static readonly string[] AbilitySlotKeyLabels = { "1", "2", "3" };
+    private Image[] abilitySlotIcons;
+    private Image[] abilitySlotGlows;
+    private TextMeshProUGUI[] abilitySlotCooldownTexts;
+    private PlayerAbilityController abilityController;
+    private static readonly Color ActiveEffectGlowColor = new Color(1f, 0.85f, 0.2f, 0f);
+
     [Header("Game Over")]
     [SerializeField] private CanvasGroup gameOverGroup;
     [SerializeField] private TMP_Text gameOverWaveText;
@@ -51,6 +66,135 @@ public class GameHudController : SingletonBehaviour<GameHudController>
     [SerializeField] private Button restartFromVictoryButton;
     [SerializeField] private Button quitFromVictoryButton;
 
+    protected override void Awake()
+    {
+        base.Awake();
+        if (Instance != this)
+        {
+            return;
+        }
+
+        BuildAbilitySlotsUI();
+    }
+
+    private void Update()
+    {
+        if (abilityController == null)
+        {
+            return;
+        }
+
+        RefreshAbilitySlots(abilityController.LearnedAbilities, abilityController.Cooldowns, abilityController.ActiveEffects);
+    }
+
+    private void BuildAbilitySlotsUI()
+    {
+        var canvasGo = new GameObject("AbilitySlotsCanvas");
+        canvasGo.transform.SetParent(transform, false);
+
+        var canvas = canvasGo.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 100;
+
+        var scaler = canvasGo.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+
+        var rowGo = new GameObject("AbilitySlots");
+        rowGo.transform.SetParent(canvasGo.transform, false);
+
+        var rowRect = rowGo.AddComponent<RectTransform>();
+        rowRect.anchorMin = rowRect.anchorMax = new Vector2(0.5f, 0f);
+        rowRect.pivot = new Vector2(0.5f, 0f);
+        rowRect.anchoredPosition = abilitySlotsAnchoredPosition;
+
+        var layout = rowGo.AddComponent<HorizontalLayoutGroup>();
+        layout.spacing = abilitySlotSpacing;
+        layout.childAlignment = TextAnchor.MiddleCenter;
+        layout.childForceExpandWidth = false;
+        layout.childForceExpandHeight = false;
+
+        var fitter = rowGo.AddComponent<ContentSizeFitter>();
+        fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        abilitySlotIcons = new Image[AbilitySlotCount];
+        abilitySlotGlows = new Image[AbilitySlotCount];
+        abilitySlotCooldownTexts = new TextMeshProUGUI[AbilitySlotCount];
+
+        for (int i = 0; i < AbilitySlotCount; i++)
+        {
+            string keyLabel = AbilitySlotKeyLabels[Mathf.Min(i, AbilitySlotKeyLabels.Length - 1)];
+            var slotGo = new GameObject($"AbilitySlot{i + 1}");
+            slotGo.transform.SetParent(rowGo.transform, false);
+
+            slotGo.AddComponent<RectTransform>();
+
+            var slotBg = slotGo.AddComponent<Image>();
+            slotBg.color = new Color(0f, 0f, 0f, 0.55f);
+
+            var layoutElement = slotGo.AddComponent<LayoutElement>();
+            layoutElement.preferredWidth = abilitySlotSize.x;
+            layoutElement.preferredHeight = abilitySlotSize.y;
+
+            var glowGo = new GameObject("ActiveGlow");
+            glowGo.transform.SetParent(slotGo.transform, false);
+            var glowRect = glowGo.AddComponent<RectTransform>();
+            glowRect.anchorMin = Vector2.zero;
+            glowRect.anchorMax = Vector2.one;
+            glowRect.offsetMin = new Vector2(-4f, -4f);
+            glowRect.offsetMax = new Vector2(4f, 4f);
+            var glow = glowGo.AddComponent<Image>();
+            glow.color = ActiveEffectGlowColor;
+            glow.raycastTarget = false;
+            abilitySlotGlows[i] = glow;
+
+            var iconGo = new GameObject("Icon");
+            iconGo.transform.SetParent(slotGo.transform, false);
+            var iconRect = iconGo.AddComponent<RectTransform>();
+            iconRect.anchorMin = Vector2.zero;
+            iconRect.anchorMax = Vector2.one;
+            iconRect.offsetMin = new Vector2(6f, 6f);
+            iconRect.offsetMax = new Vector2(-6f, -6f);
+            var icon = iconGo.AddComponent<Image>();
+            icon.preserveAspect = true;
+            icon.enabled = false;
+            abilitySlotIcons[i] = icon;
+
+            var cooldownGo = new GameObject("Cooldown");
+            cooldownGo.transform.SetParent(slotGo.transform, false);
+            var cooldownRect = cooldownGo.AddComponent<RectTransform>();
+            cooldownRect.anchorMin = Vector2.zero;
+            cooldownRect.anchorMax = Vector2.one;
+            cooldownRect.offsetMin = Vector2.zero;
+            cooldownRect.offsetMax = Vector2.zero;
+            var cooldownText = cooldownGo.AddComponent<TextMeshProUGUI>();
+            cooldownText.alignment = TextAlignmentOptions.Center;
+            cooldownText.fontStyle = FontStyles.Bold;
+            cooldownText.fontSize = 22f;
+            cooldownText.color = Color.white;
+            cooldownText.text = string.Empty;
+            cooldownText.raycastTarget = false;
+            abilitySlotCooldownTexts[i] = cooldownText;
+
+            var keyGo = new GameObject("Key");
+            keyGo.transform.SetParent(slotGo.transform, false);
+            var keyRect = keyGo.AddComponent<RectTransform>();
+            keyRect.anchorMin = new Vector2(0f, 1f);
+            keyRect.anchorMax = new Vector2(0f, 1f);
+            keyRect.pivot = new Vector2(0f, 1f);
+            keyRect.anchoredPosition = new Vector2(2f, -2f);
+            keyRect.sizeDelta = new Vector2(20f, 20f);
+            var keyText = keyGo.AddComponent<TextMeshProUGUI>();
+            keyText.alignment = TextAlignmentOptions.Center;
+            keyText.fontStyle = FontStyles.Bold;
+            keyText.fontSize = 16f;
+            keyText.color = new Color(1f, 0.85f, 0.2f);
+            keyText.text = keyLabel;
+            keyText.raycastTarget = false;
+        }
+    }
+
     public void Bind(GameManager gameManager, PlayerController player)
     {
         if (player != null)
@@ -67,6 +211,12 @@ public class GameHudController : SingletonBehaviour<GameHudController>
             }
 
             HandleHealthChanged(player.HealthSystem.CurrentHealth, player.HealthSystem.MaxHealth);
+
+            abilityController = player.GetComponent<PlayerAbilityController>();
+            if (abilityController != null)
+            {
+                RefreshAbilitySlots(abilityController.LearnedAbilities, abilityController.Cooldowns, abilityController.ActiveEffects);
+            }
         }
 
         if (skipShopButton != null)
@@ -258,21 +408,16 @@ public class GameHudController : SingletonBehaviour<GameHudController>
         }
     }
 
-    public void RefreshAbilitySlots(IReadOnlyList<PlayerAbilityDefinition> learnedAbilities, IReadOnlyDictionary<PlayerAbilityDefinition, float> cooldowns)
+    public void RefreshAbilitySlots(IReadOnlyList<PlayerAbilityDefinition> learnedAbilities, IReadOnlyDictionary<PlayerAbilityDefinition, float> cooldowns, IReadOnlyDictionary<PlayerAbilityDefinition, float> activeEffects = null)
     {
-        if (abilitySlotTexts == null)
-        {
-            return;
-        }
-
-        for (int i = 0; i < abilitySlotTexts.Length; i++)
+        for (int i = 0; abilitySlotTexts != null && i < abilitySlotTexts.Length; i++)
         {
             if (abilitySlotTexts[i] == null)
             {
                 continue;
             }
 
-            if (learnedAbilities == null || i >= learnedAbilities.Count)
+            if (learnedAbilities == null || i >= learnedAbilities.Count || learnedAbilities[i] == null)
             {
                 abilitySlotTexts[i].text = $"Skill {i + 1}: Empty";
                 continue;
@@ -285,6 +430,58 @@ public class GameHudController : SingletonBehaviour<GameHudController>
             abilitySlotTexts[i].text = remainingCooldown > 0f
                 ? $"{i + 1}. {ability.displayName} ({remainingCooldown:0.0}s)"
                 : $"{i + 1}. {ability.displayName}";
+        }
+
+        RefreshAbilitySlotIcons(learnedAbilities, cooldowns, activeEffects);
+    }
+
+    private void RefreshAbilitySlotIcons(IReadOnlyList<PlayerAbilityDefinition> learnedAbilities, IReadOnlyDictionary<PlayerAbilityDefinition, float> cooldowns, IReadOnlyDictionary<PlayerAbilityDefinition, float> activeEffects)
+    {
+        if (abilitySlotIcons == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < abilitySlotIcons.Length; i++)
+        {
+            PlayerAbilityDefinition ability = learnedAbilities != null && i < learnedAbilities.Count ? learnedAbilities[i] : null;
+
+            Image icon = abilitySlotIcons[i];
+            if (icon != null)
+            {
+                icon.sprite = ability != null ? ability.icon : null;
+                icon.enabled = icon.sprite != null;
+            }
+
+            Image glow = abilitySlotGlows != null ? abilitySlotGlows[i] : null;
+            if (glow != null)
+            {
+                bool isActive = ability != null && activeEffects != null
+                    && activeEffects.TryGetValue(ability, out float activeUntil) && Time.time < activeUntil;
+
+                if (isActive)
+                {
+                    float pulse = (Mathf.Sin(Time.time * 6f) + 1f) * 0.5f;
+                    Color color = ActiveEffectGlowColor;
+                    color.a = Mathf.Lerp(0.35f, 0.7f, pulse);
+                    glow.color = color;
+                }
+                else
+                {
+                    glow.color = ActiveEffectGlowColor;
+                }
+            }
+
+            TextMeshProUGUI cooldownText = abilitySlotCooldownTexts[i];
+            if (cooldownText == null)
+            {
+                continue;
+            }
+
+            float remainingCooldown = ability != null && cooldowns != null && cooldowns.TryGetValue(ability, out float readyTime)
+                ? Mathf.Max(0f, readyTime - Time.time)
+                : 0f;
+            cooldownText.text = remainingCooldown > 0f ? $"{remainingCooldown:0.0}" : string.Empty;
         }
     }
 

@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ec60dd01b262114096e855067873cce, type: 3}
   m_Name: PlayerAbility 1
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAbilityDefinition
-  displayName: 
-  description: 
+  displayName: Dash Strike
+  description: Dash forward, damaging enemies in your path.
+  icon: {fileID: 1987045716447910128, guid: a7787dd35adff6046a651bd073760420, type: 3}
   abilityType: 0
-  cost: 10
-  cooldown: 8
-  power: 3
+  cost: 15
+  cooldown: 6
+  power: 4
   duration: 3
-  radius: 2
+  radius: 1.5

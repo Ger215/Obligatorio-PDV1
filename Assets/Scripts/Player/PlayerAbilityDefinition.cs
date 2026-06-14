@@ -15,6 +15,7 @@ public class PlayerAbilityDefinition : ScriptableObject
 {
     public string displayName;
     [TextArea] public string description;
+    public Sprite icon;
     public PlayerAbilityType abilityType;
     public int cost = 10;
     public float cooldown = 8f;

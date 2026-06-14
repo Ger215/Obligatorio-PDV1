@@ -517,17 +517,17 @@ public class PlayerController : SingletonBehaviour<PlayerController>
 
         if (Keyboard.current.digit1Key.wasPressedThisFrame)
         {
-            abilityController.TryUseAbilitySlot(0);
+            abilityController.HandleAbilitySlotInput(0);
         }
 
         if (Keyboard.current.digit2Key.wasPressedThisFrame)
         {
-            abilityController.TryUseAbilitySlot(1);
+            abilityController.HandleAbilitySlotInput(1);
         }
 
         if (Keyboard.current.digit3Key.wasPressedThisFrame)
         {
-            abilityController.TryUseAbilitySlot(2);
+            abilityController.HandleAbilitySlotInput(2);
         }
     }
 
@@ -591,6 +591,19 @@ public class PlayerController : SingletonBehaviour<PlayerController>
         dashTimeRemaining = dashDuration;
         UpdateAttackPointPosition();
         AudioManager.Instance?.PlayDash();
+    }
+
+    /// <summary>Dispara un dash igual al manual (mismo dashSpeed/duration) sin afectar el cooldown del dash normal. Usado por la habilidad DashStrike.</summary>
+    public void TriggerDash()
+    {
+        if (Mathf.Abs(horizontalInput) > 0.01f)
+        {
+            facingDirection = horizontalInput > 0f ? 1 : -1;
+        }
+
+        isDashing = true;
+        dashTimeRemaining = dashDuration;
+        UpdateAttackPointPosition();
     }
 
 public void Configure(
