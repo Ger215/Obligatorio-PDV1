@@ -14,9 +14,13 @@ public class PlayerAbilityController : MonoBehaviour
     private readonly Dictionary<PlayerAbilityDefinition, float> cooldowns = new Dictionary<PlayerAbilityDefinition, float>();
     private AbilityPickup nearbyPickup;
 
-    [Header("Berserk")]
-    [Tooltip("Color del aura que rodea al jugador mientras Berserk está activo.")]
-    [SerializeField] private Color berserkAuraColor = new Color(1f, 0.35f, 0.05f, 1f);
+    [Header("Dash Strike")]
+    [Tooltip("Color del rastro de imágenes residuales que deja el jugador durante Dash Strike.")]
+    [SerializeField] private Color dashTrailColor = new Color(0.6f, 0.9f, 1f, 0.5f);
+
+    [Header("Heal Pulse")]
+    [Tooltip("Color del pulso de curación que emite el jugador al usar Heal Pulse.")]
+    [SerializeField] private Color healPulseColor = new Color(0.3f, 1f, 0.4f, 0.6f);
 
     [Header("Guardian Aura")]
     [Tooltip("Color del escudo que rodea al jugador mientras Guardian Aura está activa.")]
@@ -26,17 +30,21 @@ public class PlayerAbilityController : MonoBehaviour
     [Tooltip("Color de las cuchillas que rotan alrededor del jugador durante Blade Storm.")]
     [SerializeField] private Color bladeStormColor = new Color(0.8f, 0.85f, 1f, 0.9f);
 
+    [Header("Berserk")]
+    [Tooltip("Color de tiñe pulsante aplicado al sprite del jugador mientras Berserk está activo.")]
+    [SerializeField] private Color berserkTintColor = new Color(1f, 0.25f, 0.15f, 1f);
+
     private PlayerController playerController;
     private AttackSystem attackSystem;
     private HealthSystem healthSystem;
     private SpriteRenderer spriteRenderer;
-    private SpriteRenderer berserkAuraRenderer;
-    private Coroutine berserkAuraRoutine;
+    private readonly Dictionary<PlayerAbilityDefinition, float> activeEffects = new Dictionary<PlayerAbilityDefinition, float>();
     private SpriteRenderer guardianShieldRenderer;
     private Coroutine guardianShieldRoutine;
 
     public IReadOnlyList<PlayerAbilityDefinition> LearnedAbilities => learnedAbilities;
     public IReadOnlyDictionary<PlayerAbilityDefinition, float> Cooldowns => cooldowns;
+    public IReadOnlyDictionary<PlayerAbilityDefinition, float> ActiveEffects => activeEffects;
     public bool IsAbilityCapacityReached => System.Array.TrueForAll(learnedAbilities, a => a != null);
 
     private void Awake()
@@ -81,7 +89,7 @@ public class PlayerAbilityController : MonoBehaviour
         }
 
         learnedAbilities[emptySlot] = ability;
-        GameHudController.Instance?.RefreshAbilitySlots(learnedAbilities, cooldowns);
+        GameHudController.Instance?.RefreshAbilitySlots(learnedAbilities, cooldowns, activeEffects);
         return true;
     }
 
@@ -105,7 +113,7 @@ public class PlayerAbilityController : MonoBehaviour
         }
 
         learnedAbilities[slotIndex] = ability;
-        GameHudController.Instance?.RefreshAbilitySlots(learnedAbilities, cooldowns);
+        GameHudController.Instance?.RefreshAbilitySlots(learnedAbilities, cooldowns, activeEffects);
         return true;
     }
 
@@ -139,7 +147,7 @@ public class PlayerAbilityController : MonoBehaviour
 
         ExecuteAbility(ability);
         cooldowns[ability] = Time.time + ability.cooldown;
-        GameHudController.Instance?.RefreshAbilitySlots(learnedAbilities, cooldowns);
+        GameHudController.Instance?.RefreshAbilitySlots(learnedAbilities, cooldowns, activeEffects);
         AudioManager.Instance?.PlayAbility(ability.abilityType);
         return true;
     }
@@ -152,7 +160,7 @@ public class PlayerAbilityController : MonoBehaviour
                 StartCoroutine(DashStrikeRoutine(ability));
                 break;
             case PlayerAbilityType.HealPulse:
-                healthSystem.Heal(ability.power);
+                StartCoroutine(HealPulseRoutine(ability));
                 break;
             case PlayerAbilityType.Shockwave:
                 StartCoroutine(ShockwaveRoutine(ability));
@@ -176,8 +184,94 @@ public class PlayerAbilityController : MonoBehaviour
         while (playerController.IsDashing)
         {
             attackSystem.DealAreaDamage(playerController.AttackSystem.AttackPointTransform.position, ability.radius, 1 << 8, ability.power, true);
+            SpawnDashTrailGhost();
             yield return null;
         }
+    }
+
+    private void SpawnDashTrailGhost()
+    {
+        if (spriteRenderer == null || spriteRenderer.sprite == null)
+        {
+            return;
+        }
+
+        var ghostGo = new GameObject("DashTrailGhost");
+        ghostGo.transform.SetParent(transform.parent, true);
+        ghostGo.transform.position = spriteRenderer.transform.position;
+        ghostGo.transform.rotation = spriteRenderer.transform.rotation;
+        ghostGo.transform.localScale = spriteRenderer.transform.lossyScale;
+
+        SpriteRenderer ghostRenderer = ghostGo.AddComponent<SpriteRenderer>();
+        ghostRenderer.sprite = spriteRenderer.sprite;
+        ghostRenderer.flipX = spriteRenderer.flipX;
+        ghostRenderer.flipY = spriteRenderer.flipY;
+        ghostRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
+        ghostRenderer.sortingOrder = spriteRenderer.sortingOrder - 1;
+        ghostRenderer.color = dashTrailColor;
+
+        StartCoroutine(FadeAndDestroy(ghostRenderer, 0.2f));
+    }
+
+    private static IEnumerator FadeAndDestroy(SpriteRenderer fadingRenderer, float duration)
+    {
+        float elapsed = 0f;
+        Color startColor = fadingRenderer.color;
+
+        while (elapsed < duration)
+        {
+            Color color = startColor;
+            color.a = Mathf.Lerp(startColor.a, 0f, elapsed / duration);
+            fadingRenderer.color = color;
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        Destroy(fadingRenderer.gameObject);
+    }
+
+    private IEnumerator HealPulseRoutine(PlayerAbilityDefinition ability)
+    {
+        bool wasDamaged = healthSystem.CurrentHealth < healthSystem.MaxHealth;
+        healthSystem.Heal(ability.power);
+
+        if (wasDamaged)
+        {
+            yield return HealPulseBurstRoutine(ability.radius);
+        }
+    }
+
+    private IEnumerator HealPulseBurstRoutine(float radius)
+    {
+        var burstGo = new GameObject("HealPulseBurst");
+        burstGo.transform.SetParent(transform, false);
+        burstGo.transform.localPosition = Vector3.zero;
+
+        SpriteRenderer burstRenderer = burstGo.AddComponent<SpriteRenderer>();
+        burstRenderer.sprite = CreateGlowSprite();
+        burstRenderer.color = healPulseColor;
+
+        if (spriteRenderer != null)
+        {
+            burstRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
+            burstRenderer.sortingOrder = spriteRenderer.sortingOrder - 1;
+        }
+
+        const float burstDuration = 0.4f;
+        float elapsed = 0f;
+
+        while (elapsed < burstDuration)
+        {
+            float t = elapsed / burstDuration;
+            burstGo.transform.localScale = Vector3.one * Mathf.Lerp(0.1f, radius, t);
+            Color color = burstRenderer.color;
+            color.a = Mathf.Lerp(healPulseColor.a, 0f, t);
+            burstRenderer.color = color;
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        Destroy(burstGo);
     }
 
     private IEnumerator ShockwaveRoutine(PlayerAbilityDefinition ability)
@@ -212,10 +306,20 @@ public class PlayerAbilityController : MonoBehaviour
         burstRenderer.sprite = CreateGlowSprite();
         burstRenderer.color = new Color(1f, 0.9f, 0.2f, 0.6f);
 
+        var ringGo = new GameObject("ShockwaveRing");
+        ringGo.transform.SetParent(transform, false);
+        ringGo.transform.localPosition = Vector3.zero;
+
+        SpriteRenderer ringRenderer = ringGo.AddComponent<SpriteRenderer>();
+        ringRenderer.sprite = CreateRingOutlineSprite();
+        ringRenderer.color = new Color(1f, 1f, 0.6f, 0.9f);
+
         if (spriteRenderer != null)
         {
             burstRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
             burstRenderer.sortingOrder = spriteRenderer.sortingOrder - 1;
+            ringRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
+            ringRenderer.sortingOrder = spriteRenderer.sortingOrder - 1;
         }
 
         const float burstDuration = 0.3f;
@@ -228,77 +332,49 @@ public class PlayerAbilityController : MonoBehaviour
             Color color = burstRenderer.color;
             color.a = Mathf.Lerp(0.6f, 0f, t);
             burstRenderer.color = color;
+
+            ringGo.transform.localScale = Vector3.one * Mathf.Lerp(0.1f, radius * 0.7f, t);
+            Color ringColor = ringRenderer.color;
+            ringColor.a = Mathf.Lerp(0.9f, 0f, t);
+            ringRenderer.color = ringColor;
+
             elapsed += Time.deltaTime;
             yield return null;
         }
 
         Destroy(burstGo);
+        Destroy(ringGo);
     }
 
     private IEnumerator BerserkRoutine(PlayerAbilityDefinition ability)
     {
         attackSystem.SetBonusDamageMultiplier(1f + (ability.power * 0.2f));
         attackSystem.SetBonusCriticalChance(0.1f);
+        activeEffects[ability] = Time.time + ability.duration;
 
-        if (berserkAuraRoutine != null)
-        {
-            StopCoroutine(berserkAuraRoutine);
-        }
-        berserkAuraRoutine = StartCoroutine(BerserkAuraRoutine(ability.duration));
-
-        yield return new WaitForSeconds(ability.duration);
-
-        attackSystem.SetBonusDamageMultiplier(1f);
-        attackSystem.SetBonusCriticalChance(0f);
-    }
-
-    private IEnumerator BerserkAuraRoutine(float duration)
-    {
-        if (berserkAuraRenderer == null)
-        {
-            berserkAuraRenderer = CreateBerserkAura();
-        }
-
-        berserkAuraRenderer.gameObject.SetActive(true);
-
-        const float baseScale = 1f;
-        const float pulseAmplitude = 0.15f;
-        const float pulseSpeed = 6f;
+        Color originalColor = spriteRenderer != null ? spriteRenderer.color : Color.white;
         float elapsed = 0f;
 
-        while (elapsed < duration)
+        while (elapsed < ability.duration)
         {
-            float pulse = (Mathf.Sin(Time.time * pulseSpeed) + 1f) * 0.5f;
-            berserkAuraRenderer.transform.localScale = Vector3.one * (baseScale + pulse * pulseAmplitude);
-            Color color = berserkAuraColor;
-            color.a = 0.35f + pulse * 0.3f;
-            berserkAuraRenderer.color = color;
+            if (spriteRenderer != null)
+            {
+                float pulse = (Mathf.Sin(Time.time * 8f) + 1f) * 0.5f;
+                spriteRenderer.color = Color.Lerp(originalColor, berserkTintColor, Mathf.Lerp(0.35f, 0.65f, pulse));
+            }
+
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        berserkAuraRenderer.gameObject.SetActive(false);
-        berserkAuraRoutine = null;
-    }
-
-    private SpriteRenderer CreateBerserkAura()
-    {
-        var auraGo = new GameObject("BerserkAura");
-        auraGo.transform.SetParent(transform, false);
-        auraGo.transform.localPosition = Vector3.zero;
-
-        SpriteRenderer auraRenderer = auraGo.AddComponent<SpriteRenderer>();
-        auraRenderer.sprite = CreateGlowSprite();
-        auraRenderer.color = berserkAuraColor;
-
         if (spriteRenderer != null)
         {
-            auraRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
-            auraRenderer.sortingOrder = spriteRenderer.sortingOrder - 1;
+            spriteRenderer.color = originalColor;
         }
 
-        auraGo.SetActive(false);
-        return auraRenderer;
+        attackSystem.SetBonusDamageMultiplier(1f);
+        attackSystem.SetBonusCriticalChance(0f);
+        activeEffects.Remove(ability);
     }
 
     private static Sprite CreateGlowSprite()
@@ -320,6 +396,35 @@ public class PlayerAbilityController : MonoBehaviour
                 float dist = Vector2.Distance(new Vector2(x, y), center) / maxDist;
                 float alpha = Mathf.Clamp01(1f - dist);
                 alpha *= alpha;
+                texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+            }
+        }
+
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 32f);
+    }
+
+    private static Sprite CreateRingOutlineSprite()
+    {
+        const int size = 64;
+        var texture = new Texture2D(size, size, TextureFormat.RGBA32, false)
+        {
+            wrapMode = TextureWrapMode.Clamp,
+            filterMode = FilterMode.Bilinear
+        };
+
+        Vector2 center = new Vector2(size / 2f, size / 2f);
+        float maxDist = size / 2f;
+        const float ringRadius = 0.9f;
+        const float ringWidth = 0.06f;
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dist = Vector2.Distance(new Vector2(x, y), center) / maxDist;
+                float rim = Mathf.Clamp01(1f - Mathf.Abs(dist - ringRadius) / ringWidth);
+                float alpha = dist > 1f ? 0f : rim;
                 texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
             }
         }
@@ -353,6 +458,19 @@ public class PlayerAbilityController : MonoBehaviour
         const float pulseAmplitude = 0.02f;
         const float pulseSpeed = 3f;
         const float rotationSpeed = 20f;
+        const float appearDuration = 0.2f;
+
+        float appearElapsed = 0f;
+        while (appearElapsed < appearDuration)
+        {
+            float t = appearElapsed / appearDuration;
+            guardianShieldRenderer.transform.localScale = Vector3.one * Mathf.Lerp(0f, baseScale, t);
+            Color color = guardianShieldColor;
+            color.a = Mathf.Lerp(guardianShieldColor.a + 0.35f, guardianShieldColor.a, t);
+            guardianShieldRenderer.color = color;
+            appearElapsed += Time.deltaTime;
+            yield return null;
+        }
 
         while (healthSystem.HasDamageShield)
         {
@@ -367,6 +485,42 @@ public class PlayerAbilityController : MonoBehaviour
 
         guardianShieldRenderer.gameObject.SetActive(false);
         guardianShieldRoutine = null;
+        StartCoroutine(GuardianShieldShatterRoutine());
+    }
+
+    private IEnumerator GuardianShieldShatterRoutine()
+    {
+        var shatterGo = new GameObject("GuardianShieldShatter");
+        shatterGo.transform.SetParent(transform, false);
+        shatterGo.transform.localPosition = Vector3.zero;
+
+        SpriteRenderer shatterRenderer = shatterGo.AddComponent<SpriteRenderer>();
+        shatterRenderer.sprite = CreateGlowSprite();
+        shatterRenderer.color = guardianShieldColor;
+
+        if (spriteRenderer != null)
+        {
+            shatterRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
+            shatterRenderer.sortingOrder = spriteRenderer.sortingOrder + 1;
+        }
+
+        const float shatterDuration = 0.35f;
+        const float startScale = 0.3f;
+        const float endScale = 0.7f;
+        float elapsed = 0f;
+
+        while (elapsed < shatterDuration)
+        {
+            float t = elapsed / shatterDuration;
+            shatterGo.transform.localScale = Vector3.one * Mathf.Lerp(startScale, endScale, t);
+            Color color = guardianShieldColor;
+            color.a = Mathf.Lerp(guardianShieldColor.a + 0.4f, 0f, t);
+            shatterRenderer.color = color;
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        Destroy(shatterGo);
     }
 
     private SpriteRenderer CreateGuardianShield()
@@ -425,22 +579,36 @@ public class PlayerAbilityController : MonoBehaviour
         const int bladeCount = 4;
         const float rotationSpeed = 420f;
         const float tickInterval = 0.35f;
+        const float fadeDuration = 0.15f;
 
         Transform pivot = CreateBladeStormBlades(bladeCount);
+        SpriteRenderer[] bladeRenderers = pivot.GetComponentsInChildren<SpriteRenderer>();
 
         float elapsed = 0f;
         float tickTimer = 0f;
         attackSystem.DealAreaDamage(transform.position, ability.radius, 1 << 8, ability.power, true);
+        SpawnBladeStormPulse();
 
         while (elapsed < ability.duration)
         {
             pivot.Rotate(Vector3.forward, rotationSpeed * Time.deltaTime);
+
+            float fadeIn = Mathf.Clamp01(elapsed / fadeDuration);
+            float fadeOut = Mathf.Clamp01((ability.duration - elapsed) / fadeDuration);
+            float alphaMult = Mathf.Min(fadeIn, fadeOut);
+            foreach (SpriteRenderer bladeRenderer in bladeRenderers)
+            {
+                Color color = bladeStormColor;
+                color.a *= alphaMult;
+                bladeRenderer.color = color;
+            }
 
             tickTimer += Time.deltaTime;
             if (tickTimer >= tickInterval)
             {
                 tickTimer -= tickInterval;
                 attackSystem.DealAreaDamage(transform.position, ability.radius, 1 << 8, ability.power, true);
+                SpawnBladeStormPulse();
             }
 
             elapsed += Time.deltaTime;
@@ -448,6 +616,48 @@ public class PlayerAbilityController : MonoBehaviour
         }
 
         Destroy(pivot.gameObject);
+    }
+
+    private void SpawnBladeStormPulse()
+    {
+        var pulseGo = new GameObject("BladeStormPulse");
+        pulseGo.transform.SetParent(transform, false);
+        pulseGo.transform.localPosition = Vector3.zero;
+
+        SpriteRenderer pulseRenderer = pulseGo.AddComponent<SpriteRenderer>();
+        pulseRenderer.sprite = CreateGlowSprite();
+        pulseRenderer.color = bladeStormColor;
+
+        if (spriteRenderer != null)
+        {
+            pulseRenderer.sortingLayerID = spriteRenderer.sortingLayerID;
+            pulseRenderer.sortingOrder = spriteRenderer.sortingOrder - 1;
+        }
+
+        StartCoroutine(BladeStormPulseRoutine(pulseGo, pulseRenderer));
+    }
+
+    private IEnumerator BladeStormPulseRoutine(GameObject pulseGo, SpriteRenderer pulseRenderer)
+    {
+        float parentScale = Mathf.Max(0.01f, transform.localScale.x);
+        const float visualOrbitRadius = 1.5f;
+        float targetScale = visualOrbitRadius / parentScale;
+
+        const float pulseDuration = 0.25f;
+        float elapsed = 0f;
+
+        while (elapsed < pulseDuration)
+        {
+            float t = elapsed / pulseDuration;
+            pulseGo.transform.localScale = Vector3.one * Mathf.Lerp(targetScale * 0.2f, targetScale, t);
+            Color color = bladeStormColor;
+            color.a = Mathf.Lerp(0.35f, 0f, t);
+            pulseRenderer.color = color;
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        Destroy(pulseGo);
     }
 
     private Transform CreateBladeStormBlades(int bladeCount)

@@ -38,8 +38,10 @@ public class GameHudController : SingletonBehaviour<GameHudController>
     private const int AbilitySlotCount = 3;
     private static readonly string[] AbilitySlotKeyLabels = { "1", "2", "3" };
     private Image[] abilitySlotIcons;
+    private Image[] abilitySlotGlows;
     private TextMeshProUGUI[] abilitySlotCooldownTexts;
     private PlayerAbilityController abilityController;
+    private static readonly Color ActiveEffectGlowColor = new Color(1f, 0.85f, 0.2f, 0f);
 
     [Header("Game Over")]
     [SerializeField] private CanvasGroup gameOverGroup;
@@ -82,7 +84,7 @@ public class GameHudController : SingletonBehaviour<GameHudController>
             return;
         }
 
-        RefreshAbilitySlots(abilityController.LearnedAbilities, abilityController.Cooldowns);
+        RefreshAbilitySlots(abilityController.LearnedAbilities, abilityController.Cooldowns, abilityController.ActiveEffects);
     }
 
     private void BuildAbilitySlotsUI()
@@ -117,6 +119,7 @@ public class GameHudController : SingletonBehaviour<GameHudController>
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         abilitySlotIcons = new Image[AbilitySlotCount];
+        abilitySlotGlows = new Image[AbilitySlotCount];
         abilitySlotCooldownTexts = new TextMeshProUGUI[AbilitySlotCount];
 
         for (int i = 0; i < AbilitySlotCount; i++)
@@ -133,6 +136,18 @@ public class GameHudController : SingletonBehaviour<GameHudController>
             var layoutElement = slotGo.AddComponent<LayoutElement>();
             layoutElement.preferredWidth = abilitySlotSize.x;
             layoutElement.preferredHeight = abilitySlotSize.y;
+
+            var glowGo = new GameObject("ActiveGlow");
+            glowGo.transform.SetParent(slotGo.transform, false);
+            var glowRect = glowGo.AddComponent<RectTransform>();
+            glowRect.anchorMin = Vector2.zero;
+            glowRect.anchorMax = Vector2.one;
+            glowRect.offsetMin = new Vector2(-4f, -4f);
+            glowRect.offsetMax = new Vector2(4f, 4f);
+            var glow = glowGo.AddComponent<Image>();
+            glow.color = ActiveEffectGlowColor;
+            glow.raycastTarget = false;
+            abilitySlotGlows[i] = glow;
 
             var iconGo = new GameObject("Icon");
             iconGo.transform.SetParent(slotGo.transform, false);
@@ -200,7 +215,7 @@ public class GameHudController : SingletonBehaviour<GameHudController>
             abilityController = player.GetComponent<PlayerAbilityController>();
             if (abilityController != null)
             {
-                RefreshAbilitySlots(abilityController.LearnedAbilities, abilityController.Cooldowns);
+                RefreshAbilitySlots(abilityController.LearnedAbilities, abilityController.Cooldowns, abilityController.ActiveEffects);
             }
         }
 
@@ -393,7 +408,7 @@ public class GameHudController : SingletonBehaviour<GameHudController>
         }
     }
 
-    public void RefreshAbilitySlots(IReadOnlyList<PlayerAbilityDefinition> learnedAbilities, IReadOnlyDictionary<PlayerAbilityDefinition, float> cooldowns)
+    public void RefreshAbilitySlots(IReadOnlyList<PlayerAbilityDefinition> learnedAbilities, IReadOnlyDictionary<PlayerAbilityDefinition, float> cooldowns, IReadOnlyDictionary<PlayerAbilityDefinition, float> activeEffects = null)
     {
         for (int i = 0; abilitySlotTexts != null && i < abilitySlotTexts.Length; i++)
         {
@@ -417,10 +432,10 @@ public class GameHudController : SingletonBehaviour<GameHudController>
                 : $"{i + 1}. {ability.displayName}";
         }
 
-        RefreshAbilitySlotIcons(learnedAbilities, cooldowns);
+        RefreshAbilitySlotIcons(learnedAbilities, cooldowns, activeEffects);
     }
 
-    private void RefreshAbilitySlotIcons(IReadOnlyList<PlayerAbilityDefinition> learnedAbilities, IReadOnlyDictionary<PlayerAbilityDefinition, float> cooldowns)
+    private void RefreshAbilitySlotIcons(IReadOnlyList<PlayerAbilityDefinition> learnedAbilities, IReadOnlyDictionary<PlayerAbilityDefinition, float> cooldowns, IReadOnlyDictionary<PlayerAbilityDefinition, float> activeEffects)
     {
         if (abilitySlotIcons == null)
         {
@@ -436,6 +451,25 @@ public class GameHudController : SingletonBehaviour<GameHudController>
             {
                 icon.sprite = ability != null ? ability.icon : null;
                 icon.enabled = icon.sprite != null;
+            }
+
+            Image glow = abilitySlotGlows != null ? abilitySlotGlows[i] : null;
+            if (glow != null)
+            {
+                bool isActive = ability != null && activeEffects != null
+                    && activeEffects.TryGetValue(ability, out float activeUntil) && Time.time < activeUntil;
+
+                if (isActive)
+                {
+                    float pulse = (Mathf.Sin(Time.time * 6f) + 1f) * 0.5f;
+                    Color color = ActiveEffectGlowColor;
+                    color.a = Mathf.Lerp(0.35f, 0.7f, pulse);
+                    glow.color = color;
+                }
+                else
+                {
+                    glow.color = ActiveEffectGlowColor;
+                }
             }
 
             TextMeshProUGUI cooldownText = abilitySlotCooldownTexts[i];
