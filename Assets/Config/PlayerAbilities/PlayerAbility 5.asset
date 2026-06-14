@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ec60dd01b262114096e855067873cce, type: 3}
   m_Name: PlayerAbility 5
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAbilityDefinition
-  displayName: 
-  description: 
-  abilityType: 0
-  cost: 10
-  cooldown: 8
-  power: 3
-  duration: 3
+  displayName: Guardian Aura
+  description: Summon a shield that blocks the next hit you take.
+  icon: {fileID: -2435092862780026764, guid: a7787dd35adff6046a651bd073760420, type: 3}
+  abilityType: 4
+  cost: 20
+  cooldown: 15
+  power: 5
+  duration: 6
   radius: 2

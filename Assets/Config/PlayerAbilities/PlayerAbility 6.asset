@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ec60dd01b262114096e855067873cce, type: 3}
   m_Name: PlayerAbility 6
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAbilityDefinition
-  displayName: 
-  description: 
-  abilityType: 0
-  cost: 10
-  cooldown: 8
-  power: 3
-  duration: 3
-  radius: 2
+  displayName: Blade Storm
+  description: Repeatedly damage nearby enemies for a short time.
+  icon: {fileID: 8739621762198282406, guid: 13780af3515d8514c91e5e9107a1a739, type: 3}
+  abilityType: 5
+  cost: 25
+  cooldown: 18
+  power: 2
+  duration: 3.5
+  radius: 2.2

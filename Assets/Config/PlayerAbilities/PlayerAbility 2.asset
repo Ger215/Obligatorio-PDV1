@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ec60dd01b262114096e855067873cce, type: 3}
   m_Name: PlayerAbility 2
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAbilityDefinition
-  displayName: 
-  description: 
-  abilityType: 0
-  cost: 10
-  cooldown: 8
-  power: 3
+  displayName: Heal Pulse
+  description: Instantly restore health.
+  icon: {fileID: -7845071606965531749, guid: a7787dd35adff6046a651bd073760420, type: 3}
+  abilityType: 1
+  cost: 15
+  cooldown: 12
+  power: 20
   duration: 3
   radius: 2
