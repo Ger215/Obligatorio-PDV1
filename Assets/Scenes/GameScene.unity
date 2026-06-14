@@ -2387,6 +2387,9 @@ MonoBehaviour:
   abilityButtons: []
   abilityButtonTexts: []
   skipShopButton: {fileID: 0}
+  abilitySlotSize: {x: 72, y: 72}
+  abilitySlotSpacing: 10
+  abilitySlotsAnchoredPosition: {x: 0, y: 24}
   gameOverGroup: {fileID: 1530328184}
   gameOverWaveText: {fileID: 0}
   gameOverFadeDuration: 1.2
@@ -25690,6 +25693,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAbilityController
   playerConfig: {fileID: 11400000, guid: e93990ad7d9956d43b848c5b5c237b13, type: 2}
   maxLearnedAbilities: 3
+  dashTrailColor: {r: 0.6, g: 0.9, b: 1, a: 0.5}
+  healPulseColor: {r: 0.3, g: 1, b: 0.4, a: 0.6}
+  guardianShieldColor: {r: 0.3, g: 0.6, b: 1, a: 0.35}
+  bladeStormColor: {r: 0.8, g: 0.85, b: 1, a: 0.9}
+  berserkTintColor: {r: 1, g: 0.25, b: 0.15, a: 1}
 --- !u!114 &1590280736
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28490,11 +28498,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400000002, guid: c90dc1776a8e4509b8cd2711c3caa2b8, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 35.67
+      value: -6.28
       objectReference: {fileID: 0}
     - target: {fileID: 400000002, guid: c90dc1776a8e4509b8cd2711c3caa2b8, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.06
+      value: -6
       objectReference: {fileID: 0}
     - target: {fileID: 400000002, guid: c90dc1776a8e4509b8cd2711c3caa2b8, type: 3}
       propertyPath: m_LocalPosition.z
