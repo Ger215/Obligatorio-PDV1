@@ -20,8 +20,12 @@ public class RoomLightingManager : SingletonBehaviour<RoomLightingManager>
 
     private Coroutine fadeRoutine;
 
-    private void Start()
+    // El apagado por defecto va en Awake (no en Start): Awake corre SIEMPRE antes que cualquier
+    // Start, así ocurre antes de que CameraController.Start dispare RoomChanged y el room encienda
+    // la player light. Si esto estuviera en Start, podía correr DESPUÉS y volver a apagarla.
+    protected override void Awake()
     {
+        base.Awake();
         if (playerLight2D != null)
             playerLight2D.enabled = false;
     }
