@@ -4,6 +4,13 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
+public enum VictoryAction
+{
+    ShowVictoryScreen,
+    LoadNextScene,
+    ShowEndOfDemo
+}
+
 public class GameManager : SingletonBehaviour<GameManager>
 {
     [Header("References")]
@@ -17,6 +24,15 @@ public class GameManager : SingletonBehaviour<GameManager>
 
     [Header("Scene Names")]
     [SerializeField] private string mainMenuSceneName = "MainMenu";
+
+    [Header("Progression")]
+    [Tooltip("Qué hace este nivel al derrotar a su boss. " +
+             "LoadNextScene: pasa al próximo nivel llevando el estado del Player. " +
+             "ShowEndOfDemo: muestra la pantalla de fin de demo. " +
+             "ShowVictoryScreen: pantalla de victoria clásica.")]
+    [SerializeField] private VictoryAction victoryAction = VictoryAction.ShowVictoryScreen;
+    [Tooltip("Nombre de la próxima escena a cargar cuando victoryAction = LoadNextScene.")]
+    [SerializeField] private string nextSceneName = "Level 2";
 
     [Header("Death FX")]
     [SerializeField] private GameObject enemyDeathFXPrefab;
@@ -52,10 +68,22 @@ public class GameManager : SingletonBehaviour<GameManager>
             {
                 playerHealth.Died += HandlePlayerDeath;
             }
+
+            RestorePlayerStateIfAny();
         }
 
         hudController?.Bind(this, PlayerController.Instance);
-        audioManager?.PlayBackgroundMusic();
+        StartCoroutine(PlayFallbackMusic());
+    }
+
+    // El backgroundMusic es solo un fallback: esperamos un frame para que el RoomEnvironment del
+    // room inicial pida su tema (vía CameraController.Start → RoomChanged). Si el room ya puso
+    // música, no la pisamos; si no, recién ahí ponemos el tema de fondo global.
+    private IEnumerator PlayFallbackMusic()
+    {
+        yield return null;
+        if (audioManager != null && !audioManager.IsMusicPlaying)
+            audioManager.PlayBackgroundMusic();
     }
 
     private void Update()
@@ -203,8 +231,76 @@ public class GameManager : SingletonBehaviour<GameManager>
         if (isGameOver || isVictory) return;
 
         isVictory = true;
-        Time.timeScale = 0f;
-        hudController?.ShowVictory();
+
+        switch (victoryAction)
+        {
+            case VictoryAction.LoadNextScene:
+                CapturePlayerState();
+                Time.timeScale = 0f;
+                hudController?.ShowLevelComplete();
+                break;
+
+            case VictoryAction.ShowEndOfDemo:
+                Time.timeScale = 0f;
+                hudController?.ShowEndOfDemo();
+                break;
+
+            default:
+                Time.timeScale = 0f;
+                hudController?.ShowVictory();
+                break;
+        }
+    }
+
+    // Llamado por el botón "Continuar" de la pantalla de Nivel Completado: carga el próximo nivel.
+    public void ContinueToNextScene()
+    {
+        Time.timeScale = 1f;
+
+        if (!string.IsNullOrEmpty(nextSceneName))
+        {
+            SceneManager.LoadScene(nextSceneName);
+        }
+    }
+
+    // Guarda el estado del Player (vida, XP y habilidades aprendidas) para volcarlo en el próximo nivel.
+    private void CapturePlayerState()
+    {
+        if (playerHealth == null || playerExperience == null || playerAbilities == null)
+        {
+            return;
+        }
+
+        PlayerStateStore.Capture(
+            playerHealth.CurrentHealth,
+            playerExperience.CurrentExperience,
+            playerExperience.TotalExperienceEarned,
+            playerAbilities.LearnedAbilities);
+    }
+
+    // Vuelca el estado capturado en el nivel anterior sobre el Player de esta escena (y lo consume).
+    private void RestorePlayerStateIfAny()
+    {
+        if (!PlayerStateStore.HasState)
+        {
+            return;
+        }
+
+        playerHealth?.RestoreHealth(PlayerStateStore.CurrentHealth);
+        playerExperience?.RestoreState(PlayerStateStore.CurrentExperience, PlayerStateStore.TotalExperienceEarned);
+
+        if (playerAbilities != null)
+        {
+            foreach (PlayerAbilityDefinition ability in PlayerStateStore.LearnedAbilities)
+            {
+                if (ability != null)
+                {
+                    playerAbilities.LearnAbility(ability);
+                }
+            }
+        }
+
+        PlayerStateStore.Clear();
     }
 
     public void TogglePause()
@@ -237,12 +333,14 @@ public class GameManager : SingletonBehaviour<GameManager>
     public void RestartGame()
     {
         Time.timeScale = 1f;
+        PlayerStateStore.Clear();
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     public void QuitToMenu()
     {
         Time.timeScale = 1f;
+        PlayerStateStore.Clear();
 
         if (!string.IsNullOrEmpty(mainMenuSceneName))
         {

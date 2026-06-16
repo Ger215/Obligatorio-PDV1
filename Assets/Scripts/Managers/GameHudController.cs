@@ -29,6 +29,9 @@ public class GameHudController : SingletonBehaviour<GameHudController>
     [SerializeField] private Button skipShopButton;
 
     [Header("Ability Slots (icon UI, generado en runtime)")]
+    [Tooltip("Contenedor dentro de tu Canvas del HUD donde se generan los slots. " +
+             "Si lo dejás vacío, se crea un Canvas propio aparte (los slots quedarían por encima de los paneles).")]
+    [SerializeField] private RectTransform abilitySlotsParent;
     [Tooltip("Tamaño en píxeles de cada slot de habilidad equipada.")]
     [SerializeField] private Vector2 abilitySlotSize = new Vector2(72f, 72f);
     [SerializeField] private float abilitySlotSpacing = 10f;
@@ -37,6 +40,7 @@ public class GameHudController : SingletonBehaviour<GameHudController>
 
     private const int AbilitySlotCount = 3;
     private static readonly string[] AbilitySlotKeyLabels = { "1", "2", "3" };
+    private GameObject abilitySlotsRow;
     private Image[] abilitySlotIcons;
     private Image[] abilitySlotGlows;
     private TextMeshProUGUI[] abilitySlotCooldownTexts;
@@ -66,6 +70,16 @@ public class GameHudController : SingletonBehaviour<GameHudController>
     [SerializeField] private Button restartFromVictoryButton;
     [SerializeField] private Button quitFromVictoryButton;
 
+    [Header("End Of Demo")]
+    [SerializeField] private CanvasGroup endOfDemoGroup;
+    [SerializeField] private float endOfDemoFadeDuration = 1.5f;
+    [SerializeField] private Button quitFromEndOfDemoButton;
+
+    [Header("Level Complete")]
+    [SerializeField] private CanvasGroup levelCompleteGroup;
+    [SerializeField] private float levelCompleteFadeDuration = 1f;
+    [SerializeField] private Button continueButton;
+
     protected override void Awake()
     {
         base.Awake();
@@ -89,19 +103,34 @@ public class GameHudController : SingletonBehaviour<GameHudController>
 
     private void BuildAbilitySlotsUI()
     {
-        var canvasGo = new GameObject("AbilitySlotsCanvas");
-        canvasGo.transform.SetParent(transform, false);
+        Transform slotsParent;
 
-        var canvas = canvasGo.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 100;
+        // Preferido: generar los slots dentro del Canvas del HUD (asignado en el Inspector) para que
+        // los paneles de fin (Nivel Completado / Fin de Demo / Victory) puedan taparlos. Si no se
+        // asigna, se cae al comportamiento viejo de crear un Canvas propio por encima de todo.
+        if (abilitySlotsParent != null)
+        {
+            slotsParent = abilitySlotsParent;
+        }
+        else
+        {
+            var canvasGo = new GameObject("AbilitySlotsCanvas");
+            canvasGo.transform.SetParent(transform, false);
 
-        var scaler = canvasGo.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
+            var canvas = canvasGo.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 100;
+
+            var scaler = canvasGo.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
+
+            slotsParent = canvasGo.transform;
+        }
 
         var rowGo = new GameObject("AbilitySlots");
-        rowGo.transform.SetParent(canvasGo.transform, false);
+        rowGo.transform.SetParent(slotsParent, false);
+        abilitySlotsRow = rowGo;
 
         var rowRect = rowGo.AddComponent<RectTransform>();
         rowRect.anchorMin = rowRect.anchorMax = new Vector2(0.5f, 0f);
@@ -289,6 +318,26 @@ public class GameHudController : SingletonBehaviour<GameHudController>
             });
         }
 
+        if (quitFromEndOfDemoButton != null)
+        {
+            quitFromEndOfDemoButton.onClick.RemoveAllListeners();
+            quitFromEndOfDemoButton.onClick.AddListener(() =>
+            {
+                AudioManager.Instance?.PlayButton(true);
+                GameManager.Instance?.QuitToMenu();
+            });
+        }
+
+        if (continueButton != null)
+        {
+            continueButton.onClick.RemoveAllListeners();
+            continueButton.onClick.AddListener(() =>
+            {
+                AudioManager.Instance?.PlayButton(true);
+                GameManager.Instance?.ContinueToNextScene();
+            });
+        }
+
         if (gameOverGroup != null)
         {
             gameOverGroup.alpha = 0f;
@@ -299,6 +348,18 @@ public class GameHudController : SingletonBehaviour<GameHudController>
         {
             victoryGroup.alpha = 0f;
             victoryGroup.gameObject.SetActive(false);
+        }
+
+        if (endOfDemoGroup != null)
+        {
+            endOfDemoGroup.alpha = 0f;
+            endOfDemoGroup.gameObject.SetActive(false);
+        }
+
+        if (levelCompleteGroup != null)
+        {
+            levelCompleteGroup.alpha = 0f;
+            levelCompleteGroup.gameObject.SetActive(false);
         }
 
         if (bossHealthBarPanel != null)
@@ -338,6 +399,7 @@ public class GameHudController : SingletonBehaviour<GameHudController>
     public void ShowVictory()
     {
         HideBossHealthBar();
+        SetAbilitySlotsVisible(false);
 
         if (victoryGroup != null)
         {
@@ -362,8 +424,76 @@ public class GameHudController : SingletonBehaviour<GameHudController>
         victoryGroup.alpha = 1f;
     }
 
+    public void ShowEndOfDemo()
+    {
+        HideBossHealthBar();
+        SetAbilitySlotsVisible(false);
+        AudioManager.Instance?.FadeOutMusic(endOfDemoFadeDuration);
+
+        if (endOfDemoGroup != null)
+        {
+            StopCoroutine("FadeInEndOfDemo");
+            StartCoroutine("FadeInEndOfDemo");
+        }
+    }
+
+    private IEnumerator FadeInEndOfDemo()
+    {
+        endOfDemoGroup.alpha = 0f;
+        endOfDemoGroup.gameObject.SetActive(true);
+
+        float elapsed = 0f;
+        while (elapsed < endOfDemoFadeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            endOfDemoGroup.alpha = Mathf.Clamp01(elapsed / endOfDemoFadeDuration);
+            yield return null;
+        }
+
+        endOfDemoGroup.alpha = 1f;
+    }
+
+    private void SetAbilitySlotsVisible(bool visible)
+    {
+        if (abilitySlotsRow != null)
+        {
+            abilitySlotsRow.SetActive(visible);
+        }
+    }
+
+    public void ShowLevelComplete()
+    {
+        HideBossHealthBar();
+        SetAbilitySlotsVisible(false);
+        AudioManager.Instance?.FadeOutMusic(levelCompleteFadeDuration);
+
+        if (levelCompleteGroup != null)
+        {
+            StopCoroutine("FadeInLevelComplete");
+            StartCoroutine("FadeInLevelComplete");
+        }
+    }
+
+    private IEnumerator FadeInLevelComplete()
+    {
+        levelCompleteGroup.alpha = 0f;
+        levelCompleteGroup.gameObject.SetActive(true);
+
+        float elapsed = 0f;
+        while (elapsed < levelCompleteFadeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            levelCompleteGroup.alpha = Mathf.Clamp01(elapsed / levelCompleteFadeDuration);
+            yield return null;
+        }
+
+        levelCompleteGroup.alpha = 1f;
+    }
+
     public void ShowGameOver()
     {
+        SetAbilitySlotsVisible(false);
+
         if (gameOverWaveText != null)
         {
             gameOverWaveText.text = "Game Over";

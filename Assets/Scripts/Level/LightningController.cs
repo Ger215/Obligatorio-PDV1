@@ -111,7 +111,10 @@ public class LightningController : MonoBehaviour
     private IEnumerator PlayThunder()
     {
         yield return new WaitForSeconds(thunderDelay);
-        Vector3 pos = Camera.main != null ? Camera.main.transform.position : transform.position;
-        AudioSource.PlayClipAtPoint(thunderClip, pos, thunderVolume);
+        // 2D vía AudioManager: suena igual sin importar dónde esté el player.
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlaySfx(thunderClip, thunderVolume);
+        else
+            AudioSource.PlayClipAtPoint(thunderClip, Camera.main != null ? Camera.main.transform.position : transform.position, thunderVolume);
     }
 }

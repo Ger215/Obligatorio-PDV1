@@ -80,6 +80,16 @@ public class HealthSystem : MonoBehaviour
         hasDamageShield = false;
     }
 
+    /// <summary>
+    /// Restaura la vida a un valor puntual (usado al transferir el estado del Player entre niveles).
+    /// </summary>
+    public void RestoreHealth(int current)
+    {
+        isDead = false;
+        CurrentHealth = Mathf.Clamp(current, 1, maxHealth);
+        Healed?.Invoke(CurrentHealth, maxHealth);
+    }
+
     public void SetIncomingDamageMultiplier(float multiplier)
     {
         incomingDamageMultiplier = Mathf.Max(0.1f, multiplier);

@@ -75,7 +75,6 @@ public class RoomTrigger : MonoBehaviour
             return;
         }
 
-        Debug.Log($"[RoomTrigger:{name}] TransitionToRoom → {destination.name} ({transitionStyle})", this);
         camera.TransitionToRoom(destination, transitionStyle);
 
         if (oneWay)

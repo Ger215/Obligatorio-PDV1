@@ -23,6 +23,16 @@ public class ExperienceSystem : MonoBehaviour
         ExperienceChanged?.Invoke(currentExperience, totalExperienceEarned);
     }
 
+    /// <summary>
+    /// Restaura la XP a valores puntuales (usado al transferir el estado del Player entre niveles).
+    /// </summary>
+    public void RestoreState(int current, int total)
+    {
+        currentExperience = Mathf.Max(0, current);
+        totalExperienceEarned = Mathf.Max(currentExperience, total);
+        ExperienceChanged?.Invoke(currentExperience, totalExperienceEarned);
+    }
+
     public bool TrySpend(int amount)
     {
         if (amount <= 0 || currentExperience < amount)

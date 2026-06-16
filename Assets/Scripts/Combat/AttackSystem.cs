@@ -144,11 +144,6 @@ public class AttackSystem : MonoBehaviour
         int hitCount = ApplyDamage(attackPoint.position, attackRange, targetLayers, finalDamage);
         AttackResolved?.Invoke(LastAttackWasCritical, finalDamage, hitCount);
 
-        if (debugAttackLogs)
-        {
-            Debug.Log($"{name} attacked for {finalDamage} damage. Critical: {LastAttackWasCritical}. Targets hit: {hitCount}.");
-        }
-
         yield return new WaitForSeconds(hitDuration);
 
         currentPhase = AttackPhase.Recovery;

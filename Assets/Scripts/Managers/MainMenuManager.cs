@@ -26,7 +26,8 @@ public class MainMenuManager : MonoBehaviour
 
     public void StartGame()
     {
-        SceneManager.LoadScene("GameScene"); 
+        PlayerStateStore.Clear();
+        SceneManager.LoadScene("GameScene");
     }
     public void ToggleMusic()
     {

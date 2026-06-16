@@ -14,6 +14,10 @@ public class AudioManager : SingletonBehaviour<AudioManager>
     private float baseMusicVolume = 1f;
     private Coroutine musicFadeRoutine;
 
+    /// <summary>True si hay un tema sonando o en pleno crossfade. Lo usa el GameManager para
+    /// no pisar con el backgroundMusic la música que un room ya pidió.</summary>
+    public bool IsMusicPlaying => musicSource != null && (musicSource.isPlaying || musicFadeRoutine != null);
+
     private void Start()
     {
         if (musicSource != null)
@@ -81,6 +85,39 @@ public class AudioManager : SingletonBehaviour<AudioManager>
         musicFadeRoutine = null;
     }
 
+    /// <summary>
+    /// Hace un fade out de la música hasta el silencio y la frena. Usado en las pantallas de
+    /// Nivel Completado y Fin de Demo, donde no debe sonar nada. Corre en tiempo no escalado
+    /// porque esas pantallas pausan el juego (timeScale = 0).
+    /// </summary>
+    public void FadeOutMusic(float duration = 1f)
+    {
+        if (musicSource == null) return;
+
+        if (musicFadeRoutine != null) StopCoroutine(musicFadeRoutine);
+        musicFadeRoutine = StartCoroutine(FadeOutRoutine(duration));
+    }
+
+    private IEnumerator FadeOutRoutine(float duration)
+    {
+        float startVol = musicSource.volume;
+
+        if (duration > 0f && musicSource.isPlaying)
+        {
+            float t = 0f;
+            while (t < duration)
+            {
+                t += Time.unscaledDeltaTime;
+                musicSource.volume = Mathf.Lerp(startVol, 0f, t / duration);
+                yield return null;
+            }
+        }
+
+        musicSource.Stop();
+        musicSource.volume = baseMusicVolume; // restaurar para el próximo tema
+        musicFadeRoutine = null;
+    }
+
     public void PlayJump() => PlayClip(audioConfig != null ? audioConfig.jump : null);
     public void PlayDoubleJump() => PlayClip(audioConfig != null ? (audioConfig.doubleJump != null ? audioConfig.doubleJump : audioConfig.jump) : null);
     public void PlayAttack(bool critical) => PlayClip(audioConfig != null ? (critical ? audioConfig.attackCritical : audioConfig.attack) : null);
@@ -129,5 +166,13 @@ public class AudioManager : SingletonBehaviour<AudioManager>
         }
 
         sfxSource.PlayOneShot(clip);
+    }
+
+    /// <summary>Reproduce un SFX arbitrario en 2D (sin atenuación por distancia). Útil para
+    /// sonidos ambientales como el trueno, que deben sonar igual estés donde estés.</summary>
+    public void PlaySfx(AudioClip clip, float volume = 1f)
+    {
+        if (clip == null || sfxSource == null) return;
+        sfxSource.PlayOneShot(clip, volume);
     }
 }

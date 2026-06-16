@@ -28,6 +28,11 @@ public class RoomEnvironment : MonoBehaviour
     [Tooltip("Duración del fade de música, tinte y luz al entrar.")]
     [SerializeField] private float fadeDuration = 0.6f;
 
+    [Header("Tormenta (opcional)")]
+    [Tooltip("Si se asigna, al entrar a este room arranca la tormenta de rayos y al salir se corta. " +
+             "Dejar vacío en los rooms sin tormenta.")]
+    [SerializeField] private LightningController stormLightning;
+
     private void Awake()
     {
         if (owningRoom == null) owningRoom = GetComponent<RoomBoundary>();
@@ -41,6 +46,14 @@ public class RoomEnvironment : MonoBehaviour
 
     private void HandleRoomChanged(RoomBoundary newRoom)
     {
+        // La tormenta se maneja antes del early-return: si entramos a este room arranca,
+        // y cuando el room activo pasa a ser otro, este mismo RoomEnvironment la corta.
+        if (stormLightning != null)
+        {
+            if (newRoom == owningRoom) stormLightning.BeginStorm();
+            else stormLightning.StopStorm();
+        }
+
         if (newRoom != owningRoom) return;
 
         if (music != null) AudioManager.Instance?.PlayMusic(music);
