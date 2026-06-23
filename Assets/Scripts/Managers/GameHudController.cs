@@ -15,6 +15,14 @@ public class GameHudController : SingletonBehaviour<GameHudController>
     [SerializeField] private float healthBarLerpDuration = 0.3f;
     [SerializeField] private TMP_Text experienceText;
 
+    [Header("XP Icon (orbe/cristal)")]
+    [Tooltip("Ícono de XP (orbe/cristal/moneda) que va al lado del número. Hace punch al ganar XP.")]
+    [SerializeField] private Image xpIcon;
+    [Tooltip("Opcional: imagen de glow detrás del ícono. Late suave de forma continua.")]
+    [SerializeField] private Image xpIconGlow;
+    [Tooltip("Prefijo del texto. Con el ícono puesto, dejalo vacío para mostrar solo el número.")]
+    [SerializeField] private string xpLabelPrefix = "";
+
     [Header("XP Animation")]
     [Tooltip("Duración del count-up del contador de XP.")]
     [SerializeField] private float xpCountUpDuration = 0.35f;
@@ -93,6 +101,14 @@ public class GameHudController : SingletonBehaviour<GameHudController>
 
     private void Update()
     {
+        if (xpIconGlow != null)
+        {
+            float pulse = (Mathf.Sin(Time.unscaledTime * 3f) + 1f) * 0.5f;
+            Color c = xpIconGlow.color;
+            c.a = Mathf.Lerp(0.25f, 0.65f, pulse);
+            xpIconGlow.color = c;
+        }
+
         if (abilityController == null)
         {
             return;
@@ -133,9 +149,22 @@ public class GameHudController : SingletonBehaviour<GameHudController>
         abilitySlotsRow = rowGo;
 
         var rowRect = rowGo.AddComponent<RectTransform>();
-        rowRect.anchorMin = rowRect.anchorMax = new Vector2(0.5f, 0f);
-        rowRect.pivot = new Vector2(0.5f, 0f);
-        rowRect.anchoredPosition = abilitySlotsAnchoredPosition;
+        if (abilitySlotsParent != null)
+        {
+            // Con contenedor asignado: la fila se centra dentro de él y vos controlás la posición
+            // moviendo el contenedor en el Inspector (ej: llevarlo a la derecha para no tapar la
+            // barra de vida del boss). El ContentSizeFitter hace que la fila mida lo justo.
+            rowRect.anchorMin = rowRect.anchorMax = new Vector2(0.5f, 0.5f);
+            rowRect.pivot = new Vector2(0.5f, 0.5f);
+            rowRect.anchoredPosition = Vector2.zero;
+        }
+        else
+        {
+            // Sin contenedor (Canvas propio): anclado abajo-centro como antes.
+            rowRect.anchorMin = rowRect.anchorMax = new Vector2(0.5f, 0f);
+            rowRect.pivot = new Vector2(0.5f, 0f);
+            rowRect.anchoredPosition = abilitySlotsAnchoredPosition;
+        }
 
         var layout = rowGo.AddComponent<HorizontalLayoutGroup>();
         layout.spacing = abilitySlotSpacing;
@@ -719,7 +748,9 @@ public class GameHudController : SingletonBehaviour<GameHudController>
     private bool xpInitialized;
     private Coroutine xpCountCoroutine;
     private Coroutine xpPunchCoroutine;
+    private Coroutine xpIconPunchCoroutine;
     private Vector3 xpTextBaseScale = Vector3.one;
+    private Vector3 xpIconBaseScale = Vector3.one;
 
     private void HandleExperienceChanged(int currentExperience, int totalExperience)
     {
@@ -729,8 +760,9 @@ public class GameHudController : SingletonBehaviour<GameHudController>
         if (!xpInitialized)
         {
             displayedExperience = currentExperience;
-            experienceText.text = $"XP: {currentExperience}";
+            experienceText.text = $"{xpLabelPrefix}{currentExperience}";
             xpTextBaseScale = experienceText.rectTransform.localScale;
+            if (xpIcon != null) xpIconBaseScale = xpIcon.rectTransform.localScale;
             xpInitialized = true;
             return;
         }
@@ -744,6 +776,12 @@ public class GameHudController : SingletonBehaviour<GameHudController>
         {
             if (xpPunchCoroutine != null) StopCoroutine(xpPunchCoroutine);
             xpPunchCoroutine = StartCoroutine(PunchExperienceScale());
+
+            if (xpIcon != null)
+            {
+                if (xpIconPunchCoroutine != null) StopCoroutine(xpIconPunchCoroutine);
+                xpIconPunchCoroutine = StartCoroutine(PunchIconScale());
+            }
         }
     }
 
@@ -759,11 +797,11 @@ public class GameHudController : SingletonBehaviour<GameHudController>
             // Ease-out cuadrático: arranca rápido, frena al final
             float eased = 1f - (1f - t) * (1f - t);
             int value = Mathf.RoundToInt(Mathf.Lerp(from, to, eased));
-            experienceText.text = $"XP: {value}";
+            experienceText.text = $"{xpLabelPrefix}{value}";
             yield return null;
         }
 
-        experienceText.text = $"XP: {to}";
+        experienceText.text = $"{xpLabelPrefix}{to}";
         displayedExperience = to;
         xpCountCoroutine = null;
     }
@@ -798,5 +836,35 @@ public class GameHudController : SingletonBehaviour<GameHudController>
 
         t.localScale = xpTextBaseScale;
         xpPunchCoroutine = null;
+    }
+
+    private IEnumerator PunchIconScale()
+    {
+        Transform t = xpIcon.rectTransform;
+        float duration = Mathf.Max(0.01f, xpPunchDuration);
+        float half = duration * 0.5f;
+        float elapsed = 0f;
+
+        while (elapsed < half)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float k = Mathf.Clamp01(elapsed / half);
+            float s = Mathf.Lerp(1f, xpPunchScale, k);
+            t.localScale = xpIconBaseScale * s;
+            yield return null;
+        }
+
+        elapsed = 0f;
+        while (elapsed < half)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float k = Mathf.Clamp01(elapsed / half);
+            float s = Mathf.Lerp(xpPunchScale, 1f, k);
+            t.localScale = xpIconBaseScale * s;
+            yield return null;
+        }
+
+        t.localScale = xpIconBaseScale;
+        xpIconPunchCoroutine = null;
     }
 }
