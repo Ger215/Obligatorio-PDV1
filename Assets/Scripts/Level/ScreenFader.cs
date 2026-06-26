@@ -18,11 +18,30 @@ public class ScreenFader : MonoBehaviour
     [SerializeField] private float fadeOutDuration = 0.2f;
     [SerializeField] private float fadeInDuration  = 0.28f;
 
+    [Header("Inicio de escena")]
+    [Tooltip("Si está activo, la escena arranca en negro y hace fade-in al cargar. " +
+             "Útil para revelar un nivel al entrar (ej: después de la pantalla de carga).")]
+    [SerializeField] private bool fadeInOnStart = false;
+
     private Canvas canvas;
     private Image image;
     private Coroutine routine;
 
-    private void Awake() => BuildOverlay();
+    private void Awake()
+    {
+        BuildOverlay();
+        // Empezamos cubiertos para revelar en Start, evitando un flash en el primer frame.
+        if (fadeInOnStart) SetAlpha(1f);
+    }
+
+    private void Start()
+    {
+        if (fadeInOnStart)
+        {
+            if (routine != null) StopCoroutine(routine);
+            routine = StartCoroutine(Fade(1f, 0f, fadeInDuration));
+        }
+    }
 
     private void OnEnable()
     {
@@ -63,6 +82,20 @@ public class ScreenFader : MonoBehaviour
         rect.offsetMax = Vector2.zero;
 
         SetAlpha(0f);
+    }
+
+    /// <summary>
+    /// Fundido a negro manual, fuera del flujo de transición de rooms (ej: la pantalla de carga
+    /// que oculta el "tirón" del cambio de escena antes de activar el próximo nivel).
+    /// Devuelve la corutina para poder esperarla con `yield return`.
+    /// </summary>
+    public Coroutine FadeToBlack() => FadeToBlack(fadeOutDuration);
+
+    public Coroutine FadeToBlack(float duration)
+    {
+        if (routine != null) StopCoroutine(routine);
+        routine = StartCoroutine(Fade(GetAlpha(), 1f, duration));
+        return routine;
     }
 
     // Inicio de transición: cubrir la pantalla.

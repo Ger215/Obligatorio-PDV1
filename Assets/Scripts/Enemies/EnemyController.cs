@@ -240,6 +240,7 @@ stuckCheckPosition = transform.position;
         if (!IsPlayerInAggroRange(deltaToPlayer))
         {
             ApplyIdleOrWander();
+            ApplySafeZones();
             animator?.SetBool(AnimIsWalking, Mathf.Abs(rb.linearVelocity.x) > 0.1f);
             return;
         }
@@ -259,6 +260,7 @@ stuckCheckPosition = transform.position;
             float horizontalFly = inRange ? 0f : horizontalDirection * moveSpeed;
             float verticalFly = Mathf.Sin(Time.time * 4f) * 2f;
             rb.linearVelocity = new Vector2(horizontalFly, verticalFly);
+            ApplySafeZones();
             return;
         }
 
@@ -311,6 +313,7 @@ stuckCheckPosition = transform.position;
         }
 
         ApplySeparation();
+        ApplySafeZones();
         animator?.SetBool(AnimIsWalking, Mathf.Abs(rb.linearVelocity.x) > 0.1f);
     }
 
@@ -428,6 +431,16 @@ stuckCheckPosition = transform.position;
         Vector2 footPos = groundCheck != null ? (Vector2)groundCheck.position : (Vector2)transform.position;
         Vector2 ahead = footPos + Vector2.right * facingDirection * 0.4f + Vector2.up * 0.1f;
         return Physics2D.Raycast(ahead, Vector2.down, groundAheadDistance + 0.2f, groundLayers).collider != null;
+    }
+
+    // Corta la velocidad horizontal si el enemigo está por entrar a una zona segura (ej: la tienda).
+    private void ApplySafeZones()
+    {
+        float clampedX = SafeZone.RestrictHorizontalVelocity(transform.position, rb.linearVelocity.x);
+        if (!Mathf.Approximately(clampedX, rb.linearVelocity.x))
+        {
+            rb.linearVelocity = new Vector2(clampedX, rb.linearVelocity.y);
+        }
     }
 
     private void ApplySeparation()

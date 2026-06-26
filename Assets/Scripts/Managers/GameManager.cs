@@ -17,6 +17,10 @@ public class GameManager : SingletonBehaviour<GameManager>
     [SerializeField] private PlayerAbilityCatalog abilityCatalog;
     [SerializeField] private GameHudController hudController;
     [SerializeField] private AudioManager audioManager;
+    [Tooltip("Opcional: fundido a negro al derrotar al boss antes de cargar la pantalla de carga. " +
+             "Si está vacío, pasa directo sin fundido.")]
+    [SerializeField] private ScreenFader screenFader;
+    [SerializeField] private float victoryFadeDuration = 0.6f;
 
     [Header("Shop")]
     [Tooltip("Cantidad de habilidades ofrecidas en cada apertura de la shop.")]
@@ -24,6 +28,9 @@ public class GameManager : SingletonBehaviour<GameManager>
 
     [Header("Scene Names")]
     [SerializeField] private string mainMenuSceneName = "MainMenu";
+    [Tooltip("Escena intermedia de carga (personaje corriendo + 'Cargando Nivel...'). " +
+             "Si está vacía, se carga la próxima escena de forma directa, sin pantalla de carga.")]
+    [SerializeField] private string loadingSceneName = "Loading";
 
     [Header("Progression")]
     [Tooltip("Qué hace este nivel al derrotar a su boss. " +
@@ -236,8 +243,7 @@ public class GameManager : SingletonBehaviour<GameManager>
         {
             case VictoryAction.LoadNextScene:
                 CapturePlayerState();
-                Time.timeScale = 0f;
-                hudController?.ShowLevelComplete();
+                LoadNextSceneWithLoadingScreen();
                 break;
 
             case VictoryAction.ShowEndOfDemo:
@@ -252,15 +258,38 @@ public class GameManager : SingletonBehaviour<GameManager>
         }
     }
 
-    // Llamado por el botón "Continuar" de la pantalla de Nivel Completado: carga el próximo nivel.
-    public void ContinueToNextScene()
+    // Pasa a la escena de carga ("Loading"), que muestra al personaje corriendo + "Cargando Nivel..."
+    // y se encarga de cargar la próxima escena en segundo plano. Si no hay escena de carga configurada,
+    // carga la próxima escena directo. El estado del Player ya viaja por PlayerStateStore.
+    private void LoadNextSceneWithLoadingScreen()
+    {
+        if (string.IsNullOrEmpty(nextSceneName))
+        {
+            return;
+        }
+
+        StartCoroutine(LoadNextSceneRoutine());
+    }
+
+    private IEnumerator LoadNextSceneRoutine()
     {
         Time.timeScale = 1f;
 
-        if (!string.IsNullOrEmpty(nextSceneName))
+        // Fundido a negro en el nivel actual antes de saltar, para que no corte de golpe.
+        if (screenFader != null)
         {
-            SceneManager.LoadScene(nextSceneName);
+            yield return screenFader.FadeToBlack(victoryFadeDuration);
         }
+
+        string sceneToLoad = !string.IsNullOrEmpty(loadingSceneName) ? loadingSceneName : nextSceneName;
+
+        // Si vamos por la pantalla de carga, le pasamos el destino real.
+        if (!string.IsNullOrEmpty(loadingSceneName))
+        {
+            LevelLoadingScreen.TargetScene = nextSceneName;
+        }
+
+        SceneManager.LoadScene(sceneToLoad);
     }
 
     // Guarda el estado del Player (vida, XP y habilidades aprendidas) para volcarlo en el próximo nivel.

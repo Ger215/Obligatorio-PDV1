@@ -1,10 +1,19 @@
 fileFormatVersion: 2
-guid: 873a1539bae0a054eb23b9d902e2ea84
+guid: 2ef200c5dfd2d6643a4cb2938d572254
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8276524687770435648
-    second: MusicIconAsset_0
+      213: 7050408539662449739
+    second: mimic rest_0
+  - first:
+      213: -7199015910049736823
+    second: mimic rest_1
+  - first:
+      213: 1255788233874686973
+    second: mimic rest_2
+  - first:
+      213: -792077051736929560
+    second: mimic rest_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -96,56 +105,17 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: VisionOS
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: WindowsStoreApps
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: MusicIconAsset_0
+      name: mimic rest_0
       rect:
         serializedVersion: 2
-        x: 432
-        y: 283
-        width: 1956
-        height: 979
+        x: 0
+        y: 0
+        width: 24
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +124,74 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0cf31bab5a0e32d80800000000000000
-      internalID: -8276524687770435648
+      spriteID: b4cf5ff463518d160800000000000000
+      internalID: 7050408539662449739
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mimic rest_1
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 0
+        width: 24
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 987991dfb25f71c90800000000000000
+      internalID: -7199015910049736823
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mimic rest_2
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 0
+        width: 24
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df34739ceb47d6110800000000000000
+      internalID: 1255788233874686973
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mimic rest_3
+      rect:
+        serializedVersion: 2
+        x: 69
+        y: 0
+        width: 24
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ea4b783e1af105f0800000000000000
+      internalID: -792077051736929560
       vertices: []
       indices: 
       edges: []
@@ -174,7 +210,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      MusicIconAsset_0: -8276524687770435648
+      mimic rest_0: 7050408539662449739
+      mimic rest_1: -7199015910049736823
+      mimic rest_2: 1255788233874686973
+      mimic rest_3: -792077051736929560
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

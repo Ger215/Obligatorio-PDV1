@@ -12,8 +12,8 @@ public class ParallaxController : MonoBehaviour
     [Tooltip("Cámara a seguir. Si está vacío usa Camera.main.")]
     [SerializeField] private Transform cam;
 
-    [Tooltip("Multiplicador global del UV scroll. Empezá en 0.1 y ajustá.")]
-    [Range(0f, 1f)]
+    [Tooltip("Multiplicador global del UV scroll. Empezá en 0.1 y ajustá. Negativo invierte el sentido.")]
+    [Range(-1f, 1f)]
     [SerializeField] private float parallaxSpeed = 0.1f;
 
     [Tooltip("Multiplicador POR CAPA, en orden de hijos. Si está vacío usa backSpeed automático por Z. " +

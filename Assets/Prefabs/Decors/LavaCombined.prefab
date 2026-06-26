@@ -442,7 +442,7 @@ MonoBehaviour:
   damage: 1
   targetLayers:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 384
   knockbackForce: 12
   damageInterval: 0.6
 --- !u!1 &6702038319210713581
