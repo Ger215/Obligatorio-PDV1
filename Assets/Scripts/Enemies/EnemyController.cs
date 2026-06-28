@@ -195,8 +195,14 @@ stuckCheckPosition = transform.position;
     private void LateUpdate()
     {
         if (isDead) return;
-        float yaw = (facingDirection == 1) == spriteFacesLeft ? 180f : 0f;
-        transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+
+        // Stationary (mimic/cofre): NO rota para encarar. Con pivot descentrado + escala grande,
+        // el giro de 180° en Y hace "saltar" el sprite de lado y parece que se mueve. Queda fijo.
+        if (enemyType != EnemyType.Stationary)
+        {
+            float yaw = (facingDirection == 1) == spriteFacesLeft ? 180f : 0f;
+            transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+        }
 
         // El attackPoint se reubica DESPUÉS de rotar, en mundo, para que la rotación no lo arrastre.
         UpdateAttackPointPosition();
@@ -204,6 +210,7 @@ stuckCheckPosition = transform.position;
 
     public void ApplyKnockback(float forceX)
     {
+        if (rb.bodyType != RigidbodyType2D.Dynamic) return; // mimic clavado: no se lo empuja
         rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
         rb.AddForce(new Vector2(forceX * knockbackMultiplier, 0f), ForceMode2D.Impulse);
         knockbackEndTime = Time.time + 0.3f;
@@ -211,6 +218,14 @@ stuckCheckPosition = transform.position;
 
     private void FixedUpdate()
     {
+        // Cuerpos no-dinámicos (Static/Kinematic, ej. mimic clavado): no aplicamos física de
+        // movimiento. El facing y el ataque se manejan en Update igual. Evita el error
+        // "Cannot use 'linearVelocity' on a static body".
+        if (rb.bodyType != RigidbodyType2D.Dynamic)
+        {
+            return;
+        }
+
         if (isDead)
         {
             rb.linearVelocity = Vector2.zero;
@@ -226,6 +241,20 @@ stuckCheckPosition = transform.position;
 
         if (Time.time < knockbackEndTime)
         {
+            return;
+        }
+
+        // Stationary (mimic/cofre): NUNCA se mueve en X, esté el player cerca o lejos.
+        // Solo encara al player; el ataque lo dispara Update cuando entra en rango. Deja gravedad.
+        if (enemyType == EnemyType.Stationary)
+        {
+            if (playerTarget != null)
+            {
+                float dx = playerTarget.position.x - transform.position.x;
+                if (Mathf.Abs(dx) > 0.05f) facingDirection = dx >= 0f ? 1 : -1;
+            }
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+            animator?.SetBool(AnimIsWalking, false);
             return;
         }
 
@@ -481,9 +510,18 @@ stuckCheckPosition = transform.position;
             return;
         }
 
+        Transform ap = attackSystem.AttackPointTransform;
+
+        // Si el AttackSystem no tiene un AttackPoint propio, cae de vuelta al transform raíz.
+        // En ese caso NO lo movemos: estaríamos empujando al enemigo mismo hacia un lado cada
+        // frame (drift infinito). Solo reubicamos un attackPoint que sea un hijo dedicado.
+        if (ap == transform)
+        {
+            return;
+        }
+
         // Posición en MUNDO según facingDirection, independiente de la rotación Y del root y
         // de la orientación del arte. Así el attackPoint siempre cae del lado real al que mira.
-        Transform ap = attackSystem.AttackPointTransform;
         ap.position = transform.position + Vector3.right * (facingDirection * attackPointDistance);
     }
 
@@ -513,7 +551,7 @@ stuckCheckPosition = transform.position;
     private void HandleDeath(HealthSystem deadHealthSystem)
     {
         isDead = true;
-        rb.linearVelocity = Vector2.zero;
+        if (rb.bodyType == RigidbodyType2D.Dynamic) rb.linearVelocity = Vector2.zero;
         AudioManager.Instance?.PlayEnemyDeath();
         animator?.SetTrigger(AnimDie);
     }
@@ -563,6 +601,10 @@ stuckCheckPosition = transform.position;
             case EnemyType.Walker:
                 wanderWhenIdle = true;   // siempre patrulla
                 knockbackMultiplier = 0.5f;
+                break;
+            case EnemyType.Stationary:
+                wanderWhenIdle = false;  // nunca deambula: queda quieto como cofre
+                knockbackMultiplier = 0f; // no se lo empuja al golpearlo
                 break;
         }
 

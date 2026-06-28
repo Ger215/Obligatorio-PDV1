@@ -148,8 +148,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c105a3be5e1f9b04a86c06fa8aa867fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AutoParallaxScroller
-  scrollSpeed: 0.03
-  perLayerSpeed: []
+  scrollSpeed: -0.003
+  perLayerSpeed:
+  - -0.03
+  - -0.75
+  - 0.25
   scrollVertical: 0
   pixelSnapUV: 0
 --- !u!4 &42597811

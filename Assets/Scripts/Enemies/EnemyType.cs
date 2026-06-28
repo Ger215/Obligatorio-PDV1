@@ -4,5 +4,6 @@ public enum EnemyType
     Fast,
     Ranged,
     Tank,
-    Walker
+    Walker,
+    Stationary
 }
