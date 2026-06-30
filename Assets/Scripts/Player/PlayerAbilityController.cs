@@ -181,9 +181,13 @@ public class PlayerAbilityController : MonoBehaviour
     {
         playerController.TriggerDash();
 
+        // El dash barre su trayectoria varios frames; este set asegura que a cada enemigo se le
+        // aplique el daño una sola vez por dash (antes pegaba por frame, escalando con los FPS).
+        var alreadyHit = new HashSet<HealthSystem>();
+
         while (playerController.IsDashing)
         {
-            attackSystem.DealAreaDamage(playerController.AttackSystem.AttackPointTransform.position, ability.radius, 1 << 8, ability.power, true);
+            attackSystem.DealAreaDamage(playerController.AttackSystem.AttackPointTransform.position, ability.radius, 1 << 8, ability.power, true, alreadyHit);
             SpawnDashTrailGhost();
             yield return null;
         }

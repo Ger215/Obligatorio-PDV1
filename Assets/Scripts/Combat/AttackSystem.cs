@@ -157,9 +157,19 @@ public class AttackSystem : MonoBehaviour
 
     public int DealAreaDamage(Vector2 center, float radius, LayerMask targets, int damage, bool canCrit)
     {
+        return DealAreaDamage(center, radius, targets, damage, canCrit, null);
+    }
+
+    /// <summary>
+    /// Igual que DealAreaDamage, pero ignora los HealthSystem ya presentes en <paramref name="alreadyDamaged"/>
+    /// y agrega a ese set los que golpea. Sirve para ataques que se evalúan varios frames (ej: Dash Strike
+    /// barriendo su trayectoria) y deben pegarle a cada enemigo una sola vez.
+    /// </summary>
+    public int DealAreaDamage(Vector2 center, float radius, LayerMask targets, int damage, bool canCrit, HashSet<HealthSystem> alreadyDamaged)
+    {
         LastAttackWasCritical = canCrit && RollCritical();
         int finalDamage = CalculateDamage(LastAttackWasCritical, damage);
-        int hitCount = ApplyDamage(center, radius, targets, finalDamage);
+        int hitCount = ApplyDamage(center, radius, targets, finalDamage, alreadyDamaged);
         AttackResolved?.Invoke(LastAttackWasCritical, finalDamage, hitCount);
         return hitCount;
     }
@@ -217,6 +227,11 @@ public class AttackSystem : MonoBehaviour
 
     private int ApplyDamage(Vector2 center, float radius, LayerMask targets, int damage)
     {
+        return ApplyDamage(center, radius, targets, damage, null);
+    }
+
+    private int ApplyDamage(Vector2 center, float radius, LayerMask targets, int damage, HashSet<HealthSystem> alreadyDamaged)
+    {
         Collider2D[] hitColliders = Physics2D.OverlapCircleAll(center, radius, targets);
         HashSet<HealthSystem> damagedTargets = new HashSet<HealthSystem>();
 
@@ -225,6 +240,12 @@ public class AttackSystem : MonoBehaviour
             HealthSystem targetHealth = hitCollider.GetComponentInParent<HealthSystem>();
 
             if (targetHealth == null || targetHealth == ownerHealth || damagedTargets.Contains(targetHealth))
+            {
+                continue;
+            }
+
+            // Excluir los ya golpeados en este mismo barrido (ej: a lo largo de un Dash Strike).
+            if (alreadyDamaged != null && !alreadyDamaged.Add(targetHealth))
             {
                 continue;
             }
