@@ -1,0 +1,481 @@
+fileFormatVersion: 2
+guid: 568ff8c648af12e4ba41082f950a74de
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 9207864301734568319
+    second: GhostWarrior-Attack1_0
+  - first:
+      213: 6612342481769816342
+    second: GhostWarrior-Attack1_1
+  - first:
+      213: 6729246689648251494
+    second: GhostWarrior-Attack1_2
+  - first:
+      213: -3140271105171241126
+    second: GhostWarrior-Attack1_3
+  - first:
+      213: -1893387739154433167
+    second: GhostWarrior-Attack1_4
+  - first:
+      213: 2626341304933451395
+    second: GhostWarrior-Attack1_5
+  - first:
+      213: 52165548011141000
+    second: GhostWarrior-Attack1_6
+  - first:
+      213: -336371518862562753
+    second: GhostWarrior-Attack1_7
+  - first:
+      213: 4964953444466895076
+    second: GhostWarrior-Attack1_8
+  - first:
+      213: -7481084114426214411
+    second: GhostWarrior-Attack1_9
+  - first:
+      213: 7054471644735520072
+    second: GhostWarrior-Attack1_10
+  - first:
+      213: -446579038788558837
+    second: GhostWarrior-Attack1_11
+  - first:
+      213: -755235018176716741
+    second: GhostWarrior-Attack1_12
+  - first:
+      213: -5375743196869103822
+    second: GhostWarrior-Attack1_13
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: GhostWarrior-Attack1_0
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 16
+        width: 16
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f71a3ec0cc7e8cf70800000000000000
+      internalID: 9207864301734568319
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Attack1_1
+      rect:
+        serializedVersion: 2
+        x: 41
+        y: 9
+        width: 30
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6116d171472c3cb50800000000000000
+      internalID: 6612342481769816342
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Attack1_2
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 9
+        width: 35
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 662157e0636136d50800000000000000
+      internalID: 6729246689648251494
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Attack1_3
+      rect:
+        serializedVersion: 2
+        x: 245
+        y: 9
+        width: 29
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5748d551148b64d0800000000000000
+      internalID: -3140271105171241126
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Attack1_4
+      rect:
+        serializedVersion: 2
+        x: 347
+        y: 9
+        width: 29
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17bbe9102e559b5e0800000000000000
+      internalID: -1893387739154433167
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Attack1_5
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 23
+        width: 35
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3868e7b7083a27420800000000000000
+      internalID: 2626341304933451395
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Attack1_6
+      rect:
+        serializedVersion: 2
+        x: 434
+        y: 15
+        width: 43
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 887b7be1a4459b000800000000000000
+      internalID: 52165548011141000
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Attack1_7
+      rect:
+        serializedVersion: 2
+        x: 500
+        y: 16
+        width: 87
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f3a63a1c2e7f45bf0800000000000000
+      internalID: -336371518862562753
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Attack1_8
+      rect:
+        serializedVersion: 2
+        x: 626
+        y: 16
+        width: 61
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e82dcf2ade07e440800000000000000
+      internalID: 4964953444466895076
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Attack1_9
+      rect:
+        serializedVersion: 2
+        x: 725
+        y: 16
+        width: 61
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f7cec862a9dd2890800000000000000
+      internalID: -7481084114426214411
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Attack1_10
+      rect:
+        serializedVersion: 2
+        x: 830
+        y: 14
+        width: 53
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 84db68ea59486e160800000000000000
+      internalID: 7054471644735520072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Attack1_11
+      rect:
+        serializedVersion: 2
+        x: 938
+        y: 9
+        width: 31
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b006fd4fabe6dc9f0800000000000000
+      internalID: -446579038788558837
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Attack1_12
+      rect:
+        serializedVersion: 2
+        x: 1027
+        y: 16
+        width: 16
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3024ab90cdd485f0800000000000000
+      internalID: -755235018176716741
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Attack1_13
+      rect:
+        serializedVersion: 2
+        x: 1041
+        y: 9
+        width: 30
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 23fe4ea5b068565b0800000000000000
+      internalID: -5375743196869103822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      GhostWarrior-Attack1_0: 9207864301734568319
+      GhostWarrior-Attack1_1: 6612342481769816342
+      GhostWarrior-Attack1_10: 7054471644735520072
+      GhostWarrior-Attack1_11: -446579038788558837
+      GhostWarrior-Attack1_12: -755235018176716741
+      GhostWarrior-Attack1_13: -5375743196869103822
+      GhostWarrior-Attack1_2: 6729246689648251494
+      GhostWarrior-Attack1_3: -3140271105171241126
+      GhostWarrior-Attack1_4: -1893387739154433167
+      GhostWarrior-Attack1_5: 2626341304933451395
+      GhostWarrior-Attack1_6: 52165548011141000
+      GhostWarrior-Attack1_7: -336371518862562753
+      GhostWarrior-Attack1_8: 4964953444466895076
+      GhostWarrior-Attack1_9: -7481084114426214411
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

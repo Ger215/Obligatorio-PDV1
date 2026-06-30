@@ -77,7 +77,13 @@ public class SignUI : SingletonBehaviour<SignUI>
         label = textGo.AddComponent<TextMeshProUGUI>();
         if (pixelFont != null) label.font = pixelFont;
         label.color = textColor;
-        label.fontSize = fontSize;
+        // Auto-size: usa fontSize como tope y achica el texto hasta que entre en el panel, así los
+        // mensajes largos no se desbordan ni se encima todo.
+        label.enableAutoSizing = true;
+        label.fontSizeMax = fontSize;
+        label.fontSizeMin = Mathf.Min(10f, fontSize);
+        label.textWrappingMode = TextWrappingModes.Normal;
+        label.overflowMode = TextOverflowModes.Truncate;
         label.alignment = TextAlignmentOptions.Center;
 
         var lrect = label.rectTransform;

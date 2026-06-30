@@ -27,10 +27,6 @@ public class GameHudController : SingletonBehaviour<GameHudController>
     [Tooltip("Duración del count-up del contador de XP.")]
     [SerializeField] private float xpCountUpDuration = 0.35f;
     [SerializeField] private TMP_Text[] abilitySlotTexts;
-    [SerializeField] private GameObject abilityShopPanel;
-    [SerializeField] private Button[] abilityButtons;
-    [SerializeField] private TMP_Text[] abilityButtonTexts;
-    [SerializeField] private Button skipShopButton;
 
     [Header("Ability Slots (icon UI, generado en runtime)")]
     [Tooltip("Contenedor dentro de tu Canvas del HUD donde se generan los slots. " +
@@ -266,16 +262,6 @@ public class GameHudController : SingletonBehaviour<GameHudController>
             {
                 RefreshAbilitySlots(abilityController.LearnedAbilities, abilityController.Cooldowns, abilityController.ActiveEffects);
             }
-        }
-
-        if (skipShopButton != null)
-        {
-            skipShopButton.onClick.RemoveAllListeners();
-            skipShopButton.onClick.AddListener(() =>
-            {
-                AudioManager.Instance?.PlayButton(true);
-                GameManager.Instance?.SkipAbilityShop();
-            });
         }
 
         if (restartButton != null)
@@ -587,61 +573,6 @@ public class GameHudController : SingletonBehaviour<GameHudController>
                 ? Mathf.Max(0f, readyTime - Time.time)
                 : 0f;
             cooldownText.text = remainingCooldown > 0f ? $"{remainingCooldown:0.0}" : string.Empty;
-        }
-    }
-
-    public void ShowAbilityShop(IReadOnlyList<PlayerAbilityDefinition> abilities, int currentExperience)
-    {
-        if (abilityShopPanel != null)
-        {
-            abilityShopPanel.SetActive(true);
-        }
-
-        if (abilityButtons == null)
-        {
-            return;
-        }
-
-        for (int i = 0; i < abilityButtons.Length; i++)
-        {
-            Button button = abilityButtons[i];
-            TMP_Text label = i < abilityButtonTexts.Length ? abilityButtonTexts[i] : null;
-
-            if (button == null)
-            {
-                continue;
-            }
-
-            button.onClick.RemoveAllListeners();
-
-            if (abilities == null || i >= abilities.Count)
-            {
-                button.gameObject.SetActive(false);
-                continue;
-            }
-
-            int capturedIndex = i;
-            PlayerAbilityDefinition ability = abilities[i];
-            button.gameObject.SetActive(true);
-            button.interactable = currentExperience >= ability.cost;
-            button.onClick.AddListener(() =>
-            {
-                AudioManager.Instance?.PlayButton(true);
-                GameManager.Instance?.SelectOfferedAbility(capturedIndex);
-            });
-
-            if (label != null)
-            {
-                label.text = $"{ability.displayName}\nCost: {ability.cost}\n{ability.description}";
-            }
-        }
-    }
-
-    public void HideAbilityShop()
-    {
-        if (abilityShopPanel != null)
-        {
-            abilityShopPanel.SetActive(false);
         }
     }
 

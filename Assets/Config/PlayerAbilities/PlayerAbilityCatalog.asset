@@ -12,4 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfde747e683bc0249945ea3e79cf3355, type: 3}
   m_Name: PlayerAbilityCatalog
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAbilityCatalog
-  abilities: []
+  abilities:
+  - {fileID: 11400000, guid: bc5564c6532effd4bb962f5402e51c16, type: 2}
+  - {fileID: 11400000, guid: 7e13d14f62a5cb147a2c19f460a9bfe7, type: 2}
+  - {fileID: 11400000, guid: 1160fc1a894b1d94b9f7553369631fac, type: 2}
+  - {fileID: 11400000, guid: f0be11e3a32ec5e48809a0f5e20790aa, type: 2}
+  - {fileID: 11400000, guid: 29f6bdc2e12d7ee4da07862d305bc4df, type: 2}
+  - {fileID: 11400000, guid: 9285583f4925dd44ba73c1cc9e7e3e13, type: 2}

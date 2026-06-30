@@ -1,0 +1,611 @@
+fileFormatVersion: 2
+guid: cb8e496282e267a4a8fd3113a2df7d5f
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6059557895580682283
+    second: EvilCreature-Attack2_0
+  - first:
+      213: -1185036011578659735
+    second: EvilCreature-Attack2_1
+  - first:
+      213: 7738153325526415538
+    second: EvilCreature-Attack2_2
+  - first:
+      213: 942012827511926190
+    second: EvilCreature-Attack2_3
+  - first:
+      213: 8208910933095000610
+    second: EvilCreature-Attack2_4
+  - first:
+      213: 2688046666484978415
+    second: EvilCreature-Attack2_5
+  - first:
+      213: -1447996114926314006
+    second: EvilCreature-Attack2_6
+  - first:
+      213: -4586362629569653492
+    second: EvilCreature-Attack2_7
+  - first:
+      213: -6680693001897667729
+    second: EvilCreature-Attack2_8
+  - first:
+      213: 8420913683253711639
+    second: EvilCreature-Attack2_9
+  - first:
+      213: -6478007287612648267
+    second: EvilCreature-Attack2_10
+  - first:
+      213: 6239961503716371623
+    second: EvilCreature-Attack2_11
+  - first:
+      213: -8504148198562138897
+    second: EvilCreature-Attack2_12
+  - first:
+      213: 3420695863923901637
+    second: EvilCreature-Attack2_13
+  - first:
+      213: 466562642302087233
+    second: EvilCreature-Attack2_14
+  - first:
+      213: -2699692930804118556
+    second: EvilCreature-Attack2_15
+  - first:
+      213: 7029230224218996838
+    second: EvilCreature-Attack2_16
+  - first:
+      213: -8966105053281521190
+    second: EvilCreature-Attack2_17
+  - first:
+      213: -7401169667587014558
+    second: EvilCreature-Attack2_18
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_0
+      rect:
+        serializedVersion: 2
+        x: 33
+        y: 4
+        width: 24
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d7fff9e23028eba0800000000000000
+      internalID: -6059557895580682283
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_1
+      rect:
+        serializedVersion: 2
+        x: 120
+        y: 4
+        width: 31
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96ceecba608ed8fe0800000000000000
+      internalID: -1185036011578659735
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_2
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 4
+        width: 61
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b872897371736b60800000000000000
+      internalID: 7738153325526415538
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_3
+      rect:
+        serializedVersion: 2
+        x: 283
+        y: 4
+        width: 67
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eada5b5fca3b21d00800000000000000
+      internalID: 942012827511926190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_4
+      rect:
+        serializedVersion: 2
+        x: 372
+        y: 4
+        width: 67
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 22aa2ff3009ebe170800000000000000
+      internalID: 8208910933095000610
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_5
+      rect:
+        serializedVersion: 2
+        x: 462
+        y: 4
+        width: 67
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe29287833cdd4520800000000000000
+      internalID: 2688046666484978415
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_6
+      rect:
+        serializedVersion: 2
+        x: 552
+        y: 4
+        width: 67
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aeddbad843fa7ebe0800000000000000
+      internalID: -1447996114926314006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_7
+      rect:
+        serializedVersion: 2
+        x: 642
+        y: 4
+        width: 67
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c05df5dec77f950c0800000000000000
+      internalID: -4586362629569653492
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_8
+      rect:
+        serializedVersion: 2
+        x: 719
+        y: 4
+        width: 80
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6393705c196943a0800000000000000
+      internalID: -6680693001897667729
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_9
+      rect:
+        serializedVersion: 2
+        x: 809
+        y: 4
+        width: 80
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 713509601681dd470800000000000000
+      internalID: 8420913683253711639
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_10
+      rect:
+        serializedVersion: 2
+        x: 899
+        y: 4
+        width: 80
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b4d471a1be7916a0800000000000000
+      internalID: -6478007287612648267
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_11
+      rect:
+        serializedVersion: 2
+        x: 989
+        y: 4
+        width: 80
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ac60294debc89650800000000000000
+      internalID: 6239961503716371623
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_12
+      rect:
+        serializedVersion: 2
+        x: 1093
+        y: 4
+        width: 67
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe4fc6335423bf980800000000000000
+      internalID: -8504148198562138897
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_13
+      rect:
+        serializedVersion: 2
+        x: 1187
+        y: 4
+        width: 67
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c405ddb3c0c87f20800000000000000
+      internalID: 3420695863923901637
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_14
+      rect:
+        serializedVersion: 2
+        x: 1276
+        y: 4
+        width: 67
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 14032ef4040997600800000000000000
+      internalID: 466562642302087233
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_15
+      rect:
+        serializedVersion: 2
+        x: 1369
+        y: 4
+        width: 61
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4eb89c04593c88ad0800000000000000
+      internalID: -2699692930804118556
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_16
+      rect:
+        serializedVersion: 2
+        x: 1472
+        y: 4
+        width: 31
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 660430f75a7dc8160800000000000000
+      internalID: 7029230224218996838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_17
+      rect:
+        serializedVersion: 2
+        x: 1562
+        y: 4
+        width: 25
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad1f15065fef19380800000000000000
+      internalID: -8966105053281521190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EvilCreature-Attack2_18
+      rect:
+        serializedVersion: 2
+        x: 1653
+        y: 4
+        width: 24
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26084118663c94990800000000000000
+      internalID: -7401169667587014558
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      EvilCreature-Attack2_0: -6059557895580682283
+      EvilCreature-Attack2_1: -1185036011578659735
+      EvilCreature-Attack2_10: -6478007287612648267
+      EvilCreature-Attack2_11: 6239961503716371623
+      EvilCreature-Attack2_12: -8504148198562138897
+      EvilCreature-Attack2_13: 3420695863923901637
+      EvilCreature-Attack2_14: 466562642302087233
+      EvilCreature-Attack2_15: -2699692930804118556
+      EvilCreature-Attack2_16: 7029230224218996838
+      EvilCreature-Attack2_17: -8966105053281521190
+      EvilCreature-Attack2_18: -7401169667587014558
+      EvilCreature-Attack2_2: 7738153325526415538
+      EvilCreature-Attack2_3: 942012827511926190
+      EvilCreature-Attack2_4: 8208910933095000610
+      EvilCreature-Attack2_5: 2688046666484978415
+      EvilCreature-Attack2_6: -1447996114926314006
+      EvilCreature-Attack2_7: -4586362629569653492
+      EvilCreature-Attack2_8: -6680693001897667729
+      EvilCreature-Attack2_9: 8420913683253711639
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

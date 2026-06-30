@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -14,17 +13,12 @@ public enum VictoryAction
 public class GameManager : SingletonBehaviour<GameManager>
 {
     [Header("References")]
-    [SerializeField] private PlayerAbilityCatalog abilityCatalog;
     [SerializeField] private GameHudController hudController;
     [SerializeField] private AudioManager audioManager;
     [Tooltip("Opcional: fundido a negro al derrotar al boss antes de cargar la pantalla de carga. " +
              "Si está vacío, pasa directo sin fundido.")]
     [SerializeField] private ScreenFader screenFader;
     [SerializeField] private float victoryFadeDuration = 0.6f;
-
-    [Header("Shop")]
-    [Tooltip("Cantidad de habilidades ofrecidas en cada apertura de la shop.")]
-    [SerializeField] private int offeredAbilitiesCount = 3;
 
     [Header("Scene Names")]
     [SerializeField] private string mainMenuSceneName = "MainMenu";
@@ -47,9 +41,6 @@ public class GameManager : SingletonBehaviour<GameManager>
     [SerializeField] private Canvas hudCanvas;
     [SerializeField] private Color xpFloatingTextColor = new Color(0.3f, 1f, 0.4f);
 
-    private readonly List<PlayerAbilityDefinition> offeredAbilities = new List<PlayerAbilityDefinition>();
-
-    private bool shopOpen;
     private bool isPaused;
     private bool isGameOver;
     private bool isVictory;
@@ -57,8 +48,6 @@ public class GameManager : SingletonBehaviour<GameManager>
     private ExperienceSystem playerExperience;
     private PlayerAbilityController playerAbilities;
 
-    public IReadOnlyList<PlayerAbilityDefinition> OfferedAbilities => offeredAbilities;
-    public bool ShopOpen => shopOpen;
     public bool IsPaused => isPaused;
     public bool IsGameOver => isGameOver;
     public bool IsVictory => isVictory;
@@ -146,76 +135,6 @@ public class GameManager : SingletonBehaviour<GameManager>
                 floatingText?.Play($"+{xpReward} XP", xpFloatingTextColor);
             }
         }
-    }
-
-    /// <summary>
-    /// Abre la shop de habilidades. Llamalo desde un trigger en el mundo, un NPC, post-boss, etc.
-    /// </summary>
-    public void OpenAbilityShop()
-    {
-        if (shopOpen || isGameOver || isPaused) return;
-        TryOpenAbilityShop();
-    }
-
-    public void SelectOfferedAbility(int index)
-    {
-        if (!shopOpen || playerAbilities == null || playerExperience == null || index < 0 || index >= offeredAbilities.Count)
-        {
-            return;
-        }
-
-        PlayerAbilityDefinition selectedAbility = offeredAbilities[index];
-
-        if (!playerExperience.TrySpend(selectedAbility.cost))
-        {
-            return;
-        }
-
-        playerAbilities.LearnAbility(selectedAbility);
-        CloseShop();
-    }
-
-    public void SkipAbilityShop()
-    {
-        if (!shopOpen) return;
-        CloseShop();
-    }
-
-    private void CloseShop()
-    {
-        shopOpen = false;
-        offeredAbilities.Clear();
-        hudController?.HideAbilityShop();
-        Time.timeScale = 1f;
-    }
-
-    private bool TryOpenAbilityShop()
-    {
-        if (abilityCatalog == null || playerAbilities == null || playerExperience == null || playerAbilities.IsAbilityCapacityReached)
-        {
-            return false;
-        }
-
-        List<PlayerAbilityDefinition> availableAbilities = abilityCatalog.GetUnlearnedAbilities(playerAbilities.LearnedAbilities);
-
-        if (availableAbilities.Count == 0)
-        {
-            return false;
-        }
-
-        offeredAbilities.Clear();
-
-        while (offeredAbilities.Count < offeredAbilitiesCount && availableAbilities.Count > 0)
-        {
-            int randomIndex = Random.Range(0, availableAbilities.Count);
-            offeredAbilities.Add(availableAbilities[randomIndex]);
-            availableAbilities.RemoveAt(randomIndex);
-        }
-
-        shopOpen = true;
-        Time.timeScale = 0f;
-        hudController?.ShowAbilityShop(offeredAbilities, playerExperience.CurrentExperience);
-        return true;
     }
 
     private void HandlePlayerDeath(HealthSystem _)
@@ -334,7 +253,7 @@ public class GameManager : SingletonBehaviour<GameManager>
 
     public void TogglePause()
     {
-        if (shopOpen || isVictory) return;
+        if (isVictory) return;
 
         isPaused = !isPaused;
 

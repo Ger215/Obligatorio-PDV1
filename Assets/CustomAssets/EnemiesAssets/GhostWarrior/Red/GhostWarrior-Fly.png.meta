@@ -1,0 +1,533 @@
+fileFormatVersion: 2
+guid: 9a13bbcfdcb5f2b4b84d9c3f455624de
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 4767265062775482876
+    second: GhostWarrior-Fly_0
+  - first:
+      213: 5246565823194089030
+    second: GhostWarrior-Fly_1
+  - first:
+      213: 8378008069833888162
+    second: GhostWarrior-Fly_2
+  - first:
+      213: 6982606453671208927
+    second: GhostWarrior-Fly_3
+  - first:
+      213: -2715718544236766698
+    second: GhostWarrior-Fly_4
+  - first:
+      213: -7383879840963016000
+    second: GhostWarrior-Fly_5
+  - first:
+      213: -3849477117919780434
+    second: GhostWarrior-Fly_6
+  - first:
+      213: 9115315429359599178
+    second: GhostWarrior-Fly_7
+  - first:
+      213: 2523783023521440955
+    second: GhostWarrior-Fly_8
+  - first:
+      213: 3002275926897353328
+    second: GhostWarrior-Fly_9
+  - first:
+      213: -1143801327870254338
+    second: GhostWarrior-Fly_10
+  - first:
+      213: 4158638173030615383
+    second: GhostWarrior-Fly_11
+  - first:
+      213: -5647960048155746164
+    second: GhostWarrior-Fly_12
+  - first:
+      213: 2020294976524774110
+    second: GhostWarrior-Fly_13
+  - first:
+      213: 4628279124310534819
+    second: GhostWarrior-Fly_14
+  - first:
+      213: 2182718122629423543
+    second: GhostWarrior-Fly_15
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: GhostWarrior-Fly_0
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 17
+        width: 19
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf9ecd8015ab82240800000000000000
+      internalID: 4767265062775482876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Fly_1
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 13
+        width: 38
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 646403691db8fc840800000000000000
+      internalID: 5246565823194089030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Fly_2
+      rect:
+        serializedVersion: 2
+        x: 123
+        y: 14
+        width: 19
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a11ecf63f9a44470800000000000000
+      internalID: 8378008069833888162
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Fly_3
+      rect:
+        serializedVersion: 2
+        x: 139
+        y: 11
+        width: 38
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fd72c6df29337e060800000000000000
+      internalID: 6982606453671208927
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Fly_4
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 13
+        width: 19
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61a93dc5f54df4ad0800000000000000
+      internalID: -2715718544236766698
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Fly_5
+      rect:
+        serializedVersion: 2
+        x: 239
+        y: 11
+        width: 38
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ca4b37f760378990800000000000000
+      internalID: -7383879840963016000
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Fly_6
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 15
+        width: 19
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea1a567e4f8e39ac0800000000000000
+      internalID: -3849477117919780434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Fly_7
+      rect:
+        serializedVersion: 2
+        x: 339
+        y: 12
+        width: 39
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4ebd96861b108e70800000000000000
+      internalID: 9115315429359599178
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Fly_8
+      rect:
+        serializedVersion: 2
+        x: 420
+        y: 18
+        width: 19
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb4282fc947460320800000000000000
+      internalID: 2523783023521440955
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Fly_9
+      rect:
+        serializedVersion: 2
+        x: 439
+        y: 14
+        width: 41
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0726c6c7c0a3aa920800000000000000
+      internalID: 3002275926897353328
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Fly_10
+      rect:
+        serializedVersion: 2
+        x: 522
+        y: 22
+        width: 19
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef26cae90c66020f0800000000000000
+      internalID: -1143801327870254338
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Fly_11
+      rect:
+        serializedVersion: 2
+        x: 539
+        y: 16
+        width: 43
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7598edc826376b930800000000000000
+      internalID: 4158638173030615383
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Fly_12
+      rect:
+        serializedVersion: 2
+        x: 623
+        y: 22
+        width: 19
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c802418a24a6e91b0800000000000000
+      internalID: -5647960048155746164
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Fly_13
+      rect:
+        serializedVersion: 2
+        x: 639
+        y: 16
+        width: 45
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: edae341c397890c10800000000000000
+      internalID: 2020294976524774110
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Fly_14
+      rect:
+        serializedVersion: 2
+        x: 724
+        y: 20
+        width: 19
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3aaa2e58753fa3040800000000000000
+      internalID: 4628279124310534819
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GhostWarrior-Fly_15
+      rect:
+        serializedVersion: 2
+        x: 739
+        y: 15
+        width: 46
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7b1622861929a4e10800000000000000
+      internalID: 2182718122629423543
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      GhostWarrior-Fly_0: 4767265062775482876
+      GhostWarrior-Fly_1: 5246565823194089030
+      GhostWarrior-Fly_10: -1143801327870254338
+      GhostWarrior-Fly_11: 4158638173030615383
+      GhostWarrior-Fly_12: -5647960048155746164
+      GhostWarrior-Fly_13: 2020294976524774110
+      GhostWarrior-Fly_14: 4628279124310534819
+      GhostWarrior-Fly_15: 2182718122629423543
+      GhostWarrior-Fly_2: 8378008069833888162
+      GhostWarrior-Fly_3: 6982606453671208927
+      GhostWarrior-Fly_4: -2715718544236766698
+      GhostWarrior-Fly_5: -7383879840963016000
+      GhostWarrior-Fly_6: -3849477117919780434
+      GhostWarrior-Fly_7: 9115315429359599178
+      GhostWarrior-Fly_8: 2523783023521440955
+      GhostWarrior-Fly_9: 3002275926897353328
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

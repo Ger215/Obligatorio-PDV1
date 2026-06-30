@@ -10,6 +10,13 @@ public enum PlayerAbilityType
     BladeStorm
 }
 
+public enum AbilityRarity
+{
+    Common,
+    Rare,
+    Epic
+}
+
 [CreateAssetMenu(fileName = "PlayerAbility", menuName = "Config/Abilities/Player Ability")]
 public class PlayerAbilityDefinition : ScriptableObject
 {
@@ -23,6 +30,13 @@ public class PlayerAbilityDefinition : ScriptableObject
     public float duration = 3f;
     public float radius = 2f;
 
+    [Header("Ruleta")]
+    [Tooltip("Rareza de la habilidad. Solo informativa/visual; el peso real lo define rouletteWeight.")]
+    public AbilityRarity rarity = AbilityRarity.Common;
+    [Tooltip("Peso para la ruleta: a mayor valor, más probable que salga. Las habilidades fuertes " +
+             "deberían tener peso bajo (más raras).")]
+    public float rouletteWeight = 1f;
+
     private void OnValidate()
     {
         cost = Mathf.Max(0, cost);
@@ -30,5 +44,6 @@ public class PlayerAbilityDefinition : ScriptableObject
         power = Mathf.Max(1, power);
         duration = Mathf.Max(0.1f, duration);
         radius = Mathf.Max(0.1f, radius);
+        rouletteWeight = Mathf.Max(0.01f, rouletteWeight);
     }
 }
