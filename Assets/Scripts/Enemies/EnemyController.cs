@@ -93,6 +93,7 @@ public class EnemyController : MonoBehaviour
     private int wanderDirection;
     private float nextWanderChangeTime;
     private bool isAggroed;
+    private readonly System.Collections.Generic.HashSet<int> animParamHashes = new System.Collections.Generic.HashSet<int>();
 
     private void Awake()
     {
@@ -102,11 +103,32 @@ public class EnemyController : MonoBehaviour
         projectileLauncher = GetComponent<ProjectileLauncher>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
+        CacheAnimatorParameters();
 
         if (groundCheck == null)
         {
             groundCheck = transform;
         }
+    }
+
+    // Guardamos los hashes de los parámetros que EXISTEN en el controller, para no llamar
+    // SetTrigger/SetBool sobre uno inexistente (Unity tira "Parameter does not exist").
+    private void CacheAnimatorParameters()
+    {
+        animParamHashes.Clear();
+        if (animator == null || animator.runtimeAnimatorController == null) return;
+        foreach (AnimatorControllerParameter p in animator.parameters)
+            animParamHashes.Add(p.nameHash);
+    }
+
+    private void SafeSetTrigger(int hash)
+    {
+        if (animator != null && animParamHashes.Contains(hash)) animator.SetTrigger(hash);
+    }
+
+    private void SafeSetBool(int hash, bool value)
+    {
+        if (animator != null && animParamHashes.Contains(hash)) animator.SetBool(hash, value);
     }
 
     private void OnEnable()
@@ -183,7 +205,7 @@ stuckCheckPosition = transform.position;
             else
             {
                 if (attackSystem.TryAttack())
-                    animator?.SetTrigger(AnimAttack);
+                    SafeSetTrigger(AnimAttack);
             }
         }
     }
@@ -235,7 +257,7 @@ stuckCheckPosition = transform.position;
         if (isStunned)
         {
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
-            animator?.SetBool(AnimIsWalking, false);
+            SafeSetBool(AnimIsWalking, false);
             return;
         }
 
@@ -254,7 +276,7 @@ stuckCheckPosition = transform.position;
                 if (Mathf.Abs(dx) > 0.05f) facingDirection = dx >= 0f ? 1 : -1;
             }
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
-            animator?.SetBool(AnimIsWalking, false);
+            SafeSetBool(AnimIsWalking, false);
             return;
         }
 
@@ -270,7 +292,7 @@ stuckCheckPosition = transform.position;
         {
             ApplyIdleOrWander();
             ApplySafeZones();
-            animator?.SetBool(AnimIsWalking, Mathf.Abs(rb.linearVelocity.x) > 0.1f);
+            SafeSetBool(AnimIsWalking, Mathf.Abs(rb.linearVelocity.x) > 0.1f);
             return;
         }
 
@@ -343,7 +365,7 @@ stuckCheckPosition = transform.position;
 
         ApplySeparation();
         ApplySafeZones();
-        animator?.SetBool(AnimIsWalking, Mathf.Abs(rb.linearVelocity.x) > 0.1f);
+        SafeSetBool(AnimIsWalking, Mathf.Abs(rb.linearVelocity.x) > 0.1f);
     }
 
     private void ApplyIdleOrWander()
@@ -379,11 +401,17 @@ stuckCheckPosition = transform.position;
         if (wanderDirection != 0)
         {
             facingDirection = wanderDirection;
-            // Evitar caer al vacío o chocar contra pared
+            // Evitar caer al vacío o chocar contra pared: dar vuelta UNA vez.
             if (!CheckGroundAhead() || CheckWallAhead())
             {
                 wanderDirection = -wanderDirection;
                 facingDirection = wanderDirection;
+                // Si del OTRO lado también está bloqueado, frenar. Sin esto, gira en el lugar
+                // cada frame (flip 180/-180) cuando no hay piso a ninguno de los dos lados.
+                if (!CheckGroundAhead() || CheckWallAhead())
+                {
+                    wanderDirection = 0;
+                }
             }
         }
 
@@ -534,7 +562,7 @@ stuckCheckPosition = transform.position;
     {
         attackSystem?.CancelAttack();
         AudioManager.Instance?.PlayEnemyDamaged();
-        animator?.SetTrigger(AnimHit);
+        SafeSetTrigger(AnimHit);
         if (spriteRenderer != null)
         {
             StartCoroutine(HitFlash());
@@ -553,7 +581,7 @@ stuckCheckPosition = transform.position;
         isDead = true;
         if (rb.bodyType == RigidbodyType2D.Dynamic) rb.linearVelocity = Vector2.zero;
         AudioManager.Instance?.PlayEnemyDeath();
-        animator?.SetTrigger(AnimDie);
+        SafeSetTrigger(AnimDie);
     }
 
     public void ApplyMovementConfig(float newMoveSpeed, float newJumpForce, float newAttackDistance,

@@ -1,43 +1,46 @@
+using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// Enemigo teletransportador. Cicla: queda visible un rato, se desvanece (TeleportOut), reaparece
-/// DETRÁS del jugador (TeleportIn) y lo ataca por la espalda. Maneja el Animator
-/// (Enemy_Teleporter.controller) con los triggers "teleportOut"/"teleportIn".
+/// Enemigo teletransportador que COEXISTE con un EnemyController (walker): el walker camina,
+/// encara y ataca melee normal; este componente le suma un teleport periódico detrás del jugador.
 ///
-/// El ritmo lo marcan ANIMATION EVENTS al final de cada clip (así no hay que adivinar la duración):
-///   - Final de TeleportOut -> AnimEvent_TeleportOutComplete(): reubica detrás del jugador y entra a TeleportIn.
-///   - Final de TeleportIn  -> AnimEvent_TeleportInComplete():  ataca por la espalda y reinicia el ciclo visible.
-/// Estos métodos deben estar en el MISMO GameObject que el Animator (este componente lo está).
-///
-/// El daño se hace con el <see cref="AttackSystem"/> del propio enemigo. Si hay un
-/// <see cref="EnemyController"/> caminador en el mismo objeto, asignalo en
-/// <see cref="walkerToDisable"/> para apagarlo (este enemigo se mueve solo por teleport).
+/// El ritmo lo maneja una COROUTINE por tiempo (no Animation Events), así los triggers del walker
+/// (attack/hit/isWalking) que interrumpen el Animator NO rompen la secuencia: la reubicación y el
+/// unstun siempre se completan. Durante cada teleport se aturde al walker para que no pelee con la
+/// reubicación; el facing lo maneja el walker (rotación), no este script.
 /// </summary>
 [RequireComponent(typeof(Animator))]
 public class TeleporterController : MonoBehaviour
 {
     [Header("Ritmo del teleport")]
-    [Tooltip("Segundos que se queda visible antes de desvanecerse. (La duración de las animaciones " +
-             "la marcan los Animation Events, no este valor.)")]
+    [Tooltip("Segundos visible antes de desvanecerse.")]
     [SerializeField] private float visibleTime = 2.5f;
+    [Tooltip("Duración de la animación TeleportOut (desvanecerse). Ponela igual al largo de tu clip.")]
+    [SerializeField] private float teleportOutDuration = 1f;
+    [Tooltip("Duración de la animación TeleportIn (aparecer). Ponela igual al largo de tu clip.")]
+    [SerializeField] private float teleportInDuration = 1f;
 
     [Header("Reaparición detrás del jugador")]
-    [Tooltip("A qué distancia, por detrás del jugador, reaparece.")]
     [SerializeField] private float behindOffset = 1.2f;
-    [Tooltip("Ajuste vertical respecto al jugador al reaparecer.")]
     [SerializeField] private float verticalOffset = 0f;
+    [Tooltip("Solo se usa si NO hay walker asignado (el walker maneja el facing por rotación).")]
+    [SerializeField] private bool spriteFacesLeft = false;
 
     [Header("Ataque por la espalda")]
-    [Tooltip("Radio del golpe al reaparecer.")]
+    [Tooltip("Si está apagado, NO golpea al reaparecer (el ataque lo hace el walker melee).")]
+    [SerializeField] private bool attackOnReappear = false;
     [SerializeField] private float attackRadius = 1.2f;
-    [Tooltip("Daño del golpe.")]
     [SerializeField] private int attackDamage = 8;
-    [Tooltip("Capas a las que pega (seleccioná la capa del Player).")]
     [SerializeField] private LayerMask playerLayers;
 
+    [Header("Activación")]
+    [Tooltip("Solo empieza a teleportarse cuando el jugador entra en este radio.")]
+    [SerializeField] private float activationRange = 8f;
+
     [Header("Refs")]
-    [Tooltip("EnemyController caminador a apagar al iniciar (opcional).")]
+    [Tooltip("EnemyController (walker) que coexiste. Camina/encara/ataca melee normal; se lo aturde " +
+             "solo durante cada teleport. Si lo asignás, el facing lo maneja él (rotación).")]
     [SerializeField] private EnemyController walkerToDisable;
 
     private Animator animator;
@@ -45,9 +48,12 @@ public class TeleporterController : MonoBehaviour
     private HealthSystem healthSystem;
     private SpriteRenderer spriteRenderer;
     private bool isDead;
+    private bool activated;
+    private int lastPlayerFacing = 1;
 
     private static readonly int AnimTeleportOut = Animator.StringToHash("teleportOut");
     private static readonly int AnimTeleportIn = Animator.StringToHash("teleportIn");
+    private static readonly int AnimDie = Animator.StringToHash("die");
 
     private void Awake()
     {
@@ -55,11 +61,7 @@ public class TeleporterController : MonoBehaviour
         attackSystem = GetComponent<AttackSystem>();
         healthSystem = GetComponent<HealthSystem>();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-
-        if (walkerToDisable != null)
-        {
-            walkerToDisable.enabled = false;
-        }
+        // El walker NO se apaga: coexiste. Se aturde solo durante cada teleport.
     }
 
     private void OnEnable()
@@ -72,40 +74,47 @@ public class TeleporterController : MonoBehaviour
         if (healthSystem != null) healthSystem.Died -= HandleDeath;
     }
 
-    private void Start()
+    // Espera a que el jugador entre en activationRange y arranca el ciclo de teleport.
+    private void Update()
     {
-        BeginVisiblePhase();
+        if (activated || isDead) return;
+
+        PlayerController player = PlayerController.Instance;
+        if (player == null) return;
+
+        if (Vector2.Distance(transform.position, player.transform.position) <= activationRange)
+        {
+            activated = true;
+            StartCoroutine(TeleportLoop());
+        }
     }
 
-    // Arranca el tiempo visible; al terminar, dispara el desvanecimiento.
-    private void BeginVisiblePhase()
+    private IEnumerator TeleportLoop()
     {
-        if (isDead) return;
-        Invoke(nameof(TriggerTeleportOut), visibleTime);
-    }
+        while (!isDead)
+        {
+            // Fase visible: el walker camina/ataca normal.
+            yield return new WaitForSeconds(visibleTime);
+            if (isDead) break;
 
-    private void TriggerTeleportOut()
-    {
-        if (isDead) return;
-        animator.SetTrigger(AnimTeleportOut);
-    }
+            // Teleport OUT: aturdir al walker y desvanecerse.
+            if (walkerToDisable != null) walkerToDisable.SetStunned(true);
+            animator.SetTrigger(AnimTeleportOut);
+            yield return new WaitForSeconds(teleportOutDuration);
+            if (isDead) break;
 
-    // --- Animation Events (llamados desde los clips) ---
+            // Reubicar detrás del jugador (ya invisible) y aparecer.
+            RepositionBehindPlayer();
+            animator.SetTrigger(AnimTeleportIn);
+            yield return new WaitForSeconds(teleportInDuration);
 
-    // Final de TeleportOut: ya invisible -> reubicar detrás del jugador y reaparecer.
-    public void AnimEvent_TeleportOutComplete()
-    {
-        if (isDead) return;
-        RepositionBehindPlayer();
-        animator.SetTrigger(AnimTeleportIn);
-    }
+            // Ya materializado: (opcional) golpe, y SIEMPRE soltar al walker para que retome.
+            if (!isDead && attackOnReappear) AttackFromBehind();
+            if (walkerToDisable != null) walkerToDisable.SetStunned(false);
+        }
 
-    // Final de TeleportIn: ya materializado -> golpe por la espalda y reiniciar ciclo.
-    public void AnimEvent_TeleportInComplete()
-    {
-        if (isDead) return;
-        AttackFromBehind();
-        BeginVisiblePhase();
+        // Seguridad: si murió a mitad de teleport, no dejar al walker aturdido.
+        if (walkerToDisable != null) walkerToDisable.SetStunned(false);
     }
 
     private void RepositionBehindPlayer()
@@ -113,40 +122,47 @@ public class TeleporterController : MonoBehaviour
         PlayerController player = PlayerController.Instance;
         if (player == null) return;
 
-        int playerFacing = player.FacingDirection; // 1 der, -1 izq
-        Vector3 behind = player.transform.position - new Vector3(playerFacing * behindOffset, -verticalOffset, 0f);
-        transform.position = behind;
+        // FacingDirection puede ser 0 (player quieto): usamos el último facing válido.
+        int playerFacing = player.FacingDirection;
+        if (playerFacing == 0) playerFacing = lastPlayerFacing;
+        else lastPlayerFacing = playerFacing;
 
-        if (spriteRenderer != null)
+        transform.position = player.transform.position
+            - new Vector3(playerFacing * behindOffset, -verticalOffset, 0f);
+
+        // Si hay walker, ÉL encara (rotación). Solo tocamos flipX si va solo.
+        if (walkerToDisable == null && spriteRenderer != null)
         {
-            spriteRenderer.flipX = playerFacing > 0;
+            bool wantFaceRight = playerFacing > 0;
+            spriteRenderer.flipX = spriteFacesLeft ? wantFaceRight : !wantFaceRight;
         }
     }
 
     private void AttackFromBehind()
     {
         PlayerController player = PlayerController.Instance;
-        if (player == null) return;
-
-        if (attackSystem != null)
-        {
-            attackSystem.DealAreaDamage(player.transform.position, attackRadius, playerLayers, attackDamage, false);
-        }
-        else
-        {
-            Debug.LogWarning("[TeleporterController] No hay AttackSystem; no se aplicó daño.", this);
-        }
+        if (player == null || attackSystem == null) return;
+        attackSystem.DealAreaDamage(player.transform.position, attackRadius, playerLayers, attackDamage, false);
     }
+
+    // Los clips de TeleportIn/Out pueden tener Animation Events apuntando a estos métodos.
+    // Los dejamos vacíos a propósito: el ritmo ahora lo maneja la coroutine por tiempo.
+    public void AnimEvent_TeleportOutComplete() { }
+    public void AnimEvent_TeleportInComplete() { }
 
     private void HandleDeath(HealthSystem deadHealthSystem)
     {
         isDead = true;
-        CancelInvoke();
+        StopAllCoroutines();
+        if (walkerToDisable != null) walkerToDisable.SetStunned(false);
+        if (animator != null) animator.SetTrigger(AnimDie);
     }
 
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = new Color(1f, 0.3f, 0.8f, 0.7f);
         Gizmos.DrawWireSphere(transform.position, attackRadius);
+        Gizmos.color = new Color(0.3f, 0.8f, 1f, 0.6f);
+        Gizmos.DrawWireSphere(transform.position, activationRange);
     }
 }
