@@ -82,6 +82,24 @@ public class RainEffect : MonoBehaviour
         renderer.sortingOrder = 1000; // por delante de casi todo
     }
 
+    /// <summary>
+    /// Prende o corta la lluvia. Al cortar, deja de emitir pero las gotas ya en pantalla terminan
+    /// de caer (transición suave, no un corte de golpe). La usan las <c>RainZone</c> por room.
+    /// </summary>
+    public void SetRaining(bool raining)
+    {
+        if (ps == null) return;
+
+        if (raining)
+        {
+            if (!ps.isEmitting) ps.Play();
+        }
+        else
+        {
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        }
+    }
+
     private void LateUpdate()
     {
         if (cam == null) cam = Camera.main;

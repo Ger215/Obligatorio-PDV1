@@ -44,6 +44,11 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private float stuckMoveThreshold = 0.12f;
     [SerializeField] private float separationRadius = 1f;
     [SerializeField] private float separationForce = 4f;
+    [Tooltip("Chequeos de atasco seguidos contra una pared que no puede escalar (con el player arriba) " +
+             "antes de rendirse un rato. Evita quedar martillando/caminando contra el borde de la plataforma.")]
+    [SerializeField] private int wallStuckStrikesToGiveUp = 3;
+    [Tooltip("Segundos que deja de intentar escalar/empujar una pared inescalable antes de reintentar.")]
+    [SerializeField] private float wallGiveUpDuration = 2.5f;
 
     private Rigidbody2D rb;
     private AttackSystem attackSystem;
@@ -87,6 +92,8 @@ public class EnemyController : MonoBehaviour
     private float knockbackEndTime;
     private float stuckTimer;
     private Vector3 stuckCheckPosition;
+    private int wallStuckStrikes;
+    private float wallGiveUpUntil;
     private float dashEndTime;
     private float nextDashTime;
     private Vector3 spawnPosition;
@@ -301,21 +308,33 @@ stuckCheckPosition = transform.position;
         bool isFalling = !isGrounded && rb.linearVelocity.y < 0f;
         bool forceHorizontal = (ceilingAbove && wallAhead) || (playerBelow && !groundAhead);
 
+        // Si la pared desapareció o el player ya no está arriba, cancelar el "me rindo": puede
+        // reintentar de una.
+        if (!wallAhead || verticalDistance <= 0.1f)
+        {
+            wallGiveUpUntil = 0f;
+            wallStuckStrikes = 0;
+        }
+        // Nos rendimos con una pared que no logramos escalar (player arriba): dejamos de empujar/saltar
+        // contra el borde por un rato para no quedar pegados caminando contra él.
+        bool climbGaveUp = Time.time < wallGiveUpUntil;
+        bool grindingWall = climbGaveUp && wallAhead && isGrounded && !forceHorizontal;
+
         if (!isFalling)
         {
             // Force movement: under a platform (ceiling+wall) or walking off a ledge toward player below
-            float horizontalVelocity = (!forceHorizontal && horizontalDistance <= attackDistance && playerAttackable)
+            float horizontalVelocity = ((!forceHorizontal && horizontalDistance <= attackDistance && playerAttackable) || grindingWall)
                 ? 0f
                 : horizontalDirection * moveSpeed;
             rb.linearVelocity = new Vector2(horizontalVelocity, rb.linearVelocity.y);
 
-            if (enemyType == EnemyType.Fast)
+            if (enemyType == EnemyType.Fast && !grindingWall)
                 TryFastDash(horizontalDistance, horizontalDirection);
         }
 
-        // Only jump if no ceiling is blocking the path
+        // Only jump if no ceiling is blocking the path (y si no nos rendimos con esta pared)
         bool shouldJump = isGrounded && !jumpConsumed && enemyType != EnemyType.Fast && enemyType != EnemyType.Walker
-            && !ceilingAbove
+            && !ceilingAbove && !climbGaveUp
             && (verticalDistance > jumpTriggerHeight || wallAhead);
 
         if (shouldJump)
@@ -329,9 +348,32 @@ stuckCheckPosition = transform.position;
         stuckTimer += Time.fixedDeltaTime;
         if (stuckTimer >= stuckCheckInterval)
         {
-            float moved = Vector3.Distance(transform.position, stuckCheckPosition);
-            if (tryingToMove && moved < stuckMoveThreshold && isGrounded && !jumpConsumed
-                && enemyType != EnemyType.Fast && enemyType != EnemyType.Walker && !ceilingAbove)
+            // Progreso HORIZONTAL: si el enemigo rebota verticalmente contra la pared (salta y cae),
+            // la distancia 3D engañaría (parece que se mueve). Lo que importa es si avanza en X.
+            float movedX = Mathf.Abs(transform.position.x - stuckCheckPosition.x);
+            bool tryingButNoProgress = tryingToMove && movedX < stuckMoveThreshold && !ceilingAbove;
+
+            // Pared inescalable (player arriba y sin avanzar en X): acumular strikes y, al llegar al
+            // tope, rendirse (evita martillar/caminar contra el borde). Aplica a todos los tipos que
+            // chocan pared, incluido Walker. Si logra avanzar en X, se resetea.
+            if (tryingButNoProgress && wallAhead && verticalDistance > 0.1f)
+            {
+                wallStuckStrikes++;
+                if (wallStuckStrikes >= wallStuckStrikesToGiveUp)
+                {
+                    wallGiveUpUntil = Time.time + wallGiveUpDuration;
+                    wallStuckStrikes = 0;
+                }
+            }
+            else
+            {
+                wallStuckStrikes = 0;
+            }
+
+            // Salto anti-atasco: solo tipos que saltan, en el piso, y si no nos rendimos con la pared.
+            if (tryingButNoProgress && isGrounded && !jumpConsumed
+                && enemyType != EnemyType.Fast && enemyType != EnemyType.Walker
+                && Time.time >= wallGiveUpUntil)
             {
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
                 isGrounded = false;
@@ -523,6 +565,19 @@ stuckCheckPosition = transform.position;
         // Posición en MUNDO según facingDirection, independiente de la rotación Y del root y
         // de la orientación del arte. Así el attackPoint siempre cae del lado real al que mira.
         ap.position = transform.position + Vector3.right * (facingDirection * attackPointDistance);
+    }
+
+    // Fuerza el facing hacia una posición X del mundo. Lo usa el teleporter al reaparecer detrás
+    // del jugador: mientras está stunned, Update no actualiza el facing, así que sin esto el sprite
+    // quedaría mirando para el lado contrario hasta el próximo frame activo.
+    public void FaceTowards(float targetWorldX)
+    {
+        float dx = targetWorldX - transform.position.x;
+        if (Mathf.Abs(dx) > 0.01f)
+        {
+            facingDirection = dx >= 0f ? 1 : -1;
+            UpdateAttackPointPosition();
+        }
     }
 
     private void HandleAttackResolved(bool critical, int damage, int targetsHit)
