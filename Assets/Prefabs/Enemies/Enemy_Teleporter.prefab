@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 6678226369412751958}
   - component: {fileID: 1429650930565815721}
   - component: {fileID: 8047216060857636654}
+  - component: {fileID: 6692329030032458192}
   m_Layer: 8
   m_Name: Enemy_Teleporter
   m_TagString: Untagged
@@ -183,8 +184,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.01, y: -0.02}
-  m_Size: {x: 0.36, y: 0.48}
+  m_Offset: {x: -0.005459171, y: -0.0045390255}
+  m_Size: {x: 0.28864193, y: 0.44907802}
   m_Direction: 0
 --- !u!114 &4131080825601674170
 MonoBehaviour:
@@ -222,15 +223,15 @@ MonoBehaviour:
   targetLayers:
     serializedVersion: 2
     m_Bits: 128
-  attackRange: 1.24
+  attackRange: 1.51
   attackCooldown: 1.33
   windUpDuration: 0.61
   hitDuration: 0.27
   recoveryDuration: 0.43
-  baseDamage: 1
+  baseDamage: 2
   criticalChance: 0.15
   criticalMultiplier: 2
-  knockbackForce: 100
+  knockbackForce: 2
   useAnimationEvent: 1
   debugAttackLogs: 0
 --- !u!114 &1429650930565815721
@@ -247,7 +248,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
   moveSpeed: 3
   jumpForce: 0.1
-  attackDistance: 1
+  attackDistance: 2.11
   verticalAttackTolerance: 1
   jumpTriggerHeight: 0.1
   repathDelay: 0.5
@@ -257,7 +258,7 @@ MonoBehaviour:
     m_Bits: 64
   groundCheckRadius: 0.36
   attackPointDistance: 0.6
-  spriteFacesLeft: 0
+  spriteFacesLeft: 1
   aggroRadius: 7.73
   wanderWhenIdle: 1
   wanderRange: 3
@@ -284,6 +285,32 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyXpReward
   xpReward: 7
+--- !u!114 &6692329030032458192
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2948453176520989669}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dc7ad60de89c344eafa239532b10c71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TeleporterController
+  visibleTime: 2.5
+  teleportOutDuration: 1
+  teleportInDuration: 1
+  behindOffset: 1.2
+  verticalOffset: 0
+  spriteFacesLeft: 1
+  attackOnReappear: 0
+  attackRadius: 1.2
+  attackDamage: 2
+  playerLayers:
+    serializedVersion: 2
+    m_Bits: 128
+  activationRange: 8
+  walkerToDisable: {fileID: 1429650930565815721}
 --- !u!1 &3219022029639802726
 GameObject:
   m_ObjectHideFlags: 0
@@ -309,7 +336,7 @@ Transform:
   m_GameObject: {fileID: 3219022029639802726}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.038, y: -0.02, z: 0}
+  m_LocalPosition: {x: -0.198, y: -0.02, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -340,7 +367,7 @@ Transform:
   m_GameObject: {fileID: 4097904198064324431}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.04, y: -0.097, z: 0}
+  m_LocalPosition: {x: 0.0032, y: -0.192, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
