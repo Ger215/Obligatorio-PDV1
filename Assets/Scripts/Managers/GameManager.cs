@@ -34,6 +34,9 @@ public class GameManager : SingletonBehaviour<GameManager>
     [SerializeField] private VictoryAction victoryAction = VictoryAction.ShowVictoryScreen;
     [Tooltip("Nombre de la próxima escena a cargar cuando victoryAction = LoadNextScene.")]
     [SerializeField] private string nextSceneName = "Level 2";
+    [Tooltip("Texto de la pantalla de carga al pasar de nivel (ej: 'Cargando Nivel 3'). " +
+             "Si está vacío, la pantalla de carga usa su propio texto por defecto.")]
+    [SerializeField] private string nextLevelLoadingLabel = "Cargando Nivel 2";
 
     [Header("Death FX")]
     [SerializeField] private GameObject enemyDeathFXPrefab;
@@ -206,6 +209,7 @@ public class GameManager : SingletonBehaviour<GameManager>
         if (!string.IsNullOrEmpty(loadingSceneName))
         {
             LevelLoadingScreen.TargetScene = nextSceneName;
+            LevelLoadingScreen.TargetLabel = nextLevelLoadingLabel;
         }
 
         SceneManager.LoadScene(sceneToLoad);

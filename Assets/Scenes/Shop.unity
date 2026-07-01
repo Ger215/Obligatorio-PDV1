@@ -3527,6 +3527,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SceneTransitionDoor
   targetScene: Level 2
   targetSpawnId: FromShop
+  recordAsOrigin: 0
+  returnToOrigin: 1
   capturePlayerState: 1
   promptObject: {fileID: 802520497}
   screenFader: {fileID: 1172229694}

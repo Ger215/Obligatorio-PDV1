@@ -23,6 +23,11 @@ public class LevelLoadingScreen : MonoBehaviour
     /// la transición justo antes de cargar la escena "Loading".</summary>
     public static string TargetScene;
 
+    /// <summary>Texto a mostrar en esta carga (ej: "Cargando Nivel 3"). Lo setea quien dispara la
+    /// transición justo antes de cargar la escena "Loading". Si es null/vacío, se usa el
+    /// <see cref="label"/> del inspector.</summary>
+    public static string TargetLabel;
+
     [Header("Texto")]
     [SerializeField] private TMP_Text loadingText;
     [SerializeField] private string label = "Cargando Nivel 2";
@@ -52,6 +57,13 @@ public class LevelLoadingScreen : MonoBehaviour
 
         string sceneToLoad = string.IsNullOrEmpty(TargetScene) ? fallbackScene : TargetScene;
         TargetScene = null; // consumimos el destino para que no quede pegado.
+
+        // Si quien disparó la transición mandó un texto propio, pisa el del inspector.
+        if (!string.IsNullOrEmpty(TargetLabel))
+        {
+            label = TargetLabel;
+        }
+        TargetLabel = null; // consumimos el texto para que no quede pegado.
 
         StartCoroutine(LoadRoutine(sceneToLoad));
     }

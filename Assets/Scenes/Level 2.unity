@@ -3664,6 +3664,7 @@ GameObject:
   - component: {fileID: 351401693}
   - component: {fileID: 351401692}
   - component: {fileID: 351401696}
+  - component: {fileID: 351401697}
   m_Layer: 5
   m_Name: GameHud
   m_TagString: Untagged
@@ -3780,6 +3781,22 @@ MonoBehaviour:
   panelSprite: {fileID: 5195839322462967097, guid: 7817905ecc7fd174ebef45fe52c457e2, type: 3}
   spriteBorderScale: 2
   openDuration: 0.18
+--- !u!114 &351401697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 351401691}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc8b30bc535e4b44dadea070aa6e3fb3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScreenFader
+  fadeColor: {r: 0, g: 0, b: 0, a: 1}
+  fadeOutDuration: 0.47
+  fadeInDuration: 0.43
+  fadeInOnStart: 0
 --- !u!1001 &365456546
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6237,6 +6254,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SceneTransitionDoor
   targetScene: Shop
   targetSpawnId: 
+  recordAsOrigin: 1
+  returnToOrigin: 0
   capturePlayerState: 1
   promptObject: {fileID: 1152443275}
   screenFader: {fileID: 519420036}
@@ -8373,6 +8392,24 @@ Transform:
   - {fileID: 37304578}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &902134247 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5567071987261642664, guid: 94c6df91213a848e4b10259462784231, type: 3}
+  m_PrefabInstance: {fileID: 1851449877}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &902134258
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 902134247}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81323034fa75b8f4593f7373b2a255c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyXpReward
+  xpReward: 15
 --- !u!1 &908657779
 GameObject:
   m_ObjectHideFlags: 0
@@ -8604,9 +8641,10 @@ MonoBehaviour:
   screenFader: {fileID: 0}
   victoryFadeDuration: 0.6
   mainMenuSceneName: MainMenu
-  loadingSceneName: Loading
-  victoryAction: 2
-  nextSceneName: Level 2
+  loadingSceneName: LoadingScene
+  victoryAction: 1
+  nextSceneName: Level 3
+  nextLevelLoadingLabel: Cargando Nivel 3
   enemyDeathFXPrefab: {fileID: 995318177037323328, guid: d2730e32cfa264267aca320d28dd988f, type: 3}
   floatingTextPrefab: {fileID: 298158651408366755, guid: 1b5612ab19f72a844b32f4bc72587b74, type: 3}
   hudCanvas: {fileID: 351401694}
@@ -69480,7 +69518,7 @@ Transform:
   m_GameObject: {fileID: 1590280731}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -6.8, y: -3.6, z: 0}
+  m_LocalPosition: {x: -7, y: -3.6, z: 0}
   m_LocalScale: {x: 4.18, y: 4.18, z: 4.18}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -71247,6 +71285,10 @@ PrefabInstance:
       propertyPath: m_Offset.y
       value: 0.01916087
       objectReference: {fileID: 0}
+    - target: {fileID: 2766487229391979447, guid: 94c6df91213a848e4b10259462784231, type: 3}
+      propertyPath: verticalAttackTolerance
+      value: 2.49
+      objectReference: {fileID: 0}
     - target: {fileID: 2876151079395397295, guid: 94c6df91213a848e4b10259462784231, type: 3}
       propertyPath: m_Controller
       value: 
@@ -71338,7 +71380,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5567071987261642664, guid: 94c6df91213a848e4b10259462784231, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 902134258}
   m_SourcePrefab: {fileID: 100100000, guid: 94c6df91213a848e4b10259462784231, type: 3}
 --- !u!1 &1870077269
 GameObject:

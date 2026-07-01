@@ -16,12 +16,25 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(Collider2D))]
 public class SceneTransitionDoor : MonoBehaviour
 {
+    // Escena desde la que se entró a la Shop. La graban las puertas con recordAsOrigin (las de los
+    // niveles que llevan a la Shop) y la lee la puerta de salida con returnToOrigin, para volver al
+    // nivel correcto sea cual sea (Level 2, Level 3, etc.) sin hardcodear el destino.
+    public static string OriginScene { get; private set; }
+
     [Header("Destino")]
-    [Tooltip("Nombre EXACTO de la escena a cargar (tiene que estar en Build Settings).")]
+    [Tooltip("Nombre EXACTO de la escena a cargar (tiene que estar en Build Settings). Se ignora si " +
+             "Return To Origin está activo.")]
     [SerializeField] private string targetScene;
     [Tooltip("Id del SceneSpawnPoint donde aparecer en la escena destino. Vacío = posición por " +
              "defecto de la escena.")]
     [SerializeField] private string targetSpawnId;
+
+    [Tooltip("Activalo en las puertas que ENTRAN a la Shop (una en cada nivel). Recuerda de qué " +
+             "nivel venís para que la puerta de salida sepa a dónde volver.")]
+    [SerializeField] private bool recordAsOrigin;
+    [Tooltip("Activalo en la puerta de SALIDA de la Shop. Ignora Target Scene y vuelve al nivel " +
+             "desde el que entraste (el que grabó Record As Origin).")]
+    [SerializeField] private bool returnToOrigin;
 
     [Header("Estado del Player")]
     [Tooltip("Si está activo, guarda vida/XP/habilidades del Player antes de cambiar de escena " +
@@ -91,9 +104,19 @@ public class SceneTransitionDoor : MonoBehaviour
 
     private IEnumerator TravelRoutine()
     {
-        if (string.IsNullOrEmpty(targetScene))
+        // Grabar de qué nivel venimos ANTES de resolver el destino, así la puerta de salida sabe
+        // a dónde volver (Level 2, Level 3, etc.).
+        if (recordAsOrigin)
         {
-            Debug.LogWarning($"{name}: no hay escena destino configurada en SceneTransitionDoor.", this);
+            OriginScene = SceneManager.GetActiveScene().name;
+        }
+
+        string destination = returnToOrigin ? OriginScene : targetScene;
+
+        if (string.IsNullOrEmpty(destination))
+        {
+            Debug.LogWarning($"{name}: no hay escena destino en SceneTransitionDoor" +
+                             (returnToOrigin ? " (Return To Origin activo pero no se grabó ningún origen)." : "."), this);
             yield break;
         }
 
@@ -117,7 +140,7 @@ public class SceneTransitionDoor : MonoBehaviour
             yield return screenFader.FadeToBlack(fadeDuration);
         }
 
-        SceneManager.LoadScene(targetScene);
+        SceneManager.LoadScene(destination);
     }
 
     private void CaptureState()

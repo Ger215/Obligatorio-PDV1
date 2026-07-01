@@ -161,12 +161,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a61d7608cee69e41900f463da18bf3a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackSystem
-  config: {fileID: 11400000, guid: 96a86de857af98b4aa0f306999f3654f, type: 2}
+  config: {fileID: 0}
   attackPoint: {fileID: 4542554025826081973}
   targetLayers:
     serializedVersion: 2
     m_Bits: 128
-  attackRange: 1.25
+  attackRange: 1.05
   attackCooldown: 0.4
   windUpDuration: 0.12
   hitDuration: 0.08
@@ -201,8 +201,8 @@ MonoBehaviour:
     m_Bits: 64
   groundCheckRadius: 0.15
   attackPointDistance: 0.6
-  spriteFacesLeft: 0
-  aggroRadius: 13
+  spriteFacesLeft: 1
+  aggroRadius: 4.3
   wanderWhenIdle: 0
   wanderRange: 3
   wanderChangeInterval: 2
@@ -214,7 +214,9 @@ MonoBehaviour:
   stuckMoveThreshold: 0.12
   separationRadius: 1
   separationForce: 4
-  enemyType: 0
+  wallStuckStrikesToGiveUp: 3
+  wallGiveUpDuration: 2.5
+  enemyType: 2
 --- !u!212 &8741199782492536330
 SpriteRenderer:
   serializedVersion: 2
@@ -324,7 +326,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileLauncher
   projectilePrefab: {fileID: 2594636052371397479, guid: b84ad201e00d0b44d92f609269689646, type: 3}
-  cooldown: 3.5
+  cooldown: 4.44
   damage: 1
   targetLayers:
     serializedVersion: 2
