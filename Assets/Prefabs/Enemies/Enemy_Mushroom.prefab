@@ -257,7 +257,7 @@ MonoBehaviour:
     m_Bits: 64
   groundCheckRadius: 0.36
   attackPointDistance: 0.6
-  spriteFacesLeft: 0
+  spriteFacesLeft: 1
   aggroRadius: 7.73
   wanderWhenIdle: 1
   wanderRange: 3
