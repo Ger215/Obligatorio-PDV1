@@ -55551,9 +55551,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8662a2def54c244e9859ad3c92ae898, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoomTrigger
-  targetRoom: {fileID: 1523328451}
+  targetRoom: {fileID: 1564720925}
   transitionStyle: 0
-  reverseRoom: {fileID: 1980394995}
+  reverseRoom: {fileID: 1523328451}
   oneWay: 0
   overrideDirection: 1
   manualDirection: 3
