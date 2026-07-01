@@ -1,26 +1,34 @@
 using UnityEngine;
 
 /// <summary>
-/// Enemigo teletransportador. Cicla: queda visible un rato, se desvanece (TeleportOut), reaparece
-/// DETRÁS del jugador (TeleportIn) y lo ataca por la espalda. Maneja el Animator
-/// (Enemy_Teleporter.controller) con los triggers "teleportOut"/"teleportIn".
+/// Capa de teletransporte que se monta ENCIMA de un <see cref="EnemyController"/> caminador.
+/// No hace daño por sí mismo: cada cierto tiempo reubica al enemigo DETRÁS del jugador para que
+/// el walker lo ataque de melee desde la espalda. Los dos sistemas conviven:
+///   - Fase visible: el <see cref="EnemyController"/> persigue, encara y pega melee normalmente.
+///   - Teleport: se congela el walker (<see cref="EnemyController.SetStunned"/>), se reproduce
+///     TeleportOut, se reubica detrás del jugador, se reproduce TeleportIn y se descongela.
 ///
-/// El ritmo lo marcan ANIMATION EVENTS al final de cada clip (así no hay que adivinar la duración):
+/// El ritmo lo marcan ANIMATION EVENTS al final de cada clip (no hay que adivinar duraciones):
 ///   - Final de TeleportOut -> AnimEvent_TeleportOutComplete(): reubica detrás del jugador y entra a TeleportIn.
-///   - Final de TeleportIn  -> AnimEvent_TeleportInComplete():  ataca por la espalda y reinicia el ciclo visible.
+///   - Final de TeleportIn  -> AnimEvent_TeleportInComplete():  descongela al walker y reinicia el ciclo.
 /// Estos métodos deben estar en el MISMO GameObject que el Animator (este componente lo está).
 ///
-/// El daño se hace con el <see cref="AttackSystem"/> del propio enemigo. Si hay un
-/// <see cref="EnemyController"/> caminador en el mismo objeto, asignalo en
-/// <see cref="walkerToDisable"/> para apagarlo (este enemigo se mueve solo por teleport).
+/// El facing NO se toca acá: lo maneja el <see cref="EnemyController"/> por rotación del root,
+/// así que al reaparecer detrás del jugador encara solo, sin invertir el sprite.
 /// </summary>
 [RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(EnemyController))]
 public class TeleporterController : MonoBehaviour
 {
     [Header("Ritmo del teleport")]
-    [Tooltip("Segundos que se queda visible antes de desvanecerse. (La duración de las animaciones " +
-             "la marcan los Animation Events, no este valor.)")]
+    [Tooltip("Segundos que actúa como walker normal antes de reubicarse detrás del jugador. " +
+             "(La duración de las animaciones la marcan los Animation Events, no este valor.)")]
     [SerializeField] private float visibleTime = 2.5f;
+
+    [Tooltip("Distancia máxima al jugador para permitir el teleport. Si está más lejos, NO se " +
+             "teletransporta (seguiría como walker normal) y reintenta más tarde. Evita que " +
+             "aparezca detrás tuyo desde el otro lado del mapa.")]
+    [SerializeField] private float teleportRange = 8f;
 
     [Header("Reaparición detrás del jugador")]
     [Tooltip("A qué distancia, por detrás del jugador, reaparece.")]
@@ -28,23 +36,12 @@ public class TeleporterController : MonoBehaviour
     [Tooltip("Ajuste vertical respecto al jugador al reaparecer.")]
     [SerializeField] private float verticalOffset = 0f;
 
-    [Header("Ataque por la espalda")]
-    [Tooltip("Radio del golpe al reaparecer.")]
-    [SerializeField] private float attackRadius = 1.2f;
-    [Tooltip("Daño del golpe.")]
-    [SerializeField] private int attackDamage = 8;
-    [Tooltip("Capas a las que pega (seleccioná la capa del Player).")]
-    [SerializeField] private LayerMask playerLayers;
-
-    [Header("Refs")]
-    [Tooltip("EnemyController caminador a apagar al iniciar (opcional).")]
-    [SerializeField] private EnemyController walkerToDisable;
-
     private Animator animator;
+    private EnemyController walker;
     private AttackSystem attackSystem;
     private HealthSystem healthSystem;
-    private SpriteRenderer spriteRenderer;
     private bool isDead;
+    private bool teleporting;
 
     private static readonly int AnimTeleportOut = Animator.StringToHash("teleportOut");
     private static readonly int AnimTeleportIn = Animator.StringToHash("teleportIn");
@@ -52,24 +49,27 @@ public class TeleporterController : MonoBehaviour
     private void Awake()
     {
         animator = GetComponent<Animator>();
+        walker = GetComponent<EnemyController>();
         attackSystem = GetComponent<AttackSystem>();
         healthSystem = GetComponent<HealthSystem>();
-        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-
-        if (walkerToDisable != null)
-        {
-            walkerToDisable.enabled = false;
-        }
     }
 
     private void OnEnable()
     {
-        if (healthSystem != null) healthSystem.Died += HandleDeath;
+        if (healthSystem != null)
+        {
+            healthSystem.Died += HandleDeath;
+            healthSystem.Damaged += HandleDamaged;
+        }
     }
 
     private void OnDisable()
     {
-        if (healthSystem != null) healthSystem.Died -= HandleDeath;
+        if (healthSystem != null)
+        {
+            healthSystem.Died -= HandleDeath;
+            healthSystem.Damaged -= HandleDamaged;
+        }
     }
 
     private void Start()
@@ -77,7 +77,7 @@ public class TeleporterController : MonoBehaviour
         BeginVisiblePhase();
     }
 
-    // Arranca el tiempo visible; al terminar, dispara el desvanecimiento.
+    // Arranca el tiempo actuando como walker; al terminar, dispara el desvanecimiento.
     private void BeginVisiblePhase()
     {
         if (isDead) return;
@@ -87,6 +87,24 @@ public class TeleporterController : MonoBehaviour
     private void TriggerTeleportOut()
     {
         if (isDead) return;
+
+        PlayerController player = PlayerController.Instance;
+
+        // Solo se teletransporta si el jugador está dentro de rango. Sin jugador o demasiado lejos,
+        // no warpea (sigue como walker) y reintenta más tarde. Evita apariciones desde el otro lado del mapa.
+        if (player == null ||
+            Vector2.Distance(transform.position, player.transform.position) > teleportRange)
+        {
+            BeginVisiblePhase();
+            return;
+        }
+
+        teleporting = true;
+        // Cancelar cualquier ataque en curso: el teleportOut corta la animación de Attack y, si el
+        // swing estaba antes de su frame de TriggerHit, la corrutina del AttackSystem quedaría colgada
+        // en WindUp (IsAttacking = true para siempre) y no volvería a atacar nunca.
+        attackSystem?.CancelAttack();
+        walker.SetStunned(true); // congela movimiento/ataque mientras dura el teleport
         animator.SetTrigger(AnimTeleportOut);
     }
 
@@ -100,11 +118,26 @@ public class TeleporterController : MonoBehaviour
         animator.SetTrigger(AnimTeleportIn);
     }
 
-    // Final de TeleportIn: ya materializado -> golpe por la espalda y reiniciar ciclo.
+    // Final de TeleportIn: ya materializado -> devolver el control al walker para que pegue melee.
     public void AnimEvent_TeleportInComplete()
     {
         if (isDead) return;
-        AttackFromBehind();
+        teleporting = false;
+        walker.SetStunned(false);
+        BeginVisiblePhase();
+    }
+
+    // Si lo golpean en medio del teleport, el trigger "hit" (AnyState->Hurt) corta la animación
+    // y los Animation Events no llegarían a disparar, dejando al walker congelado. Abortamos limpio:
+    // descongelamos, limpiamos triggers y reiniciamos el ciclo visible.
+    private void HandleDamaged(int current, int max)
+    {
+        if (isDead || !teleporting) return;
+        teleporting = false;
+        animator.ResetTrigger(AnimTeleportOut);
+        animator.ResetTrigger(AnimTeleportIn);
+        walker.SetStunned(false);
+        CancelInvoke();
         BeginVisiblePhase();
     }
 
@@ -114,39 +147,19 @@ public class TeleporterController : MonoBehaviour
         if (player == null) return;
 
         int playerFacing = player.FacingDirection; // 1 der, -1 izq
+        // Detrás = del lado opuesto al que mira el jugador.
         Vector3 behind = player.transform.position - new Vector3(playerFacing * behindOffset, -verticalOffset, 0f);
         transform.position = behind;
 
-        if (spriteRenderer != null)
-        {
-            spriteRenderer.flipX = playerFacing > 0;
-        }
-    }
-
-    private void AttackFromBehind()
-    {
-        PlayerController player = PlayerController.Instance;
-        if (player == null) return;
-
-        if (attackSystem != null)
-        {
-            attackSystem.DealAreaDamage(player.transform.position, attackRadius, playerLayers, attackDamage, false);
-        }
-        else
-        {
-            Debug.LogWarning("[TeleporterController] No hay AttackSystem; no se aplicó daño.", this);
-        }
+        // Encarar al jugador ya mismo. Sin esto, como el walker está stunned durante el TeleportIn,
+        // su facing no se actualiza y el sprite se materializa mirando para el lado contrario.
+        // No tocamos flipX: el EnemyController encara por rotación del root.
+        walker.FaceTowards(player.transform.position.x);
     }
 
     private void HandleDeath(HealthSystem deadHealthSystem)
     {
         isDead = true;
         CancelInvoke();
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = new Color(1f, 0.3f, 0.8f, 0.7f);
-        Gizmos.DrawWireSphere(transform.position, attackRadius);
     }
 }
